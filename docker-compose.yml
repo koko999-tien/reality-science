@@ -1,0 +1,127 @@
+version: "3.8"
+
+networks:
+  app_net:
+    driver: bridge
+  data_net:
+    driver: bridge
+    internal: true
+  compute_net:
+    driver: bridge
+    internal: true
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: rs_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - app_net
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: rs_backend_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    networks:
+      - app_net
+      - data_net
+      - compute_net
+    env_file:
+      - backend/.env.example
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: rs_postgres
+    restart: unless-stopped
+    networks:
+      - data_net
+    environment:
+      POSTGRES_DB: reality_science
+      POSTGRES_USER: rs_app_user
+      POSTGRES_PASSWORD: app_secure_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rs_app_user -d reality_science"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: rs_redis
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "redis_secret_pw", "--maxmemory", "512mb", "--maxmemory-policy", "volatile-lru"]
+    networks:
+      - data_net
+      - compute_net
+    volumes:
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis_secret_pw", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: rs_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    networks:
+      - data_net
+    environment:
+      MINIO_ROOT_USER: minio_admin
+      MINIO_ROOT_PASSWORD: minio_secure_password
+    volumes:
+      - minio_data:/data
+
+  compute_worker:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    container_name: rs_compute_worker
+    restart: unless-stopped
+    user: "10001:10001"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    cpus: 1.0
+    mem_limit: 512m
+    pids_limit: 100
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+          pids: 100
+    networks:
+      - compute_net
+    env_file:
+      - worker/.env.example
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  minio_data:

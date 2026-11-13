@@ -1,0 +1,71 @@
+# =============================================================================
+# REALITY SCIENCE — Git Attributes
+# Enforce universal LF line endings to eliminate Windows CRLF corruption.
+# =============================================================================
+
+# Universal default: all files are treated as text and normalized to LF
+* text eol=lf
+
+# Explicit Source Code Files (enforce LF)
+*.py text eol=lf diff=python
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+
+# Configuration & Data Files
+*.json text eol=lf
+*.jsonc text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+*.env* text eol=lf
+*.sql text eol=lf
+*.sh text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.editorconfig text eol=lf
+*.gitattributes text eol=lf
+*.gitignore text eol=lf
+
+# Docker & Container Files
+Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+docker-compose*.yml text eol=lf
+
+# Binary Files (DO NOT CONVERT LINE ENDINGS — PRESERVE EXACT BYTES)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.svg text eol=lf
+*.pdf binary
+*.tar binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.parquet binary
+*.feather binary
+*.arrow binary
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+*.pyc binary
+*.pyo binary
+*.pyd binary
+*.so binary
+*.dll binary
+*.exe binary
+*.bin binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary

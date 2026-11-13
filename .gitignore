@@ -1,0 +1,181 @@
+# =============================================================================
+# REALITY SCIENCE — Repository .gitignore
+# Monorepo: Python (FastAPI + Celery Worker), Node/TypeScript (Next.js), Docker
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Environment Variables & Secrets (CRITICAL SECURITY RULE)
+# NEVER commit private credentials, production secrets, or local environment files.
+# Explicitly allow .env.example templates.
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+*.cer
+secrets/
+private_keys/
+
+# -----------------------------------------------------------------------------
+# 2. Python (Backend & Compute Worker)
+# -----------------------------------------------------------------------------
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution / packaging
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Testing & Coverage
+.cache
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Static analysis, linting, and type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# Celery task queue runtime artifacts
+celerybeat-schedule
+celerybeat.pid
+
+# Jupyter / IPython
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+# -----------------------------------------------------------------------------
+# 3. Node.js & Next.js (Zone 1 Frontend)
+# -----------------------------------------------------------------------------
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build and export output
+.next/
+out/
+
+# TypeScript build info cache
+*.tsbuildinfo
+next-env.d.ts
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Turborepo cache
+.turbo/
+
+# -----------------------------------------------------------------------------
+# 4. Docker & Orchestration
+# -----------------------------------------------------------------------------
+.docker/
+docker-compose.override.yml
+
+# -----------------------------------------------------------------------------
+# 5. Local Runtime Storage, Staged Artifacts & Databases
+# -----------------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+staging_artifacts/
+worker_artifacts/
+task_results/
+
+# -----------------------------------------------------------------------------
+# 6. Operating System & Editor Artifacts
+# -----------------------------------------------------------------------------
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+
+# IDEs & Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+
+# -----------------------------------------------------------------------------
+# 7. Teamwork Agent Execution Traces
+# -----------------------------------------------------------------------------
+.agents/teamwork/*/
+
+# -----------------------------------------------------------------------------
+# 8. Safeguards: Critical Directories & Files (NEVER IGNORE)
+# -----------------------------------------------------------------------------
+!docs/
+!docs/**
+!PROJECT.md
+!AGENTS.md
+!shared/
+!shared/**

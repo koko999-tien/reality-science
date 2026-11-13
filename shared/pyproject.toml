@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "reality-science-shared"
+version = "0.1.0"
+description = "Canonical Pydantic v2 AST models and data contracts for REALITY SCIENCE"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.7.0,<3.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["shared"]

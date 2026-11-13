@@ -1,0 +1,100 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // OpenCode V2 configuration. Keep your existing provider/model/MCP setup.
+  // No root model or agent model is pinned: switch models per session as needed.
+  "default_agent": "reality-orchestrator",
+
+  "experimental": {
+    "todo": true,
+    "subagent_depth": 1,
+    "background_compaction": true
+  },
+
+  "compaction": {
+    "auto": true,
+    "keep": { "tokens": 15000 },
+    "buffer": "20%"
+  },
+
+  "permissions": [
+    // Read and discover project files.
+    { "action": "read", "resource": "*", "effect": "allow" },
+    // Preserve OpenCode secret-file protection even though general reads are allowed.
+    { "action": "read", "resource": "*.env", "effect": "ask" },
+    { "action": "read", "resource": "*.env.*", "effect": "ask" },
+    { "action": "read", "resource": "**/.env*", "effect": "ask" },
+    { "action": "read", "resource": "*.env.example", "effect": "allow" },
+    { "action": "read", "resource": "**/.env.example", "effect": "allow" },
+    { "action": "glob", "resource": "*", "effect": "allow" },
+    { "action": "grep", "resource": "*", "effect": "allow" },
+
+    // Allow normal project edits, then protect secrets and generated/vendor data.
+    { "action": "edit", "resource": "*", "effect": "allow" },
+    { "action": "edit", "resource": "*.env", "effect": "deny" },
+    { "action": "edit", "resource": "*.env.*", "effect": "deny" },
+    { "action": "edit", "resource": "**/.env*", "effect": "deny" },
+    { "action": "edit", "resource": ".git/**", "effect": "deny" },
+    { "action": "edit", "resource": "**/node_modules/**", "effect": "deny" },
+    { "action": "edit", "resource": "**/.next/**", "effect": "deny" },
+    { "action": "edit", "resource": "**/dist/**", "effect": "deny" },
+    { "action": "edit", "resource": "**/build/**", "effect": "deny" },
+
+    // Shell: ask for everything unless it is a narrow, non-mutating Git inspection.
+    { "action": "shell", "resource": "*", "effect": "ask" },
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git show *", "effect": "allow" },
+    { "action": "shell", "resource": "git branch --show-current", "effect": "allow" },
+
+    // Explicitly block destructive/high-impact actions even if approvals are saved.
+    { "action": "shell", "resource": "git push *", "effect": "deny" },
+    { "action": "shell", "resource": "git reset --hard *", "effect": "deny" },
+    { "action": "shell", "resource": "git clean *", "effect": "deny" },
+    { "action": "shell", "resource": "npm publish *", "effect": "deny" },
+    { "action": "shell", "resource": "pnpm publish *", "effect": "deny" },
+    { "action": "shell", "resource": "prisma migrate reset *", "effect": "deny" },
+    { "action": "shell", "resource": "dropdb *", "effect": "deny" },
+
+    // Protect files outside the project root.
+    { "action": "external_directory", "resource": "*", "effect": "ask" },
+
+    // Parent may launch only the named specialist agents.
+    { "action": "subagent", "resource": "*", "effect": "deny" },
+    { "action": "subagent", "resource": "reality-reviewer", "effect": "allow" },
+    { "action": "subagent", "resource": "reality-researcher", "effect": "allow" },
+    { "action": "subagent", "resource": "reality-test-analyst", "effect": "allow" }
+  ],
+
+  "agents": {
+    "reality-orchestrator": {
+      "description": "Primary milestone owner. Plans, implements, delegates bounded analysis, verifies, records durable state, and continues until acceptance criteria are met or a genuine blocker is reached.",
+      "mode": "primary"
+    },
+    "reality-reviewer": {
+      "description": "Independent read-only reviewer for correctness, security, regressions and architecture drift.",
+      "mode": "subagent",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
+      ]
+    },
+    "reality-researcher": {
+      "description": "Read-only researcher for official documentation, dependency compatibility, standards and evidence.",
+      "mode": "subagent",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
+      ]
+    },
+    "reality-test-analyst": {
+      "description": "Read-only test strategist who identifies missing acceptance, negative, boundary, integration and regression tests.",
+      "mode": "subagent",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
+      ]
+    }
+  }
+}
