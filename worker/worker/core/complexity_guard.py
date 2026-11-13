@@ -27,7 +27,7 @@ def inspect_ast_complexity(node: ExprNode, current_depth: int = 1) -> Tuple[int,
     # Check power operator limits to prevent exponential expansion bombs
     if node.node_type == NodeType.BINARY_OP and node.op == OperatorType.POW:
         if node.right and node.right.node_type == NodeType.CONSTANT:
-            if isinstance(node.right.value, (int, float)) and node.right.value > MAX_POLYNOMIAL_POWER:
+            if isinstance(node.right.value, (int, float)) and abs(float(node.right.value)) > MAX_POLYNOMIAL_POWER:
                 raise ComplexityLimitExceededError(
                     f"Exponent {node.right.value} exceeds maximum limit of {MAX_POLYNOMIAL_POWER}"
                 )

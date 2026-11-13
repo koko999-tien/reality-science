@@ -31,7 +31,7 @@ def upgrade() -> None:
     op.create_table(
         "research_actors",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("user_account_id", sa.String(36), sa.ForeignKey("user_accounts.id", ondelete="CASCADE"), nullable=False),
+        sa.Column("user_account_id", sa.String(36), sa.ForeignKey("user_accounts.id", ondelete="SET NULL"), nullable=True),
         sa.Column("display_name", sa.String(100), nullable=False),
         sa.Column("orcid", sa.String(19), nullable=True),
         sa.Column("organization_id", sa.String(36), nullable=True),

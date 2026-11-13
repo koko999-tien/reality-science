@@ -1,22 +1,41 @@
+"""
+REALITY SCIENCE — Compute Worker Configuration & Anti-Database Guard (Zone 3)
+Approved Decision 2 (ADR-002: Private Scientific Compute Infrastructure)
+Mandate: Strict Zero-Database Invariant. Zero database credentials injected into worker.
+"""
+
 import os
 import re
+from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Definition of forbidden environment patterns for zero database credentials
-FORBIDDEN_ENV_PATTERNS = [
-    re.compile(r".*POSTGRES.*", re.IGNORECASE),  # forbidden regex check
-    re.compile(r".*DATABASE_URL.*", re.IGNORECASE),  # forbidden regex check
-    re.compile(r"^PG[A-Z0-9_]*$", re.IGNORECASE),  # forbidden regex check
+# Exhaustively blocks PostgreSQL, MySQL, SQLite, MongoDB, MariaDB, CockroachDB,
+# Oracle, MSSQL, SQL_*, and DB_* credential injection attempts.
+FORBIDDEN_ENV_PATTERNS: List[re.Pattern] = [
+    # Full connection strings and database-specific engine keys
+    re.compile(r".*(POSTGRES|DATABASE|MYSQL|MONGO|MARIADB|SQLITE|COCKROACH|ORACLE|MSSQL).*", re.IGNORECASE),
+    # Prefixed database variables (DB_HOST, DB_USER, DB_PASSWORD, DB_PORT, DB_NAME, DB_URI, etc.)
+    re.compile(r".*DB_.*", re.IGNORECASE),
+    # SQL query or credential variables (SQL_USER, SQL_PASSWORD, SQL_HOST, SQL_PORT, etc.)
+    re.compile(r".*SQL_.*", re.IGNORECASE),
+    # Standard PostgreSQL libpq environment variables (PGHOST, PGPORT, PGUSER, PGPASSWORD, etc.)
+    re.compile(r"^PG[A-Z0-9_]*$", re.IGNORECASE),
 ]
 
 
 def assert_zero_database_credentials() -> None:
-    """Pre-flight check: assert zero database credentials exist in worker environment."""
+    """Pre-flight check: assert zero database credentials exist in worker environment.
+
+    Raises:
+        RuntimeError: If any environment variable matches any pattern in FORBIDDEN_ENV_PATTERNS.
+    """
     violations = []
     for key in os.environ.keys():
         for pattern in FORBIDDEN_ENV_PATTERNS:
             if pattern.match(key):
                 violations.append(key)
+                break
     if violations:
         raise RuntimeError(
             f"FATAL SECURITY VIOLATION: Compute worker started with forbidden database credentials: {violations}. "
@@ -39,5 +58,6 @@ class WorkerSettings(BaseSettings):
 
 
 def get_worker_settings() -> WorkerSettings:
+    """Instantiates worker settings after asserting zero database credentials."""
     assert_zero_database_credentials()
     return WorkerSettings()

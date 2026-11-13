@@ -5,6 +5,10 @@ from shared.schemas.finding_result import FindingResult, FindingState
 from shared.models.enums import DiagnosticCode
 from worker.tasks.symbolic import execute_symbolic_evaluation
 from worker.tasks.dimensional import execute_dimensional_verification
+from worker.core.complexity_guard import (
+    inspect_ast_complexity,
+    ComplexityLimitExceededError,
+)
 
 
 @celery_app.task(name="worker.tasks.verify_equation_ast", bind=True)
@@ -12,6 +16,20 @@ def verify_equation_ast(self, bundle_data: dict) -> dict:
     bundle = JobBundle.model_validate(bundle_data)
     try:
         declared_symbols = {v.symbol for v in bundle.variables}
+
+        # 0. Pre-flight AST complexity guard (defense against recursion/power DoS)
+        try:
+            inspect_ast_complexity(bundle.expression_ast)
+        except ComplexityLimitExceededError as e:
+            finding = FindingResult(
+                job_id=bundle.job_id,
+                state=FindingState.FAIL,
+                diagnostic_code="COMPLEXITY_LIMIT_EXCEEDED",
+                message=str(e),
+                dimensions_verified=False,
+                diagnostics=[str(e)],
+            )
+            return finding.model_dump()
 
         # 1. Dimensional verification
         dim_ok, dim_str, dim_diag = execute_dimensional_verification(

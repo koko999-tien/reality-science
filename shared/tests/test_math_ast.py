@@ -55,3 +55,26 @@ def test_expr_node_extra_fields_forbidden():
             value="x",
             malicious_field="injection",  # extra="forbid"
         )
+
+
+def test_expr_node_rejects_booleans():
+    with pytest.raises(ValidationError):
+        ExprNode(node_type=NodeType.CONSTANT, value=True)
+    with pytest.raises(ValidationError):
+        ExprNode(node_type=NodeType.CONSTANT, value=False)
+
+
+def test_expr_node_rejects_non_numeric_constant_string():
+    with pytest.raises(ValidationError):
+        ExprNode(node_type=NodeType.CONSTANT, value='__import__("os").system("echo RCE")')
+    with pytest.raises(ValidationError):
+        ExprNode(node_type=NodeType.CONSTANT, value="not_a_number")
+
+
+def test_expr_node_accepts_numeric_constant_strings():
+    n1 = ExprNode(node_type=NodeType.CONSTANT, value="42")
+    assert n1.value == "42"
+    n2 = ExprNode(node_type=NodeType.CONSTANT, value="-3.14159")
+    assert n2.value == "-3.14159"
+    n3 = ExprNode(node_type=NodeType.CONSTANT, value="1e-5")
+    assert n3.value == "1e-5"

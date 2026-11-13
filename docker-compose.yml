@@ -66,7 +66,7 @@ services:
     image: redis:7-alpine
     container_name: rs_redis
     restart: unless-stopped
-    command: ["redis-server", "--requirepass", "redis_secret_pw", "--maxmemory", "512mb", "--maxmemory-policy", "volatile-lru"]
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     networks:
       - data_net
       - compute_net

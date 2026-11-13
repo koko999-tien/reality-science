@@ -1,3 +1,4 @@
+import math
 from typing import Dict, Set
 import sympy as sp
 from shared.schemas.math_ast import (
@@ -16,12 +17,47 @@ class MathematicalSingularityError(ValueError):
     pass
 
 
+def safe_constant_to_sympy(val: object) -> sp.Expr:
+    """Safely converts a constant value to a SymPy numeric expression without eval(), exec(), or sympify().
+
+    Strictly supports int, float, or validated numeric strings.
+    Rejects booleans, non-finite floats, and any non-numeric strings.
+    """
+    if val is None:
+        raise ValueError("Constant node value cannot be None")
+    if isinstance(val, bool):
+        raise TypeError("Boolean values cannot be converted to mathematical numeric constants")
+
+    if isinstance(val, int):
+        return sp.Integer(val)
+
+    if isinstance(val, float):
+        if not math.isfinite(val):
+            raise ValueError(f"Non-finite floating-point constant not permitted: {val}")
+        return sp.Float(val)
+
+    if isinstance(val, str):
+        val_str = val.strip()
+        try:
+            if "." in val_str or "e" in val_str.lower():
+                float_val = float(val_str)
+                if not math.isfinite(float_val):
+                    raise ValueError(f"Non-finite floating-point constant not permitted: {val}")
+                return sp.Float(float_val)
+            return sp.Integer(int(val_str))
+        except (ValueError, TypeError):
+            raise ValueError(
+                f"Invalid constant numeric string: '{val}'. "
+                "Arbitrary string expressions or code execution are forbidden by Decision 1."
+            )
+
+    raise TypeError(f"Unsupported constant type: {type(val).__name__}")
+
+
 def ast_to_sympy(node: ExprNode, declared_symbols: Set[str]) -> sp.Expr:
-    """Programmatically converts an ExprNode AST into a SymPy expression without eval() or exec()."""
+    """Programmatically converts an ExprNode AST into a SymPy expression without eval(), exec(), or string sympify()."""
     if node.node_type == NodeType.CONSTANT:
-        if node.value is None:
-            raise ValueError("Constant node value cannot be None")
-        return sp.sympify(node.value)
+        return safe_constant_to_sympy(node.value)
 
     if node.node_type == NodeType.VARIABLE:
         if not node.value or str(node.value) not in declared_symbols:
