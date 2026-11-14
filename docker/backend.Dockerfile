@@ -3,9 +3,11 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libpq-dev && rm -rf /var/lib/apt/lists/*
+COPY backend/requirements.lock /build/backend/
+RUN pip install --no-cache-dir --prefix=/install -r /build/backend/requirements.lock
 COPY shared/ /build/shared/
 COPY backend/ /build/backend/
-RUN pip install --no-cache-dir --prefix=/install /build/shared /build/backend
+RUN pip install --no-cache-dir --no-deps --prefix=/install /build/shared /build/backend
 
 FROM python:3.11-slim AS runner
 

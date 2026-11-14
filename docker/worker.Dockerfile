@@ -3,9 +3,11 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /build
 RUN apt-get update && apt-get install -y --no-install-recommends gcc && rm -rf /var/lib/apt/lists/*
+COPY worker/requirements.lock /build/worker/
+RUN pip install --no-cache-dir --prefix=/install -r /build/worker/requirements.lock
 COPY shared/ /build/shared/
 COPY worker/ /build/worker/
-RUN pip install --no-cache-dir --prefix=/install /build/shared /build/worker
+RUN pip install --no-cache-dir --no-deps --prefix=/install /build/shared /build/worker
 
 FROM python:3.11-slim AS runner
 

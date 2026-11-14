@@ -41,8 +41,10 @@ services:
     env_file:
       - backend/.env.example
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   postgres:
     image: postgres:16-alpine

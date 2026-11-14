@@ -1,8 +1,8 @@
 # Multi-stage Dockerfile for Next.js App Router (Zone 1)
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY frontend/package.json ./
-RUN npm install
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
 
 FROM node:20-alpine AS builder
 WORKDIR /app
