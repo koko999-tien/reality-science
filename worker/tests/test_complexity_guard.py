@@ -104,3 +104,24 @@ def test_valid_string_exponent_accepted():
     assert nodes == 3
     assert depth == 2
 
+
+def test_inspect_ast_complexity_deep_right_pow_subtree():
+    """Verifies that an AST with POW and a deep right-hand subtree does not crash with RecursionError
+    and instead cleanly raises ComplexityLimitExceededError."""
+    deep_right = ExprNode(node_type=NodeType.CONSTANT, value=1.0)
+    for _ in range(1200):
+        deep_right = ExprNode(
+            node_type=NodeType.BINARY_OP,
+            op=OperatorType.ADD,
+            left=deep_right,
+            right=ExprNode(node_type=NodeType.CONSTANT, value=1.0),
+        )
+    expr = ExprNode(
+        node_type=NodeType.BINARY_OP,
+        op=OperatorType.POW,
+        left=ExprNode(node_type=NodeType.VARIABLE, value="x"),
+        right=deep_right,
+    )
+    with pytest.raises(ComplexityLimitExceededError):
+        inspect_ast_complexity(expr)
+

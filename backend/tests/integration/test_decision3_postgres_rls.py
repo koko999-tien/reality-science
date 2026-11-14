@@ -28,13 +28,24 @@ async def test_postgres_rls_isolation():
     engine = create_async_engine(db_url)
 
     async with engine.begin() as conn:
+        # Seed research actor A before inserting project to satisfy foreign key constraint
+        await conn.execute(
+            text(
+                """
+            INSERT INTO research_actors (id, display_name)
+            VALUES ('actor-a-uuid', 'Actor A')
+            ON CONFLICT (id) DO NOTHING;
+            """
+            )
+        )
         # Actor A context
         await conn.execute(text("SET LOCAL app.current_actor_id = 'actor-a-uuid';"))
         await conn.execute(
             text(
                 """
             INSERT INTO research_projects (id, slug, title, owner_actor_id, visibility)
-            VALUES ('proj-a-1', 'private-a', 'Private Project A', 'actor-a-uuid', 'private_draft');
+            VALUES ('proj-a-1', 'private-a', 'Private Project A', 'actor-a-uuid', 'private_draft')
+            ON CONFLICT (id) DO NOTHING;
         """
             )
         )

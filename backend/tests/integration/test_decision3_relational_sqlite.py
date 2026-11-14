@@ -29,7 +29,8 @@ def sqlite_db():
         title TEXT NOT NULL,
         owner_actor_id TEXT NOT NULL REFERENCES research_actors(id),
         organization_id TEXT NULL,
-        visibility TEXT DEFAULT 'private_draft' NOT NULL CHECK (visibility IN ('private_draft', 'public_preprint'))
+        visibility TEXT DEFAULT 'private_draft' NOT NULL CHECK (visibility IN ('private_draft', 'public_preprint')),
+        is_frozen INTEGER DEFAULT 0 NOT NULL
     );
     """)
     con.execute("""
@@ -70,7 +71,7 @@ def test_right_to_erasure_preserves_scholarly_lineage(sqlite_db):
     """Verifies that deleting a UserAccount sets research_actors.user_account_id = NULL without deleting actor or project."""
     sqlite_db.execute("INSERT INTO user_accounts VALUES ('u_1', 'researcher@inst.edu', 1);")
     sqlite_db.execute("INSERT INTO research_actors VALUES ('act_1', 'u_1', 'Dr. Researcher', 0);")
-    sqlite_db.execute("INSERT INTO research_projects VALUES ('proj_1', 'quantum-gravity-bounds', 'QG Bounds', 'act_1', NULL, 'private_draft');")
+    sqlite_db.execute("INSERT INTO research_projects VALUES ('proj_1', 'quantum-gravity-bounds', 'QG Bounds', 'act_1', NULL, 'private_draft', 0);")
 
     # Verify initial link
     actor = sqlite_db.execute("SELECT user_account_id, display_name FROM research_actors WHERE id = 'act_1'").fetchone()
@@ -99,19 +100,19 @@ def test_project_visibility_check_constraint(sqlite_db):
     sqlite_db.execute("INSERT INTO research_actors VALUES ('act_2', 'u_2', 'Actor Two', 0);")
 
     # Allowed states
-    sqlite_db.execute("INSERT INTO research_projects VALUES ('p_draft', 'slug-1', 'Draft', 'act_2', NULL, 'private_draft');")
-    sqlite_db.execute("INSERT INTO research_projects VALUES ('p_pub', 'slug-2', 'Preprint', 'act_2', NULL, 'public_preprint');")
+    sqlite_db.execute("INSERT INTO research_projects VALUES ('p_draft', 'slug-1', 'Draft', 'act_2', NULL, 'private_draft', 0);")
+    sqlite_db.execute("INSERT INTO research_projects VALUES ('p_pub', 'slug-2', 'Preprint', 'act_2', NULL, 'public_preprint', 0);")
 
     # Disallowed state raises IntegrityError
     with pytest.raises(sqlite3.IntegrityError, match="CHECK constraint failed"):
-        sqlite_db.execute("INSERT INTO research_projects VALUES ('p_bad', 'slug-3', 'Bad', 'act_2', NULL, 'unauthorized_stage');")
+        sqlite_db.execute("INSERT INTO research_projects VALUES ('p_bad', 'slug-3', 'Bad', 'act_2', NULL, 'unauthorized_stage', 0);")
 
 
 def test_research_version_freeze_trigger_blocks_mutation(sqlite_db):
     """Verifies that when is_frozen = 1, subsequent UPDATE and DELETE operations are rejected with CANNOT_MODIFY_FROZEN_VERSION."""
     sqlite_db.execute("INSERT INTO user_accounts VALUES ('u_3', 'user3@inst.edu', 1);")
     sqlite_db.execute("INSERT INTO research_actors VALUES ('act_3', 'u_3', 'Actor Three', 0);")
-    sqlite_db.execute("INSERT INTO research_projects VALUES ('p_v', 'slug-v', 'Versions Project', 'act_3', NULL, 'private_draft');")
+    sqlite_db.execute("INSERT INTO research_projects VALUES ('p_v', 'slug-v', 'Versions Project', 'act_3', NULL, 'private_draft', 0);")
 
     # 1. Unfrozen draft allows mutation
     sqlite_db.execute("INSERT INTO research_versions VALUES ('ver_1', 'p_v', 1, 'Draft Version Title', 0);")
@@ -128,3 +129,15 @@ def test_research_version_freeze_trigger_blocks_mutation(sqlite_db):
     # 4. Deletion is strictly rejected
     with pytest.raises(sqlite3.IntegrityError, match="CANNOT_MODIFY_FROZEN_VERSION"):
         sqlite_db.execute("DELETE FROM research_versions WHERE id = 'ver_1';")
+
+
+def test_unfrozen_draft_version_deletion_succeeds(sqlite_db):
+    """Verifies that an unfrozen draft version (is_frozen = 0) can be deleted cleanly."""
+    sqlite_db.execute("INSERT INTO user_accounts VALUES ('u_4', 'user4@inst.edu', 1);")
+    sqlite_db.execute("INSERT INTO research_actors VALUES ('act_4', 'u_4', 'Actor Four', 0);")
+    sqlite_db.execute("INSERT INTO research_projects VALUES ('p_draft_del', 'slug-del', 'Draft Del', 'act_4', NULL, 'private_draft', 0);")
+    sqlite_db.execute("INSERT INTO research_versions VALUES ('ver_draft', 'p_draft_del', 1, 'Draft Version To Delete', 0);")
+
+    # Deletion of unfrozen draft succeeds cleanly
+    sqlite_db.execute("DELETE FROM research_versions WHERE id = 'ver_draft';")
+    assert sqlite_db.execute("SELECT * FROM research_versions WHERE id = 'ver_draft'").fetchone() is None

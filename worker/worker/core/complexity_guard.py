@@ -32,10 +32,15 @@ def inspect_ast_complexity(node: ExprNode, current_depth: int = 1) -> Tuple[int,
     # Check power operator limits to prevent exponential expansion bombs
     if node.node_type == NodeType.BINARY_OP and node.op == OperatorType.POW:
         if node.right:
-            exp_val = try_eval_constant_ast(node.right)
-            if exp_val is not None and abs(exp_val) > MAX_POLYNOMIAL_POWER:
+            try:
+                exp_val = try_eval_constant_ast(node.right, max_depth=MAX_AST_DEPTH)
+                if exp_val is not None and abs(exp_val) > MAX_POLYNOMIAL_POWER:
+                    raise ComplexityLimitExceededError(
+                        f"Exponent {exp_val} exceeds maximum limit of {MAX_POLYNOMIAL_POWER}"
+                    )
+            except RecursionError:
                 raise ComplexityLimitExceededError(
-                    f"Exponent {exp_val} exceeds maximum limit of {MAX_POLYNOMIAL_POWER}"
+                    "AST exponent expression exceeds recursion limit"
                 )
 
     children = []

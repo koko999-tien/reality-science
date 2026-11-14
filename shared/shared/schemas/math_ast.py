@@ -123,13 +123,19 @@ class ExprNode(BaseModel):
 ExprNode.model_rebuild()
 
 
-def try_eval_constant_ast(node: ExprNode) -> Optional[float]:
+def try_eval_constant_ast(
+    node: ExprNode, depth: int = 1, max_depth: int = 30
+) -> Optional[float]:
     """Recursively evaluates an AST subtree if and only if it consists entirely of
     numeric constants, unary/binary arithmetic operations, and allowed functions.
 
     Returns float value if statically evaluatable, or None if it references
-    variables, encounters division by zero, or overflows.
+    variables, encounters division by zero, non-finite values, complex numbers,
+    or exceeds depth / recursion limits.
     """
+    if depth > max_depth:
+        return None
+
     if node.node_type == NodeType.CONSTANT:
         if node.value is None:
             return None
@@ -145,18 +151,26 @@ def try_eval_constant_ast(node: ExprNode) -> Optional[float]:
     elif node.node_type == NodeType.UNARY_OP:
         if not node.left:
             return None
-        val = try_eval_constant_ast(node.left)
+        val = try_eval_constant_ast(node.left, depth=depth + 1, max_depth=max_depth)
         if val is None:
             return None
-        if node.op == OperatorType.NEG:
-            return -val
-        return None
+        try:
+            if node.op == OperatorType.NEG:
+                res = -val
+                if isinstance(res, complex):
+                    return None
+                if not isinstance(res, (int, float)):
+                    return None
+                return float(res) if math.isfinite(res) else None
+            return None
+        except (OverflowError, ZeroDivisionError, ValueError, TypeError, RecursionError):
+            return None
 
     elif node.node_type == NodeType.BINARY_OP:
         if not node.left or not node.right:
             return None
-        lv = try_eval_constant_ast(node.left)
-        rv = try_eval_constant_ast(node.right)
+        lv = try_eval_constant_ast(node.left, depth=depth + 1, max_depth=max_depth)
+        rv = try_eval_constant_ast(node.right, depth=depth + 1, max_depth=max_depth)
         if lv is None or rv is None:
             return None
         try:
@@ -177,14 +191,19 @@ def try_eval_constant_ast(node: ExprNode) -> Optional[float]:
                 res = lv ** rv
             else:
                 return None
-            return res if math.isfinite(res) else None
-        except (OverflowError, ZeroDivisionError, ValueError):
+
+            if isinstance(res, complex):
+                return None
+            if not isinstance(res, (int, float)):
+                return None
+            return float(res) if math.isfinite(res) else None
+        except (OverflowError, ZeroDivisionError, ValueError, TypeError, RecursionError):
             return None
 
     elif node.node_type == NodeType.FUNCTION_CALL:
         if not node.args or len(node.args) != 1:
             return None
-        argv = try_eval_constant_ast(node.args[0])
+        argv = try_eval_constant_ast(node.args[0], depth=depth + 1, max_depth=max_depth)
         if argv is None:
             return None
         try:
@@ -204,8 +223,13 @@ def try_eval_constant_ast(node: ExprNode) -> Optional[float]:
                 res = math.log(argv)
             else:
                 return None
-            return res if math.isfinite(res) else None
-        except (OverflowError, ValueError):
+
+            if isinstance(res, complex):
+                return None
+            if not isinstance(res, (int, float)):
+                return None
+            return float(res) if math.isfinite(res) else None
+        except (OverflowError, ZeroDivisionError, ValueError, TypeError, RecursionError):
             return None
 
     return None

@@ -49,6 +49,7 @@ def upgrade() -> None:
         sa.Column("owner_actor_id", sa.String(36), sa.ForeignKey("research_actors.id"), nullable=False),
         sa.Column("organization_id", sa.String(36), nullable=True),
         sa.Column("visibility", sa.String(30), nullable=False, server_default="private_draft"),
+        sa.Column("is_frozen", sa.Boolean(), server_default=sa.text("false"), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.CheckConstraint("visibility IN ('private_draft', 'public_preprint')", name="ck_project_visibility"),
     )
@@ -73,6 +74,9 @@ def upgrade() -> None:
     BEGIN
         IF OLD.is_frozen = TRUE THEN
             RAISE EXCEPTION 'CANNOT_MODIFY_FROZEN_VERSION: Research version % is frozen and immutable.', OLD.id;
+        END IF;
+        IF TG_OP = 'DELETE' THEN
+            RETURN OLD;
         END IF;
         RETURN NEW;
     END;
@@ -122,6 +126,13 @@ def upgrade() -> None:
                     AND p.organization_id = NULLIF(current_setting('app.current_org_id', true), '')
                 )
             )
+        )
+    )
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM research_projects p
+            WHERE p.id = research_versions.project_id
+            AND p.owner_actor_id = NULLIF(current_setting('app.current_actor_id', true), '')
         )
     );
     """)

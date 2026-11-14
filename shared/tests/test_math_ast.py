@@ -152,3 +152,36 @@ def test_try_eval_constant_ast():
     )
     assert try_eval_constant_ast(div_zero) is None
 
+
+def test_try_eval_constant_ast_complex_number_defense():
+    """Verifies that try_eval_constant_ast gracefully returns None for complex results like (-2.0) ** 0.5 without raising TypeError."""
+    pow_node = ExprNode(
+        node_type=NodeType.BINARY_OP,
+        op=OperatorType.POW,
+        left=ExprNode(node_type=NodeType.CONSTANT, value=-2.0),
+        right=ExprNode(node_type=NodeType.CONSTANT, value=0.5),
+    )
+    assert try_eval_constant_ast(pow_node) is None
+
+    # Negative one to fractional power
+    neg_one_pow = ExprNode(
+        node_type=NodeType.BINARY_OP,
+        op=OperatorType.POW,
+        left=ExprNode(node_type=NodeType.CONSTANT, value=-1.0),
+        right=ExprNode(node_type=NodeType.CONSTANT, value=0.5),
+    )
+    assert try_eval_constant_ast(neg_one_pow) is None
+
+
+def test_try_eval_constant_ast_max_depth_defense():
+    """Verifies that try_eval_constant_ast respects max_depth and returns None instead of recursing unbounded."""
+    deep_tree = ExprNode(node_type=NodeType.CONSTANT, value=1.0)
+    for _ in range(35):
+        deep_tree = ExprNode(
+            node_type=NodeType.BINARY_OP,
+            op=OperatorType.ADD,
+            left=deep_tree,
+            right=ExprNode(node_type=NodeType.CONSTANT, value=1.0),
+        )
+    assert try_eval_constant_ast(deep_tree, max_depth=30) is None
+
