@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     )
 
     project_name: str = "REALITY SCIENCE API"
+    version: str = "0.1.0"
     environment: str = "development"
     log_level: str = "INFO"
 

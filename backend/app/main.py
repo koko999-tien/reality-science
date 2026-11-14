@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logging import setup_logging
+from app.api.health import health_router
 from app.api.v1.router import api_router
 from app.core.redis import close_redis_client
 
@@ -31,4 +32,5 @@ if settings.backend_cors_origins:
         allow_headers=["*"],
     )
 
+app.include_router(health_router)
 app.include_router(api_router, prefix="/api/v1")
