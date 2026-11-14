@@ -6,6 +6,7 @@ from shared.schemas.math_ast import (
     OperatorType,
     UnitSpec,
     VariableSpec,
+    try_eval_constant_ast,
 )
 from shared.schemas.job_bundle import (
     JobBundle,
@@ -23,6 +24,7 @@ __all__ = [
     "OperatorType",
     "UnitSpec",
     "VariableSpec",
+    "try_eval_constant_ast",
     "JobBundle",
     "TargetEntityType",
     "FindingResult",

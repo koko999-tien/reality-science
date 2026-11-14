@@ -93,9 +93,9 @@ def ast_to_sympy(node: ExprNode, declared_symbols: Set[str]) -> sp.Expr:
         raise ValueError(f"Unsupported binary operator: {node.op}")
 
     if node.node_type == NodeType.FUNCTION_CALL:
-        if not node.args:
-            raise ValueError("Function call requires arguments")
-        arg_exprs = [ast_to_sympy(arg, declared_symbols) for arg in node.args]
+        if not node.args or len(node.args) != 1:
+            raise ValueError(f"Function call {node.func} requires exactly 1 argument")
+        arg_exprs = [ast_to_sympy(node.args[0], declared_symbols)]
 
         if node.func == AllowedFunction.SQRT:
             return sp.sqrt(arg_exprs[0])

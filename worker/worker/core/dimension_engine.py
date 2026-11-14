@@ -1,11 +1,13 @@
 from typing import Dict, List
 import pint
 from shared.schemas.math_ast import (
+    AllowedFunction,
     ExprNode,
     NodeType,
     OperatorType,
     UnitSpec,
     VariableSpec,
+    try_eval_constant_ast,
 )
 
 ureg = pint.UnitRegistry()
@@ -61,18 +63,40 @@ def evaluate_ast_dimensions(
                 raise DimensionalityCheckError(
                     f"Exponent must be dimensionless, got {right_q.dimensionality}"
                 )
-            power_val = float(node.right.value) if node.right.value is not None else 1.0
-            return left_q ** power_val
+            if left_q.dimensionless:
+                return 1.0 * ureg.dimensionless
+
+            exp_val = try_eval_constant_ast(node.right)
+            if exp_val is None:
+                raise DimensionalityCheckError(
+                    f"Dimensionful base '{left_q.dimensionality}' requires a statically "
+                    "evaluatable constant exponent to determine dimensional power"
+                )
+            return left_q ** exp_val
 
     if node.node_type == NodeType.FUNCTION_CALL:
-        # Transcendental functions (sin, cos, exp, log) require dimensionless argument
-        if not node.args:
-            raise DimensionalityCheckError("Function call requires arguments")
-        arg_q = evaluate_ast_dimensions(node.args[0], var_map, unit_map)
-        if not arg_q.dimensionless:
+        if not node.args or len(node.args) != 1:
             raise DimensionalityCheckError(
-                f"Transcendental function {node.func} requires dimensionless input, got {arg_q.dimensionality}"
+                f"Function {node.func} requires exactly 1 argument"
             )
-        return 1.0 * ureg.dimensionless
+        arg_q = evaluate_ast_dimensions(node.args[0], var_map, unit_map)
+
+        if node.func == AllowedFunction.SQRT:
+            return arg_q ** 0.5
+
+        if node.func in (
+            AllowedFunction.SIN,
+            AllowedFunction.COS,
+            AllowedFunction.EXP,
+            AllowedFunction.LOG,
+        ):
+            if not arg_q.dimensionless:
+                func_name = node.func.value if hasattr(node.func, "value") else str(node.func)
+                raise DimensionalityCheckError(
+                    f"Transcendental function {func_name} requires dimensionless input, got {arg_q.dimensionality}"
+                )
+            return 1.0 * ureg.dimensionless
+
+        raise DimensionalityCheckError(f"Unsupported function: {node.func}")
 
     raise DimensionalityCheckError(f"Unsupported node type: {node.node_type}")

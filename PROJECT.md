@@ -69,8 +69,8 @@ Evidence-Driven Scientific Platform establishing an epistemically sound, mathema
 |---|------|-------|-------------|--------|
 | M1 | Architecture Audit & ADRs | Preserve reference docs, generate consistency audit report, write comprehensive ADRs | none | DONE |
 | M2 | Workspace Scaffolding & Isolation | Git init, directory structure, worker boundary configs with zero Postgres credentials | M1 | DONE |
-| M3 | Environment & Docker Orchestration | .env.example, pinned dependencies, multi-zone Docker Compose, static validations | M2 | IN_PROGRESS |
-| M4 | Math Contracts & RLS Database Schemas | Typed AST models, SymPy/Pint tests, PostgreSQL DDL migrations, RLS test suite | M3 | PLANNED |
+| M3 | Environment & Docker Orchestration | .env.example, pinned dependencies, multi-zone Docker Compose, static validations | M2 | DONE |
+| M4 | Math Contracts & RLS Database Schemas | Typed AST models, SymPy/Pint tests, PostgreSQL DDL migrations, RLS test suite | M3 | IN_PROGRESS |
 | M5 | Security QA & Stage 0 Report | SAST scan, health check endpoints, test execution, comprehensive 10-point report | M4 | PLANNED |
 
 ---

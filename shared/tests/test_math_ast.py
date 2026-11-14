@@ -7,6 +7,7 @@ from shared.schemas.math_ast import (
     AllowedFunction,
     UnitSpec,
     VariableSpec,
+    try_eval_constant_ast,
 )
 
 
@@ -78,3 +79,76 @@ def test_expr_node_accepts_numeric_constant_strings():
     assert n2.value == "-3.14159"
     n3 = ExprNode(node_type=NodeType.CONSTANT, value="1e-5")
     assert n3.value == "1e-5"
+
+
+def test_expr_node_rejects_inf_nan():
+    with pytest.raises(ValidationError):
+        ExprNode(node_type=NodeType.CONSTANT, value=float("inf"))
+    with pytest.raises(ValidationError):
+        ExprNode(node_type=NodeType.CONSTANT, value=float("-inf"))
+    with pytest.raises(ValidationError):
+        ExprNode(node_type=NodeType.CONSTANT, value=float("nan"))
+
+
+def test_expr_node_function_call_arity():
+    with pytest.raises(ValidationError):
+        # Empty args list forbidden
+        ExprNode(
+            node_type=NodeType.FUNCTION_CALL,
+            func=AllowedFunction.SQRT,
+            args=[],
+        )
+    with pytest.raises(ValidationError):
+        # More than 1 argument forbidden
+        ExprNode(
+            node_type=NodeType.FUNCTION_CALL,
+            func=AllowedFunction.SQRT,
+            args=[
+                ExprNode(node_type=NodeType.CONSTANT, value=4),
+                ExprNode(node_type=NodeType.CONSTANT, value=9),
+            ],
+        )
+
+
+def test_try_eval_constant_ast():
+    # Constant numeric and string
+    assert try_eval_constant_ast(ExprNode(node_type=NodeType.CONSTANT, value=42)) == 42.0
+    assert try_eval_constant_ast(ExprNode(node_type=NodeType.CONSTANT, value="3.5")) == 3.5
+
+    # Variable returns None
+    assert try_eval_constant_ast(ExprNode(node_type=NodeType.VARIABLE, value="x")) is None
+
+    # Binary arithmetic
+    add_node = ExprNode(
+        node_type=NodeType.BINARY_OP,
+        op=OperatorType.ADD,
+        left=ExprNode(node_type=NodeType.CONSTANT, value=10),
+        right=ExprNode(node_type=NodeType.CONSTANT, value=15),
+    )
+    assert try_eval_constant_ast(add_node) == 25.0
+
+    # Unary negation
+    neg_node = ExprNode(
+        node_type=NodeType.UNARY_OP,
+        op=OperatorType.NEG,
+        left=ExprNode(node_type=NodeType.CONSTANT, value=7),
+    )
+    assert try_eval_constant_ast(neg_node) == -7.0
+
+    # Functions
+    sqrt_node = ExprNode(
+        node_type=NodeType.FUNCTION_CALL,
+        func=AllowedFunction.SQRT,
+        args=[ExprNode(node_type=NodeType.CONSTANT, value=16)],
+    )
+    assert try_eval_constant_ast(sqrt_node) == 4.0
+
+    # Division by zero returns None
+    div_zero = ExprNode(
+        node_type=NodeType.BINARY_OP,
+        op=OperatorType.DIV,
+        left=ExprNode(node_type=NodeType.CONSTANT, value=1),
+        right=ExprNode(node_type=NodeType.CONSTANT, value=0),
+    )
+    assert try_eval_constant_ast(div_zero) is None
+

@@ -29,8 +29,13 @@ class ResearchActor(Base):
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
     orcid: Mapped[str | None] = mapped_column(String(19), nullable=True)
     organization_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    is_anonymized: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
 
     user_account: Mapped[UserAccount | None] = relationship(UserAccount, back_populates="actor")
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("is_anonymized", False)
+        super().__init__(**kwargs)

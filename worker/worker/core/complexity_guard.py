@@ -1,5 +1,10 @@
 from typing import Tuple
-from shared.schemas.math_ast import ExprNode, NodeType, OperatorType
+from shared.schemas.math_ast import (
+    ExprNode,
+    NodeType,
+    OperatorType,
+    try_eval_constant_ast,
+)
 
 MAX_AST_DEPTH = 15
 MAX_AST_NODES = 100
@@ -26,10 +31,11 @@ def inspect_ast_complexity(node: ExprNode, current_depth: int = 1) -> Tuple[int,
 
     # Check power operator limits to prevent exponential expansion bombs
     if node.node_type == NodeType.BINARY_OP and node.op == OperatorType.POW:
-        if node.right and node.right.node_type == NodeType.CONSTANT:
-            if isinstance(node.right.value, (int, float)) and abs(float(node.right.value)) > MAX_POLYNOMIAL_POWER:
+        if node.right:
+            exp_val = try_eval_constant_ast(node.right)
+            if exp_val is not None and abs(exp_val) > MAX_POLYNOMIAL_POWER:
                 raise ComplexityLimitExceededError(
-                    f"Exponent {node.right.value} exceeds maximum limit of {MAX_POLYNOMIAL_POWER}"
+                    f"Exponent {exp_val} exceeds maximum limit of {MAX_POLYNOMIAL_POWER}"
                 )
 
     children = []
