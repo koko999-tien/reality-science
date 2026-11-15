@@ -1,0 +1,309 @@
+{
+  "dataset_id": "nist-codata-2022-fundamental-constants",
+  "dataset_name": "NIST CODATA 2022 Recommended Values of Fundamental Physical Constants",
+  "dataset_type": "nist_physical_constants",
+  "source_reference": "NIST Special Publication 961 / CODATA 2022 Recommended Values",
+  "description": "Internationally recommended values of fundamental physical constants from NIST CODATA 2022",
+  "independent_variable_symbol": "index",
+  "dependent_variable_symbol": "value",
+  "independent_unit": null,
+  "dependent_unit": null,
+  "tolerance_sigma": 3.0,
+  "points": [
+    {
+      "independent_variable": 0.0,
+      "observed_value": 299792458.0,
+      "uncertainty": 0.0,
+      "weight": null,
+      "label": "c",
+      "metadata": {
+        "name": "speed of light in vacuum",
+        "unit": "m / s",
+        "is_exact": true
+      }
+    },
+    {
+      "independent_variable": 1.0,
+      "observed_value": 6.62607015e-34,
+      "uncertainty": 0.0,
+      "weight": null,
+      "label": "h",
+      "metadata": {
+        "name": "Planck constant",
+        "unit": "J * s",
+        "is_exact": true
+      }
+    },
+    {
+      "independent_variable": 2.0,
+      "observed_value": 1.0545718176461565e-34,
+      "uncertainty": 0.0,
+      "weight": null,
+      "label": "hbar",
+      "metadata": {
+        "name": "reduced Planck constant",
+        "unit": "J * s",
+        "is_exact": true
+      }
+    },
+    {
+      "independent_variable": 3.0,
+      "observed_value": 1.602176634e-19,
+      "uncertainty": 0.0,
+      "weight": null,
+      "label": "e",
+      "metadata": {
+        "name": "elementary charge",
+        "unit": "C",
+        "is_exact": true
+      }
+    },
+    {
+      "independent_variable": 4.0,
+      "observed_value": 1.380649e-23,
+      "uncertainty": 0.0,
+      "weight": null,
+      "label": "k_B",
+      "metadata": {
+        "name": "Boltzmann constant",
+        "unit": "J / K",
+        "is_exact": true
+      }
+    },
+    {
+      "independent_variable": 5.0,
+      "observed_value": 6.02214076e+23,
+      "uncertainty": 0.0,
+      "weight": null,
+      "label": "N_A",
+      "metadata": {
+        "name": "Avogadro constant",
+        "unit": "1 / mol",
+        "is_exact": true
+      }
+    },
+    {
+      "independent_variable": 6.0,
+      "observed_value": 6.6743e-11,
+      "uncertainty": 1.5e-15,
+      "weight": null,
+      "label": "G",
+      "metadata": {
+        "name": "Newtonian constant of gravitation",
+        "unit": "m^3 / (kg * s^2)",
+        "is_exact": false
+      }
+    },
+    {
+      "independent_variable": 7.0,
+      "observed_value": 9.1093837139e-31,
+      "uncertainty": 2.8e-40,
+      "weight": null,
+      "label": "m_e",
+      "metadata": {
+        "name": "electron mass",
+        "unit": "kg",
+        "is_exact": false
+      }
+    },
+    {
+      "independent_variable": 8.0,
+      "observed_value": 1.67262192595e-27,
+      "uncertainty": 5.2e-37,
+      "weight": null,
+      "label": "m_p",
+      "metadata": {
+        "name": "proton mass",
+        "unit": "kg",
+        "is_exact": false
+      }
+    },
+    {
+      "independent_variable": 9.0,
+      "observed_value": 0.0072973525643,
+      "uncertainty": 1.1e-12,
+      "weight": null,
+      "label": "alpha",
+      "metadata": {
+        "name": "fine-structure constant",
+        "unit": "dimensionless",
+        "is_exact": false
+      }
+    },
+    {
+      "independent_variable": 10.0,
+      "observed_value": 8.8541878128e-12,
+      "uncertainty": 1.3e-21,
+      "weight": null,
+      "label": "eps_0",
+      "metadata": {
+        "name": "vacuum electric permittivity",
+        "unit": "F / m",
+        "is_exact": false
+      }
+    },
+    {
+      "independent_variable": 11.0,
+      "observed_value": 1.25663706212e-06,
+      "uncertainty": 1.9e-16,
+      "weight": null,
+      "label": "mu_0",
+      "metadata": {
+        "name": "vacuum magnetic permeability",
+        "unit": "N / A^2",
+        "is_exact": false
+      }
+    },
+    {
+      "independent_variable": 12.0,
+      "observed_value": 10973731.568157,
+      "uncertainty": 1.2e-05,
+      "weight": null,
+      "label": "R_inf",
+      "metadata": {
+        "name": "Rydberg constant",
+        "unit": "1 / m",
+        "is_exact": false
+      }
+    }
+  ],
+  "cern_events": null,
+  "cern_resonance_points": null,
+  "nasa_observations": null,
+  "nist_constants": [
+    {
+      "constant_symbol": "c",
+      "constant_name": "speed of light in vacuum",
+      "value": 299792458.0,
+      "standard_uncertainty": 0.0,
+      "unit": "m / s",
+      "relative_uncertainty": 0.0,
+      "codata_year": 2022,
+      "is_exact": true
+    },
+    {
+      "constant_symbol": "h",
+      "constant_name": "Planck constant",
+      "value": 6.62607015e-34,
+      "standard_uncertainty": 0.0,
+      "unit": "J * s",
+      "relative_uncertainty": 0.0,
+      "codata_year": 2022,
+      "is_exact": true
+    },
+    {
+      "constant_symbol": "hbar",
+      "constant_name": "reduced Planck constant",
+      "value": 1.0545718176461565e-34,
+      "standard_uncertainty": 0.0,
+      "unit": "J * s",
+      "relative_uncertainty": 0.0,
+      "codata_year": 2022,
+      "is_exact": true
+    },
+    {
+      "constant_symbol": "e",
+      "constant_name": "elementary charge",
+      "value": 1.602176634e-19,
+      "standard_uncertainty": 0.0,
+      "unit": "C",
+      "relative_uncertainty": 0.0,
+      "codata_year": 2022,
+      "is_exact": true
+    },
+    {
+      "constant_symbol": "k_B",
+      "constant_name": "Boltzmann constant",
+      "value": 1.380649e-23,
+      "standard_uncertainty": 0.0,
+      "unit": "J / K",
+      "relative_uncertainty": 0.0,
+      "codata_year": 2022,
+      "is_exact": true
+    },
+    {
+      "constant_symbol": "N_A",
+      "constant_name": "Avogadro constant",
+      "value": 6.02214076e+23,
+      "standard_uncertainty": 0.0,
+      "unit": "1 / mol",
+      "relative_uncertainty": 0.0,
+      "codata_year": 2022,
+      "is_exact": true
+    },
+    {
+      "constant_symbol": "G",
+      "constant_name": "Newtonian constant of gravitation",
+      "value": 6.6743e-11,
+      "standard_uncertainty": 1.5e-15,
+      "unit": "m^3 / (kg * s^2)",
+      "relative_uncertainty": 2.2e-05,
+      "codata_year": 2022,
+      "is_exact": false
+    },
+    {
+      "constant_symbol": "m_e",
+      "constant_name": "electron mass",
+      "value": 9.1093837139e-31,
+      "standard_uncertainty": 2.8e-40,
+      "unit": "kg",
+      "relative_uncertainty": 3e-10,
+      "codata_year": 2022,
+      "is_exact": false
+    },
+    {
+      "constant_symbol": "m_p",
+      "constant_name": "proton mass",
+      "value": 1.67262192595e-27,
+      "standard_uncertainty": 5.2e-37,
+      "unit": "kg",
+      "relative_uncertainty": 3.1e-10,
+      "codata_year": 2022,
+      "is_exact": false
+    },
+    {
+      "constant_symbol": "alpha",
+      "constant_name": "fine-structure constant",
+      "value": 0.0072973525643,
+      "standard_uncertainty": 1.1e-12,
+      "unit": "dimensionless",
+      "relative_uncertainty": 1.5e-10,
+      "codata_year": 2022,
+      "is_exact": false
+    },
+    {
+      "constant_symbol": "eps_0",
+      "constant_name": "vacuum electric permittivity",
+      "value": 8.8541878128e-12,
+      "standard_uncertainty": 1.3e-21,
+      "unit": "F / m",
+      "relative_uncertainty": 1.5e-10,
+      "codata_year": 2022,
+      "is_exact": false
+    },
+    {
+      "constant_symbol": "mu_0",
+      "constant_name": "vacuum magnetic permeability",
+      "value": 1.25663706212e-06,
+      "standard_uncertainty": 1.9e-16,
+      "unit": "N / A^2",
+      "relative_uncertainty": 1.5e-10,
+      "codata_year": 2022,
+      "is_exact": false
+    },
+    {
+      "constant_symbol": "R_inf",
+      "constant_name": "Rydberg constant",
+      "value": 10973731.568157,
+      "standard_uncertainty": 1.2e-05,
+      "unit": "1 / m",
+      "relative_uncertainty": 1.1e-12,
+      "codata_year": 2022,
+      "is_exact": false
+    }
+  ],
+  "metadata": {
+    "codata_edition": 2022,
+    "si_system": "2019 redefinition"
+  }
+}

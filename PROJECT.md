@@ -56,7 +56,7 @@ Evidence-Driven Scientific Platform establishing an epistemically sound, mathema
 | 23 | RCE Layer 3 Boundary Engine | Numerical stability, asymptote, and singularity detection with Richardson's fallback | M6 | Stage 1 (Doc 3 §1) |
 | 24 | RCE Layer 4 Physical Laws | Fundamental physics invariants (energy conservation, speed of light) | Stage 2+ | Doc 3 §1 |
 | 25 | RCE Layer 5 Empirical Data | Observation dataset correlation against CERN, NASA, NIST data | Stage 2+ | Doc 3 §1 |
-| 26 | RCE Layer 6 Epistemic Logic | Cross-claim contradiction graphs and circularity detection | Stage 3+ | Doc 3 §1 |
+| 26 | RCE Layer 6 Epistemic Logic | Cross-claim contradiction graphs and circularity detection | M10 | Stage 3 (Doc 3 §1) |
 | 27 | Interactive Symbolic Canvas UI | Next.js visual node-based mathematical authoring canvas | M7 | Stage 1 (Doc 1 §3) |
 | 28 | Open Research ZIP Exporter | Zero lock-in cryptographic zip bundle export with SHA-256 and Ed25519 signatures | M8 | Stage 1 (Doc 2 §2) |
 | 29 | Outbox Event Publisher | Transactional outbox relay & asynchronous validation polling contracts | M6 | Stage 1 (Doc 2 §3) |
@@ -65,6 +65,14 @@ Evidence-Driven Scientific Platform establishing an epistemically sound, mathema
 | 32 | Draft vs Frozen Snapshot Lifecycle | Separation of mutable draft endpoints from immutable version snapshot queries | M8 | Stage 1 (ADR-003) |
 | 33 | Citation-Preserving Erasure Engine | GDPR erasure nullifying user_account_id without breaking citation foreign keys | M8 | Stage 1 (ADR-003) |
 | 34 | Anti-Database Guard & Network Sentinel | Worker runtime check rejecting DB credentials and verifying network isolation | M6 | Stage 1 (ADR-002) |
+| 35 | Tarjan SCC Cycle & Loop Detection | Bounded DFS cycle path extraction and circular reasoning isolation | M10 | Stage 3 (Request R1) |
+| 36 | SymPy Cross-Claim Contradiction Engine | Direct equality, boundary interval, and sign contradiction detection | M10 | Stage 3 (Request R1) |
+| 37 | Canonical 7-State Topological Status Propagator | Forward monotonic propagation of finding states with antecedent poisoning | M10 | Stage 3 (Request R1) |
+| 38 | Stage 3 Child Entity RLS Migration 003 | PostgreSQL RLS enabled and forced on claims and claim_relations tables | M10 | Stage 3 (Request R2) |
+| 39 | End-to-End 6-Layer Integrated RCE Pipeline | Unified execution across L1 Syntax, L2 Boundary, L3 Dimensions, L4 Physical Laws, L5 Empirical Data, L6 Epistemic Logic across Frontend, Backend, and Celery | M11 | Stage 4 (Request R1) |
+| 40 | Multi-Zone Production Docker Hardening & SAST | Strict zone separation, health checks for all services, production compose, env templates, and comprehensive SAST scan | M12 | Stage 4 (Request R2) |
+| 41 | Full-Monorepo Opaque-Box E2E Regression Suite | 4-Tier integration test suite covering L1-L6, multi-zone security, version freeze & ZIP export, 325+ test non-regression | M13 | Stage 4 (Request R3) |
+| 42 | Final Project Handover & Architecture Finalization | Exhaustive 9-section handover report, updated TEST_READY.md, production operational runbook | M14 | Stage 4 (Request R4) |
 
 ---
 
@@ -80,6 +88,11 @@ Evidence-Driven Scientific Platform establishing an epistemically sound, mathema
 | M7 | Interactive Symbolic Canvas UI | Next.js 15 / React 19 @xyflow/react node canvas, custom nodes, DAG cycle detection, bidirectional AST | M5 | DONE |
 | M8 | Open Research Cryptographic ZIP Export | Zero lock-in ZIP bundle, SHA-256 manifests, Ed25519 signatures, offline verifier, export API | M6 | DONE |
 | M9 | Stage 1 Dual-Track E2E Integration Suite | Opaque-box E2E test suite (Tiers 1-4), TEST_READY.md, full validation & export verification | M6, M7, M8 | DONE |
+| M10 | Stage 3 Epistemic Logic & Cross-Claim Verification | Feature 26 (RCE Layer 6), cycle detection, contradiction engine, 7-state status propagator, Zone 3 Celery sandbox task, migration 003 with RLS, Stage 3 E2E test suite, and 295 test baseline regression guard | M6, M9 | DONE |
+| M11 | 6-Layer End-to-End Pipeline Integration | Celery worker multi-layer pipeline task, Backend validation routes (/api/v1/validation/verify, /versions/{version_id}/validate), Frontend LayerPipelineMatrix UI | M10 | DONE |
+| M12 | Production Docker Multi-Zone Hardening & SAST | Strict zone separation (api removed from compute_net), container health checks, docker-compose.prod.yml, .env.production.example, SAST scan report | M11 | DONE |
+| M13 | Full Regression & Stage 4 Opaque-Box E2E Suite | 4-tier integration test suite (test_stage4_final_e2e_integration.py) covering L1-L6, multi-zone security, version freeze & ZIP export, 325+ test non-regression | M11, M12 | DONE |
+| M14 | Final Project Handover & Handover Documentation | Comprehensive 9-section STAGE_4_FINAL_HANDOVER.md, updated TEST_READY.md, finalized PROJECT.md | M13 | DONE |
 
 ---
 
@@ -167,6 +180,26 @@ class ExprNode(BaseModel):
 - **Bidirectional Translation**:
   - `graphToAst`: DAG cycle detection, depth $\le 15$, node count $\le 100$, strict port connection validation.
   - `astToGraph`: Tree-to-DAG visual layout algorithm placing nodes and edges.
+
+### 7. Stage 3: Layer 6 Epistemic Logic & Cross-Claim Graph Contracts
+- **Pydantic v2 Models (`shared/schemas/epistemic_logic.py`)**:
+  - `ClaimType`: `AXIOM`, `HYPOTHESIS`, `DERIVATION`, `EMPIRICAL_OBSERVATION`, `PREDICTION`, `DOMAIN_CONSTRAINT`.
+  - `RelationType`: `DEPENDS_ON`, `DERIVED_FROM`, `SUPPORTS`, `CONTRADICTS`, `EQUIVALENT_TO`, `CHALLENGES`, `SUPERSEDES`.
+  - `ClaimSpec`: `claim_id`, `claim_code`, `claim_type`, `statement`, `target_variable`, `expression_ast`, `assumptions`, `local_state`, `propagated_state`, `dependency_logic`.
+  - `ClaimDependency`: `source_claim_id`, `target_claim_id`, `relation_type`, `justification`, `weight`.
+  - `CycleReport`: `cycle_detected: bool`, `cycles: List[List[str]]`, `cyclic_claim_ids: Set[str]`.
+  - `ContradictionItem` & `ContradictionReport`: Identifies direct equality, interval boundary, sign conflicts, and explicit contradiction links.
+  - `EpistemicFinding` & `ClaimGraphValidationResult`: Overall status and detailed per-claim diagnostic breakdown.
+- **Worker Epistemic Algorithms (`worker/core/epistemic_engine.py`)**:
+  - Pure Python in-memory graph execution (zero external graph dependencies like `networkx`).
+  - Tarjan's Strongly Connected Components (SCC) with bounded DFS cycle path extraction. Cyclic nodes assign `FindingState.FAIL` and `CIRCULAR_DEPENDENCY_DETECTED`.
+  - SymPy-safe contradiction detection: algebraic subtraction, interval intersection, and sign check without `eval()`/`exec()`.
+  - Monotonic topological status propagation across the canonical 7-state taxonomy (`PASS`, `FAIL`, `WARNING`, `NOT_APPLICABLE`, `INSUFFICIENT_DATA`, `NEEDS_EXPERT_REVIEW`, `NOT_YET_TESTED`). Antecedent failure poisons dependent claim to `FAIL` with `EPISTEMIC_ANTECEDENT_FAILED`.
+- **Database & Security Contracts (`backend/`)**:
+  - PostgreSQL tables `claims` and `claim_relations` via migration `003_stage3_claims_and_epistemic_logic.py`.
+  - Row-Level Security (RLS) enabled and forced on both tables linking to `owner_actor_id` and `public_preprint` visibility.
+  - Immutability enforced on frozen versions (`is_frozen = TRUE`).
+  - ZIP export bundles `claims_graph.json` validated by `verify_bundle.py`.
 
 ---
 

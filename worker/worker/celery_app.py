@@ -7,7 +7,7 @@ celery_app = Celery(
     "reality_science_worker",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    include=["worker.tasks.compute_tasks"],
+    include=["worker.tasks.compute_tasks", "worker.tasks.epistemic"],
 )
 
 celery_app.conf.update(

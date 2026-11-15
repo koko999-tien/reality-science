@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, JSON, Integer
+from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, JSON, Integer, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
@@ -78,3 +78,61 @@ class ValidationFinding(Base):
     )
 
     run: Mapped[ValidationRun] = relationship("ValidationRun", back_populates="findings")
+
+
+class Claim(Base):
+    __tablename__ = "claims"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    version_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("research_versions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    claim_code: Mapped[str] = mapped_column(String(50), nullable=False)
+    statement: Mapped[str] = mapped_column(Text, nullable=False)
+    claim_type: Mapped[str] = mapped_column(String(50), default="HYPOTHESIS", nullable=False)
+    target_variable: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    canonical_ast_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    assumptions_json: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    epistemic_state: Mapped[str] = mapped_column(String(30), default="NOT_YET_TESTED", nullable=False)
+    uncertainty_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confidence_score: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    dependency_logic: Mapped[str] = mapped_column(String(10), default="ALL", nullable=False)
+    metadata_json: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("claim_type", "HYPOTHESIS")
+        kwargs.setdefault("epistemic_state", "NOT_YET_TESTED")
+        kwargs.setdefault("confidence_score", 1.0)
+        kwargs.setdefault("dependency_logic", "ALL")
+        kwargs.setdefault("assumptions_json", [])
+        kwargs.setdefault("metadata_json", {})
+        super().__init__(**kwargs)
+
+
+class ClaimRelation(Base):
+    __tablename__ = "claim_relations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    version_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("research_versions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    source_claim_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("claims.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    target_claim_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("claims.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    relation_type: Mapped[str] = mapped_column(String(50), default="DEPENDS_ON", nullable=False)
+    justification: Mapped[str | None] = mapped_column(Text, nullable=True)
+    weight: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("relation_type", "DEPENDS_ON")
+        kwargs.setdefault("weight", 1.0)
+        super().__init__(**kwargs)

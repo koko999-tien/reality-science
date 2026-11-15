@@ -1,38 +1,40 @@
-# REALITY SCIENCE — STAGE 1 TEST READY GUIDE & VERIFICATION MATRIX
+# REALITY SCIENCE — STAGE 4 TEST READY GUIDE & FINAL VERIFICATION MATRIX
 
 **Project Location**: `D:\Reality_Science\`  
-**Stage**: Stage 1 — Core Research Computation Engine  
-**Status**: All Stage 1 Milestones (M6, M7, M8, M9) Implemented, Tested, and Verified  
+**Stage**: Stage 4 — Final System Integration, Production Hardening, and Handover (Milestones M11–M14)  
+**Status**: All Stage 4 Milestones Implemented, Tested, and Verified with Zero Regressions  
 **Date**: 2026-11-15  
 
 ---
 
 ## 1. Architectural Scope & Multi-Zone Security Boundaries
 
-Stage 1 activates the **Core Research Computation Engine** on top of the Stage 0 hardened infrastructure:
+Stage 4 implements the final system integration, production hardening, and project handover across all multi-zone architectural boundaries:
 
-- **Zone 1: Cloud Edge (Public Frontend)**
-  - Interactive Symbolic Canvas UI built with Next.js 15 App Router, React 19, and `@xyflow/react`.
-  - Visual authoring of mathematical equations using 6 custom nodes (`ConstantNode`, `VariableNode`, `BinaryOpNode`, `UnaryOpNode`, `FunctionCallNode`, `EquationRootNode`).
-  - Strict **Symbol-First Authoring** via `VariableDeclarationPanel` enforcing variable symbols and SI units before connections.
-  - Bidirectional lossless AST conversion (`graphToAst` $\leftrightarrow$ `astToGraph`) with DAG cycle prevention, depth $\le 15$, and node count $\le 100$.
-  - Synchronized KaTeX mathematical formula rendering.
+- **Milestone M11 (6-Layer Full Pipeline Integration)**:
+  - Unified 6-layer Reality Constraint Engine (L1 Syntax -> L2 Boundary -> L3 Dimensions -> L4 Physical Laws -> L5 Empirical Data -> L6 Epistemic Logic).
+  - Pydantic v2 `PipelineValidationReport` and `LayerFinding` schemas in `shared/schemas/finding_result.py`.
+  - Zone 3 Celery worker task `verify_equation_ast` executing all 6 layers sequentially with canonical severity reduction.
+  - Zone 2 FastAPI endpoints (`POST /api/v1/validation/verify`, `POST /api/v1/versions/{version_id}/validate`, `GET /api/v1/versions/{version_id}/validation-runs`, equations & variables CRUD).
+  - Zone 1 Frontend: `LayerPipelineMatrix.tsx`, `contracts.ts`, `api.ts`, interactive status matrix.
 
-- **Zone 2: Private Core (Backend & Identity)**
-  - FastAPI Modular Monolith running Python 3.11 with asynchronous SQLAlchemy 2.0 and Alembic.
-  - Relational schema migration `002_stage1_validation_and_math.py` with PostgreSQL Row-Level Security (RLS) on `equations`, `variables`, `validation_runs`, and `validation_findings`.
-  - Identity split separating `user_accounts` (PII encrypted with AES-256-GCM) from pseudonymous `research_actors`.
-  - Immutable version freeze trigger `trg_freeze_research_versions` blocking mutations and deletions on published research.
-  - Open Research Cryptographic ZIP Exporter (`exporter.py`) with JSON-LD `manifest.json`, Linux `checksums.sha256`, digital `signature.json`, zero PII guarantee, and standalone offline `verify_bundle.py`.
+- **Milestone M12 (Production Docker Multi-Zone Hardening & SAST)**:
+  - Strict zone network isolation (`app_net`, `data_net`, `compute_net`).
+  - Container health checks configured across all services (`api`, `compute_worker`, `frontend`, `postgres`, `redis`, `minio`).
+  - Hardened production Compose configuration: `docker-compose.prod.yml`.
+  - Production environment configuration template: `.env.production.example`.
+  - Extended SAST security scanner covering 162 source files across Python, SQL, and TypeScript with 0 vulnerabilities detected (`docs/security/STAGE_4_SAST_SCAN_REPORT.md`).
 
-- **Zone 3: Isolated Compute Sandbox (Celery Worker)**
-  - Celery compute workers executing within network-isolated `compute_net` (strictly ZERO PostgreSQL access).
-  - Runtime `assert_zero_database_credentials()` guard rejecting database credentials and drivers (`psycopg2`, `asyncpg`, `sqlalchemy`).
-  - Pure programmatic SymPy AST construction without `eval()`, `exec()`, or unparsed strings.
-  - Three-layer Reality Constraint Engine (RCE):
-    - **Layer 1: Syntax & Semantics Engine** (`semantic_validator.py`): Symbol verification, domain checks, complexity gates.
-    - **Layer 2: Boundary & Singularity Solver** (`boundary_engine.py`): Physical pole detection, asymptotic limits ($t \to \infty$), Richardson's Theorem 10-point stratified numerical fallback.
-    - **Layer 3: Dimension Engine** (`dimension_engine.py`): 100+ physical units via Pint, dynamic custom unit registration, strictly dimensionless transcendental arguments.
+- **Milestone M13 (Full-Monorepo Opaque-Box E2E Regression Suite)**:
+  - 4-Tier integration test suite: `backend/tests/integration/test_stage4_final_e2e_integration.py`.
+  - Tier 1: Canonical Valid Scientific Formulation (L1–L6 All-Pass).
+  - Tier 2: Layered Rejection & Fault Injection (Tiers 2a–2e covering syntax, boundaries, dimensions, relativistic speed limit, empirical fit, epistemic cycles).
+  - Tier 3: Version Validation, Freeze Immutability & Zone 2 Persistence.
+  - Tier 4: Cryptographic ZIP Bundle Export with Offline Manifest & Claims Graph Verification.
+
+- **Milestone M14 (Final Project Handover & Handover Documentation)**:
+  - Comprehensive 9-section final project handover report: `docs/STAGE_4_FINAL_HANDOVER.md`.
+  - Updated and finalized `PROJECT.md` and `TEST_READY.md`.
 
 ---
 
@@ -40,12 +42,20 @@ Stage 1 activates the **Core Research Computation Engine** on top of the Stage 0
 
 | Package / Domain | Target Directory | Tests Collected | Passed | Skipped | Failed | Execution Time |
 |---|---|---|---|---|---|---|
-| **Shared Contracts** | `shared/tests/` | 14 | **14** | 0 | 0 | ~0.5s |
-| **Worker Compute & Isolation** | `worker/tests/` | 55 | **55** | 0 | 0 | ~20.0s |
-| **Backend API, RLS & Exporter** | `backend/tests/` | 40 | **39** | 1 (offline RLS) | 0 | ~30.0s |
-| **Frontend Canvas UI** | `frontend/tests/` | 39 | **39** | 0 | 0 | ~9.0s |
-| **Stage 1 E2E Integration Suite** | `backend/tests/integration/test_stage1_e2e_integration.py` | 5 | **5** | 0 | 0 | ~4.3s |
-| **TOTAL** | | **148** | **147** | **1** | **0** | **~64.0s** |
+| **Shared Domain Contracts** | `shared/tests/` | 53 | **53** | 0 | 0 | ~0.5s |
+| **Worker Compute & Anti-DB Isolation** | `worker/tests/` | 123 | **123** | 0 | 0 | ~11.6s |
+| **Backend Core, Evidence Lab, Cluster, Claims & Stage 4 E2E** | `backend/tests/` | 120 | **119** | 1 (offline live PG) | 0 | ~20.2s |
+| **Frontend Symbolic Canvas UI** | `frontend/tests/` | 41 | **41** | 0 | 0 | ~6.2s |
+| **Docker Multi-Zone Configuration Audit** | `scripts/validate_m3_docker_env.py` | 31 checks | **31** | 0 | 0 | ~0.3s |
+| **SAST Security Vulnerability Audit** | `scripts/run_sast_scan.py` | 162 files | **0 vuln** | 0 | 0 | ~1.5s |
+| **TOTAL AUTOMATED BASELINE** | | **337** | **336** | **1** | **0** | **~40.3s** |
+
+### Non-Regression Baseline Confirmation
+- **Baseline Automated Tests**: 325 automated passing tests (shared: 53, worker: 123, backend: 110, frontend: 39).
+- **Stage 4 Regression Outcome**: 100% of baseline tests continue to pass with zero regressions.
+- **New Stage 4 Automated Tests Added**: 11 new automated tests:
+  - `backend/tests/integration/test_stage4_final_e2e_integration.py`: 9 comprehensive E2E tests.
+  - `frontend/tests/LayerPipelineMatrix.test.tsx`: 2 frontend matrix component tests.
 
 ---
 
@@ -53,90 +63,90 @@ Stage 1 activates the **Core Research Computation Engine** on top of the Stage 0
 
 To execute the test suites independently on the host:
 
-### 3.1. Verify Shared Contracts (14 tests)
+### 3.1. Verify Shared Domain Contracts (53 tests)
 ```powershell
 Set-Location D:\Reality_Science
 $env:PYTHONPATH="D:\Reality_Science\shared"
 & "C:\Python314\python.exe" -m pytest "D:\Reality_Science\shared\tests" -v
 ```
-*Expected*: `14 passed in ~0.5s`.
+*Expected*: `53 passed in ~0.5s`.
 
-### 3.2. Verify Worker Compute Sandbox & Anti-Database Isolation (55 tests)
+### 3.2. Verify Worker Compute Sandbox & Anti-Database Isolation (123 tests)
 ```powershell
 Set-Location D:\Reality_Science
 $env:PYTHONPATH="D:\Reality_Science\shared;D:\Reality_Science\worker"
-& "C:\Python314\python.exe" -m pytest "D:\Reality_Science\worker\tests" -v
+& "C:\Python314\python.exe" -m pytest "D:\Reality_Science\worker\tests" -q
 ```
-*Expected*: `55 passed in ~20.0s` (including all 5 worker isolation tests).
+*Expected*: `123 passed in ~11.6s` (verifying L1–L6 pipeline, physical invariants, empirical correlation, epistemic engine, and zero DB access).
 
-### 3.3. Verify Backend API, RLS Schemas, Exporter & E2E Integration (40 tests)
+### 3.3. Verify Backend Core, Evidence Lab, Cluster Orchestration & All Integration Suites (120 tests)
 ```powershell
 Set-Location D:\Reality_Science
 $env:PYTHONPATH="D:\Reality_Science\shared;D:\Reality_Science\backend"
 & "D:\Reality_Science\backend\.venv\Scripts\pytest.exe" "D:\Reality_Science\backend\tests" -v
 ```
-*Expected*: `39 passed, 1 skipped in ~30.0s`.
+*Expected*: `119 passed, 1 skipped in ~20.2s` (verifying all endpoints, Alembic migrations 001–003, freeze immutability, cryptographic ZIP export, and Stage 1–4 E2E integration).
 
-### 3.4. Verify Frontend Symbolic Canvas UI (39 tests)
+### 3.4. Verify Frontend Symbolic Canvas UI & Matrix Component (41 tests)
 ```powershell
 Set-Location D:\Reality_Science\frontend
-npm test
+npm test -- --watchAll=false
 ```
-*Expected*: `Test Suites: 6 passed, 6 total`, `Tests: 39 passed, 39 total`.
+*Expected*: `Test Suites: 7 passed, 7 total`, `Tests: 41 passed, 41 total in ~6.2s`.
 
-### 3.5. Verify Dedicated Stage 1 Dual-Track E2E Integration Suite (5 tests)
+### 3.5. Verify Docker Multi-Zone Configuration Audit (31 checks)
 ```powershell
 Set-Location D:\Reality_Science
-$env:PYTHONPATH="D:\Reality_Science\shared;D:\Reality_Science\backend"
-& "D:\Reality_Science\backend\.venv\Scripts\pytest.exe" "D:\Reality_Science\backend\tests\integration\test_stage1_e2e_integration.py" -v
+& "C:\Python314\python.exe" "D:\Reality_Science\scripts\validate_m3_docker_env.py"
 ```
-*Expected*: `5 passed in ~4.3s`.
+*Expected*: `Audit Summary: 31/31 checks passed (100.0%)`.
+
+### 3.6. Verify SAST Security Vulnerability Audit (162 files)
+```powershell
+Set-Location D:\Reality_Science
+& "C:\Python314\python.exe" "D:\Reality_Science\scripts\run_sast_scan.py"
+```
+*Expected*: `Total SAST Vulnerability Findings: 0` (clean report generated at `docs/security/STAGE_4_SAST_SCAN_REPORT.md`).
+
+### 3.7. Verify Worker Health CLI
+```powershell
+Set-Location D:\Reality_Science
+$env:PYTHONPATH="D:\Reality_Science\shared;D:\Reality_Science\worker"
+& "C:\Python314\python.exe" -m worker.core.health
+```
+*Expected*: `Compute Worker Health: healthy` with `zero_database_drivers: True`.
 
 ---
 
-## 4. Four-Tier E2E Integration Architecture (Milestone 9)
+## 4. Stage 4 Opaque-Box E2E Integration Suite Architecture
 
-The Stage 1 E2E integration test suite (`backend/tests/integration/test_stage1_e2e_integration.py`) validates four sequential operational tiers:
+Located at `backend/tests/integration/test_stage4_final_e2e_integration.py`:
 
-1. **Tier 1 — Frontend AST & Visual Flow Contracts**:
-   - Programmatic construction of mathematical expressions ($E = 0.5 \cdot m \cdot v^2$).
-   - Static evaluation of constant expressions and functions (`try_eval_constant_ast`).
-   - Prevention of imaginary numbers ($\sqrt{-16} \to \text{None}$).
-   - Rejection of boolean values and arbitrary string constants.
-   - AST complexity gates (depth $\le 15$, node count $\le 100$, powers $\le 20$).
-
-2. **Tier 2 — Backend Domain, Identity Split & Immutability**:
-   - Verification of identity split between `UserAccount` (PII) and `ResearchActor` (citations).
-   - GDPR Right to Erasure: deleting user account preserves research actor and citations with `ON DELETE SET NULL`.
-   - Immutable version snapshot: `is_frozen = TRUE` rejects mutations.
-
-3. **Tier 3 — Compute Sandbox & RCE Orchestration**:
-   - Packaging typed `JobBundle` into Celery v2 envelope with headers and base64 payload.
-   - Dispatching to Redis `compute_tasks` queue.
-   - Ingestion and mapping of `FindingResult` to canonical 7-state taxonomy (`PASS`, `FAIL`, `WARNING`, `NOT_APPLICABLE`, `INSUFFICIENT_DATA`, `NEEDS_EXPERT_REVIEW`, `NOT_YET_TESTED`).
-
-4. **Tier 4 — Cryptographic Research ZIP Export & Autonomous Verification**:
-   - Exporting frozen version to complete `.zip` archive via `generate_research_zip_bundle`.
-   - Unpacking into clean temporary directory and executing standalone `verify_bundle.py`.
-   - Verification of intact bundle (`[PASS] All bundle verification checks passed successfully.`).
-   - Archive mode verification (`verify_bundle.py --zip bundle.zip`).
-   - Tamper-evidence test: altering `paper.md` fails verification.
-   - Untracked file test: injecting unauthenticated files fails verification.
-   - Anti-Poisoning test (FINDING-M8-02 remediation): injecting untracked file and updating `checksums.sha256` fails verification because `manifest.json` is the signed authority.
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Stage 4 Integration Suite                       │
+├────────────────────────────────┬───────────────────────────────────────┤
+│ Tier 1: Canonical Formulation  │ L1-L6 All-Pass Formulation            │
+│                                │ F = m * a with dimensions & claims    │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Tier 2: Fault Injection        │ Tier 2a: Malformed AST rejection      │
+│                                │ Tier 2b: Dimension mismatch rejection │
+│                                │ Tier 2c: Relativistic speed limit     │
+│                                │ Tier 2d: Positive uncertainty check   │
+│                                │ Tier 2e: Epistemic cycle detection    │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Tier 3: Version Validation     │ Full 6-layer pipeline execution       │
+│                                │ Persistence to validation_runs        │
+│                                │ Frozen version immutability guarantee │
+├────────────────────────────────┼───────────────────────────────────────┤
+│ Tier 4: Cryptographic ZIP      │ Immutable signed ZIP bundle           │
+│                                │ manifest.json, signature.json         │
+│                                │ Standalone verify_bundle.py passes    │
+└────────────────────────────────┴───────────────────────────────────────┘
+```
 
 ---
 
-## 5. Security & Anti-Cheating Invariants Summary
+## 5. Offline skipped Test Note
 
-1. **Zero Database Credentials in Compute Workers**:
-   - Worker environment contains strictly zero database connection strings.
-   - Worker container image has zero database drivers installed (`psycopg2`, `asyncpg`, `sqlalchemy`).
-   - Worker health check enforces `assert_zero_database_credentials()`.
-
-2. **Zero Arbitrary Code Execution**:
-   - Zero occurrences of `eval()`, `exec()`, `compile()`, or `parse_expr()`.
-   - AST evaluation converts pure Pydantic nodes directly into native SymPy objects (`sp.Add`, `sp.Mul`, `sp.Pow`, `sp.Symbol`).
-
-3. **Cryptographic Integrity & Zero Vendor Lock-in**:
-   - Export bundle can be independently verified on any computer running standard Python 3 without installing any third-party packages or database servers.
-   - Authoritative signed manifest prevents checksum poisoning attacks.
+`test_decision3_postgres_rls.py::test_postgres_rls_isolation` is skipped gracefully in offline dev environments when a live PostgreSQL container is not running on `localhost:5432`. Relational contracts, trigger constraints, and DDL migrations are verified 100% via SQLite and Alembic offline SQL generation.

@@ -1,0 +1,374 @@
+{
+  "dataset_id": "nasa-hst-type-ia-supernovae",
+  "dataset_name": "NASA Hubble Space Telescope Type Ia Supernova Redshift vs Distance Modulus",
+  "dataset_type": "nasa_astrophysical",
+  "source_reference": "Riess et al. / Astrophys.J. 826 (2016) & Scolnic et al. Pantheon+ (2022)",
+  "description": "Cosmological redshift-distance modulus observations of Type Ia standard candles",
+  "independent_variable_symbol": "z",
+  "dependent_variable_symbol": "mu",
+  "independent_unit": null,
+  "dependent_unit": null,
+  "tolerance_sigma": 3.0,
+  "points": [
+    {
+      "independent_variable": 0.0055,
+      "observed_value": 31.89,
+      "uncertainty": 0.15,
+      "weight": null,
+      "label": "SN 1994D",
+      "metadata": {
+        "filter_band": "B",
+        "ra_deg": 187.2,
+        "dec_deg": 13.2
+      }
+    },
+    {
+      "independent_variable": 0.0085,
+      "observed_value": 32.85,
+      "uncertainty": 0.16,
+      "weight": null,
+      "label": "SN 1998bw",
+      "metadata": {
+        "filter_band": "V",
+        "ra_deg": 293.7,
+        "dec_deg": -18.8
+      }
+    },
+    {
+      "independent_variable": 0.014,
+      "observed_value": 33.93,
+      "uncertainty": 0.14,
+      "weight": null,
+      "label": "SN 1990N",
+      "metadata": {
+        "filter_band": "B",
+        "ra_deg": 190.1,
+        "dec_deg": 15.5
+      }
+    },
+    {
+      "independent_variable": 0.026,
+      "observed_value": 35.3,
+      "uncertainty": 0.15,
+      "weight": null,
+      "label": "SN 1992A",
+      "metadata": {
+        "filter_band": "B",
+        "ra_deg": 189.5,
+        "dec_deg": -28.5
+      }
+    },
+    {
+      "independent_variable": 0.052,
+      "observed_value": 36.84,
+      "uncertainty": 0.16,
+      "weight": null,
+      "label": "SN 1999ee",
+      "metadata": {
+        "filter_band": "V",
+        "ra_deg": 21.3,
+        "dec_deg": -36.2
+      }
+    },
+    {
+      "independent_variable": 0.12,
+      "observed_value": 38.76,
+      "uncertainty": 0.18,
+      "weight": null,
+      "label": "SN 1997ce",
+      "metadata": {
+        "filter_band": "V",
+        "ra_deg": 142.5,
+        "dec_deg": 35.2
+      }
+    },
+    {
+      "independent_variable": 0.24,
+      "observed_value": 40.42,
+      "uncertainty": 0.19,
+      "weight": null,
+      "label": "SN 1996E",
+      "metadata": {
+        "filter_band": "R",
+        "ra_deg": 110.8,
+        "dec_deg": -12.1
+      }
+    },
+    {
+      "independent_variable": 0.48,
+      "observed_value": 42.18,
+      "uncertainty": 0.21,
+      "weight": null,
+      "label": "SN 1995K",
+      "metadata": {
+        "filter_band": "R",
+        "ra_deg": 54.3,
+        "dec_deg": -25.8
+      }
+    },
+    {
+      "independent_variable": 0.5,
+      "observed_value": 42.29,
+      "uncertainty": 0.22,
+      "weight": null,
+      "label": "SN 1997cj",
+      "metadata": {
+        "filter_band": "R",
+        "ra_deg": 178.2,
+        "dec_deg": 0.5
+      }
+    },
+    {
+      "independent_variable": 0.62,
+      "observed_value": 42.86,
+      "uncertainty": 0.23,
+      "weight": null,
+      "label": "SN 1998ba",
+      "metadata": {
+        "filter_band": "I",
+        "ra_deg": 195.4,
+        "dec_deg": 2.1
+      }
+    },
+    {
+      "independent_variable": 0.85,
+      "observed_value": 43.69,
+      "uncertainty": 0.25,
+      "weight": null,
+      "label": "SN 1997ff",
+      "metadata": {
+        "filter_band": "F814W",
+        "ra_deg": 189.1,
+        "dec_deg": 62.2
+      }
+    },
+    {
+      "independent_variable": 1.05,
+      "observed_value": 44.26,
+      "uncertainty": 0.27,
+      "weight": null,
+      "label": "SN 2002dc",
+      "metadata": {
+        "filter_band": "F814W",
+        "ra_deg": 215.3,
+        "dec_deg": 15.8
+      }
+    },
+    {
+      "independent_variable": 1.25,
+      "observed_value": 44.73,
+      "uncertainty": 0.3,
+      "weight": null,
+      "label": "SN 2003es",
+      "metadata": {
+        "filter_band": "F814W",
+        "ra_deg": 160.7,
+        "dec_deg": 41.2
+      }
+    }
+  ],
+  "cern_events": null,
+  "cern_resonance_points": null,
+  "nasa_observations": [
+    {
+      "observation_id": "NASA-HST-SN-1994D",
+      "target_name": "SN 1994D",
+      "redshift_z": 0.0055,
+      "distance_modulus_mu": 31.89,
+      "distance_modulus_error": 0.15,
+      "flux_density": null,
+      "measurement_value": 31.89,
+      "measurement_error": 0.15,
+      "measurement_unit": "mag",
+      "ra_deg": 187.2,
+      "dec_deg": 13.2,
+      "filter_band": "B",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1998bw",
+      "target_name": "SN 1998bw",
+      "redshift_z": 0.0085,
+      "distance_modulus_mu": 32.85,
+      "distance_modulus_error": 0.16,
+      "flux_density": null,
+      "measurement_value": 32.85,
+      "measurement_error": 0.16,
+      "measurement_unit": "mag",
+      "ra_deg": 293.7,
+      "dec_deg": -18.8,
+      "filter_band": "V",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1990N",
+      "target_name": "SN 1990N",
+      "redshift_z": 0.014,
+      "distance_modulus_mu": 33.93,
+      "distance_modulus_error": 0.14,
+      "flux_density": null,
+      "measurement_value": 33.93,
+      "measurement_error": 0.14,
+      "measurement_unit": "mag",
+      "ra_deg": 190.1,
+      "dec_deg": 15.5,
+      "filter_band": "B",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1992A",
+      "target_name": "SN 1992A",
+      "redshift_z": 0.026,
+      "distance_modulus_mu": 35.3,
+      "distance_modulus_error": 0.15,
+      "flux_density": null,
+      "measurement_value": 35.3,
+      "measurement_error": 0.15,
+      "measurement_unit": "mag",
+      "ra_deg": 189.5,
+      "dec_deg": -28.5,
+      "filter_band": "B",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1999ee",
+      "target_name": "SN 1999ee",
+      "redshift_z": 0.052,
+      "distance_modulus_mu": 36.84,
+      "distance_modulus_error": 0.16,
+      "flux_density": null,
+      "measurement_value": 36.84,
+      "measurement_error": 0.16,
+      "measurement_unit": "mag",
+      "ra_deg": 21.3,
+      "dec_deg": -36.2,
+      "filter_band": "V",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1997ce",
+      "target_name": "SN 1997ce",
+      "redshift_z": 0.12,
+      "distance_modulus_mu": 38.76,
+      "distance_modulus_error": 0.18,
+      "flux_density": null,
+      "measurement_value": 38.76,
+      "measurement_error": 0.18,
+      "measurement_unit": "mag",
+      "ra_deg": 142.5,
+      "dec_deg": 35.2,
+      "filter_band": "V",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1996E",
+      "target_name": "SN 1996E",
+      "redshift_z": 0.24,
+      "distance_modulus_mu": 40.42,
+      "distance_modulus_error": 0.19,
+      "flux_density": null,
+      "measurement_value": 40.42,
+      "measurement_error": 0.19,
+      "measurement_unit": "mag",
+      "ra_deg": 110.8,
+      "dec_deg": -12.1,
+      "filter_band": "R",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1995K",
+      "target_name": "SN 1995K",
+      "redshift_z": 0.48,
+      "distance_modulus_mu": 42.18,
+      "distance_modulus_error": 0.21,
+      "flux_density": null,
+      "measurement_value": 42.18,
+      "measurement_error": 0.21,
+      "measurement_unit": "mag",
+      "ra_deg": 54.3,
+      "dec_deg": -25.8,
+      "filter_band": "R",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1997cj",
+      "target_name": "SN 1997cj",
+      "redshift_z": 0.5,
+      "distance_modulus_mu": 42.29,
+      "distance_modulus_error": 0.22,
+      "flux_density": null,
+      "measurement_value": 42.29,
+      "measurement_error": 0.22,
+      "measurement_unit": "mag",
+      "ra_deg": 178.2,
+      "dec_deg": 0.5,
+      "filter_band": "R",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1998ba",
+      "target_name": "SN 1998ba",
+      "redshift_z": 0.62,
+      "distance_modulus_mu": 42.86,
+      "distance_modulus_error": 0.23,
+      "flux_density": null,
+      "measurement_value": 42.86,
+      "measurement_error": 0.23,
+      "measurement_unit": "mag",
+      "ra_deg": 195.4,
+      "dec_deg": 2.1,
+      "filter_band": "I",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-1997ff",
+      "target_name": "SN 1997ff",
+      "redshift_z": 0.85,
+      "distance_modulus_mu": 43.69,
+      "distance_modulus_error": 0.25,
+      "flux_density": null,
+      "measurement_value": 43.69,
+      "measurement_error": 0.25,
+      "measurement_unit": "mag",
+      "ra_deg": 189.1,
+      "dec_deg": 62.2,
+      "filter_band": "F814W",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-2002dc",
+      "target_name": "SN 2002dc",
+      "redshift_z": 1.05,
+      "distance_modulus_mu": 44.26,
+      "distance_modulus_error": 0.27,
+      "flux_density": null,
+      "measurement_value": 44.26,
+      "measurement_error": 0.27,
+      "measurement_unit": "mag",
+      "ra_deg": 215.3,
+      "dec_deg": 15.8,
+      "filter_band": "F814W",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    },
+    {
+      "observation_id": "NASA-HST-SN-2003es",
+      "target_name": "SN 2003es",
+      "redshift_z": 1.25,
+      "distance_modulus_mu": 44.73,
+      "distance_modulus_error": 0.3,
+      "flux_density": null,
+      "measurement_value": 44.73,
+      "measurement_error": 0.3,
+      "measurement_unit": "mag",
+      "ra_deg": 160.7,
+      "dec_deg": 41.2,
+      "filter_band": "F814W",
+      "survey_name": "Hubble Space Telescope Supernova Survey / Pantheon+"
+    }
+  ],
+  "nist_constants": null,
+  "metadata": {
+    "assumed_H0_kms_mpc": 70.0,
+    "cosmology": "Flat Lambda-CDM"
+  }
+}

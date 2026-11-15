@@ -3,6 +3,7 @@
 import React from "react";
 import { FindingResult, FindingState } from "@/types/contracts";
 import { KatexFormula } from "@/components/equations/KatexFormula";
+import { LayerPipelineMatrix } from "@/components/equations/LayerPipelineMatrix";
 import {
   CheckCircle2,
   XCircle,
@@ -196,6 +197,13 @@ export const ValidationStatusBar: React.FC<ValidationStatusBarProps> = ({
               <li key={idx}>{diag}</li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* 6-Layer Reality Constraint Pipeline Matrix */}
+      {result?.layer_findings && (
+        <div className="mt-4">
+          <LayerPipelineMatrix layers={result.layer_findings} />
         </div>
       )}
     </div>

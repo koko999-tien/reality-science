@@ -7,11 +7,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.modules.iam_governance.models import ResearchActor
 from app.modules.reality_constraint_engine.models import (
+    Claim,
+    ClaimRelation,
     Equation,
     ValidationFinding,
     ValidationRun,
     Variable,
 )
+
 
 
 class ResearchProject(Base):
@@ -61,6 +64,9 @@ class ResearchVersion(Base):
     equations: Mapped[list[Equation]] = relationship("Equation", foreign_keys="[Equation.version_id]", cascade="all, delete-orphan", lazy="selectin")
     variables: Mapped[list[Variable]] = relationship("Variable", foreign_keys="[Variable.version_id]", cascade="all, delete-orphan", lazy="selectin")
     validation_runs: Mapped[list[ValidationRun]] = relationship("ValidationRun", foreign_keys="[ValidationRun.version_id]", cascade="all, delete-orphan", lazy="selectin")
+    claims: Mapped[list[Claim]] = relationship("Claim", foreign_keys="[Claim.version_id]", cascade="all, delete-orphan", lazy="selectin")
+    claim_relations: Mapped[list[ClaimRelation]] = relationship("ClaimRelation", foreign_keys="[ClaimRelation.version_id]", cascade="all, delete-orphan", lazy="selectin")
+
 
     def __init__(self, **kwargs):
         kwargs.setdefault("is_frozen", False)
@@ -70,6 +76,8 @@ class ResearchVersion(Base):
 
 
 __all__ = [
+    "Claim",
+    "ClaimRelation",
     "Equation",
     "ResearchActor",
     "ResearchProject",
@@ -78,5 +86,6 @@ __all__ = [
     "ValidationRun",
     "Variable",
 ]
+
 
 

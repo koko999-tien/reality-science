@@ -1,0 +1,300 @@
+{
+  "dataset_id": "cern-lhc-z-resonance-peak",
+  "dataset_name": "CERN LHC Z0 Boson Invariant Mass & Resonance Distribution",
+  "dataset_type": "cern_particle_collision",
+  "source_reference": "CERN-EP-2022-045 / Phys.Rev.D 105 (2022)",
+  "description": "Cross-section resonance scan and dimuon invariant mass distribution for Z0 boson (M_Z = 91.1876 GeV)",
+  "independent_variable_symbol": "E",
+  "dependent_variable_symbol": "cross_section",
+  "independent_unit": null,
+  "dependent_unit": null,
+  "tolerance_sigma": 3.0,
+  "points": [
+    {
+      "independent_variable": 86.0,
+      "observed_value": 1.5854,
+      "uncertainty": 0.25,
+      "weight": null,
+      "label": "Z0_E_86.00GeV",
+      "metadata": {
+        "energy_gev": 86.0,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 88.0,
+      "observed_value": 3.9621,
+      "uncertainty": 0.25,
+      "weight": null,
+      "label": "Z0_E_88.00GeV",
+      "metadata": {
+        "energy_gev": 88.0,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 89.0,
+      "observed_value": 7.4332,
+      "uncertainty": 0.2973,
+      "weight": null,
+      "label": "Z0_E_89.00GeV",
+      "metadata": {
+        "energy_gev": 89.0,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 90.0,
+      "observed_value": 16.1184,
+      "uncertainty": 0.6447,
+      "weight": null,
+      "label": "Z0_E_90.00GeV",
+      "metadata": {
+        "energy_gev": 90.0,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 90.5,
+      "observed_value": 23.6243,
+      "uncertainty": 0.945,
+      "weight": null,
+      "label": "Z0_E_90.50GeV",
+      "metadata": {
+        "energy_gev": 90.5,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 91.0,
+      "observed_value": 29.9446,
+      "uncertainty": 1.1978,
+      "weight": null,
+      "label": "Z0_E_91.00GeV",
+      "metadata": {
+        "energy_gev": 91.0,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 91.19,
+      "observed_value": 30.4983,
+      "uncertainty": 1.2199,
+      "weight": null,
+      "label": "Z0_E_91.19GeV",
+      "metadata": {
+        "energy_gev": 91.19,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 91.5,
+      "observed_value": 28.522,
+      "uncertainty": 1.1409,
+      "weight": null,
+      "label": "Z0_E_91.50GeV",
+      "metadata": {
+        "energy_gev": 91.5,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 92.0,
+      "observed_value": 21.2073,
+      "uncertainty": 0.8483,
+      "weight": null,
+      "label": "Z0_E_92.00GeV",
+      "metadata": {
+        "energy_gev": 92.0,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 92.5,
+      "observed_value": 14.3873,
+      "uncertainty": 0.5755,
+      "weight": null,
+      "label": "Z0_E_92.50GeV",
+      "metadata": {
+        "energy_gev": 92.5,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 93.0,
+      "observed_value": 9.8084,
+      "uncertainty": 0.3923,
+      "weight": null,
+      "label": "Z0_E_93.00GeV",
+      "metadata": {
+        "energy_gev": 93.0,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 94.0,
+      "observed_value": 5.089,
+      "uncertainty": 0.25,
+      "weight": null,
+      "label": "Z0_E_94.00GeV",
+      "metadata": {
+        "energy_gev": 94.0,
+        "unit": "nb"
+      }
+    },
+    {
+      "independent_variable": 96.0,
+      "observed_value": 1.9999,
+      "uncertainty": 0.25,
+      "weight": null,
+      "label": "Z0_E_96.00GeV",
+      "metadata": {
+        "energy_gev": 96.0,
+        "unit": "nb"
+      }
+    }
+  ],
+  "cern_events": [
+    {
+      "event_id": 10001,
+      "run_number": 300001,
+      "particle_type": "Z0",
+      "pt_gev": 44.2,
+      "eta": 0.12,
+      "phi": 1.15,
+      "energy_gev": 91.18,
+      "invariant_mass_gev": 91.1876,
+      "uncertainty_gev": 0.08,
+      "charge": 0,
+      "detector": "CMS",
+      "luminosity_pb_inv": 45.2
+    },
+    {
+      "event_id": 10002,
+      "run_number": 300001,
+      "particle_type": "muon+",
+      "pt_gev": 45.6,
+      "eta": -0.45,
+      "phi": -2.1,
+      "energy_gev": 49.8,
+      "invariant_mass_gev": 0.10566,
+      "uncertainty_gev": 0.01,
+      "charge": 1,
+      "detector": "CMS",
+      "luminosity_pb_inv": null
+    },
+    {
+      "event_id": 10003,
+      "run_number": 300001,
+      "particle_type": "muon-",
+      "pt_gev": 45.5,
+      "eta": 0.48,
+      "phi": 1.04,
+      "energy_gev": 50.2,
+      "invariant_mass_gev": 0.10566,
+      "uncertainty_gev": 0.01,
+      "charge": -1,
+      "detector": "CMS",
+      "luminosity_pb_inv": null
+    }
+  ],
+  "cern_resonance_points": [
+    {
+      "energy_gev": 86.0,
+      "cross_section_pb": 1585.44,
+      "event_count": null,
+      "uncertainty": 250.0,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 88.0,
+      "cross_section_pb": 3962.14,
+      "event_count": null,
+      "uncertainty": 250.0,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 89.0,
+      "cross_section_pb": 7433.21,
+      "event_count": null,
+      "uncertainty": 297.33,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 90.0,
+      "cross_section_pb": 16118.41,
+      "event_count": null,
+      "uncertainty": 644.74,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 90.5,
+      "cross_section_pb": 23624.34,
+      "event_count": null,
+      "uncertainty": 944.97,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 91.0,
+      "cross_section_pb": 29944.62,
+      "event_count": null,
+      "uncertainty": 1197.78,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 91.19,
+      "cross_section_pb": 30498.28,
+      "event_count": null,
+      "uncertainty": 1219.93,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 91.5,
+      "cross_section_pb": 28521.99,
+      "event_count": null,
+      "uncertainty": 1140.88,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 92.0,
+      "cross_section_pb": 21207.3,
+      "event_count": null,
+      "uncertainty": 848.29,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 92.5,
+      "cross_section_pb": 14387.31,
+      "event_count": null,
+      "uncertainty": 575.49,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 93.0,
+      "cross_section_pb": 9808.39,
+      "event_count": null,
+      "uncertainty": 392.34,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 94.0,
+      "cross_section_pb": 5088.96,
+      "event_count": null,
+      "uncertainty": 250.0,
+      "bin_width_gev": 0.5
+    },
+    {
+      "energy_gev": 96.0,
+      "cross_section_pb": 1999.9,
+      "event_count": null,
+      "uncertainty": 250.0,
+      "bin_width_gev": 0.5
+    }
+  ],
+  "nasa_observations": null,
+  "nist_constants": null,
+  "metadata": {
+    "lhc_center_of_mass_energy_tev": 13.0,
+    "decay_channel": "Z -> mu+ mu-"
+  }
+}

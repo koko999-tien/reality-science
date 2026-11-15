@@ -1,0 +1,286 @@
+{
+  "dataset_id": "cern-lhc-higgs-boson-peak",
+  "dataset_name": "CERN LHC Higgs Boson Invariant Mass Distribution (H -> gamma gamma)",
+  "dataset_type": "cern_particle_collision",
+  "source_reference": "ATLAS & CMS Collaborations / Phys.Rev.Lett. 114 (2015) 191803",
+  "description": "Higgs boson invariant mass resonance distribution centered at 125.09 GeV in diphoton decay channel",
+  "independent_variable_symbol": "m",
+  "dependent_variable_symbol": "event_count",
+  "independent_unit": null,
+  "dependent_unit": null,
+  "tolerance_sigma": 3.0,
+  "points": [
+    {
+      "independent_variable": 116.0,
+      "observed_value": 133.04,
+      "uncertainty": 11.53,
+      "weight": null,
+      "label": "H0_m_116.00GeV",
+      "metadata": {
+        "invariant_mass_gev": 116.0,
+        "signal_contribution": 0.0
+      }
+    },
+    {
+      "independent_variable": 118.0,
+      "observed_value": 127.84,
+      "uncertainty": 11.31,
+      "weight": null,
+      "label": "H0_m_118.00GeV",
+      "metadata": {
+        "invariant_mass_gev": 118.0,
+        "signal_contribution": 0.01
+      }
+    },
+    {
+      "independent_variable": 120.0,
+      "observed_value": 123.45,
+      "uncertainty": 11.11,
+      "weight": null,
+      "label": "H0_m_120.00GeV",
+      "metadata": {
+        "invariant_mass_gev": 120.0,
+        "signal_contribution": 0.64
+      }
+    },
+    {
+      "independent_variable": 122.0,
+      "observed_value": 126.01,
+      "uncertainty": 11.23,
+      "weight": null,
+      "label": "H0_m_122.00GeV",
+      "metadata": {
+        "invariant_mass_gev": 122.0,
+        "signal_contribution": 8.02
+      }
+    },
+    {
+      "independent_variable": 123.5,
+      "observed_value": 138.2,
+      "uncertainty": 11.76,
+      "weight": null,
+      "label": "H0_m_123.50GeV",
+      "metadata": {
+        "invariant_mass_gev": 123.5,
+        "signal_contribution": 23.69
+      }
+    },
+    {
+      "independent_variable": 124.5,
+      "observed_value": 145.41,
+      "uncertainty": 12.06,
+      "weight": null,
+      "label": "H0_m_124.50GeV",
+      "metadata": {
+        "invariant_mass_gev": 124.5,
+        "signal_contribution": 33.17
+      }
+    },
+    {
+      "independent_variable": 125.09,
+      "observed_value": 145.92,
+      "uncertainty": 12.08,
+      "weight": null,
+      "label": "H0_m_125.09GeV",
+      "metadata": {
+        "invariant_mass_gev": 125.09,
+        "signal_contribution": 35.0
+      }
+    },
+    {
+      "independent_variable": 125.5,
+      "observed_value": 144.12,
+      "uncertainty": 12.01,
+      "weight": null,
+      "label": "H0_m_125.50GeV",
+      "metadata": {
+        "invariant_mass_gev": 125.5,
+        "signal_contribution": 34.1
+      }
+    },
+    {
+      "independent_variable": 126.5,
+      "observed_value": 133.59,
+      "uncertainty": 11.56,
+      "weight": null,
+      "label": "H0_m_126.50GeV",
+      "metadata": {
+        "invariant_mass_gev": 126.5,
+        "signal_contribution": 25.75
+      }
+    },
+    {
+      "independent_variable": 128.0,
+      "observed_value": 114.13,
+      "uncertainty": 10.68,
+      "weight": null,
+      "label": "H0_m_128.00GeV",
+      "metadata": {
+        "invariant_mass_gev": 128.0,
+        "signal_contribution": 9.47
+      }
+    },
+    {
+      "independent_variable": 130.0,
+      "observed_value": 101.4,
+      "uncertainty": 10.07,
+      "weight": null,
+      "label": "H0_m_130.00GeV",
+      "metadata": {
+        "invariant_mass_gev": 130.0,
+        "signal_contribution": 0.85
+      }
+    },
+    {
+      "independent_variable": 132.0,
+      "observed_value": 96.63,
+      "uncertainty": 9.83,
+      "weight": null,
+      "label": "H0_m_132.00GeV",
+      "metadata": {
+        "invariant_mass_gev": 132.0,
+        "signal_contribution": 0.02
+      }
+    },
+    {
+      "independent_variable": 134.0,
+      "observed_value": 92.82,
+      "uncertainty": 9.63,
+      "weight": null,
+      "label": "H0_m_134.00GeV",
+      "metadata": {
+        "invariant_mass_gev": 134.0,
+        "signal_contribution": 0.0
+      }
+    }
+  ],
+  "cern_events": [
+    {
+      "event_id": 20001,
+      "run_number": 310020,
+      "particle_type": "H0",
+      "pt_gev": 65.2,
+      "eta": 0.08,
+      "phi": 0.85,
+      "energy_gev": 125.1,
+      "invariant_mass_gev": 125.09,
+      "uncertainty_gev": 0.24,
+      "charge": 0,
+      "detector": "ATLAS",
+      "luminosity_pb_inv": 139000.0
+    },
+    {
+      "event_id": 20002,
+      "run_number": 310020,
+      "particle_type": "photon",
+      "pt_gev": 62.8,
+      "eta": 0.15,
+      "phi": 0.82,
+      "energy_gev": 63.5,
+      "invariant_mass_gev": 0.0,
+      "uncertainty_gev": 0.15,
+      "charge": null,
+      "detector": "ATLAS",
+      "luminosity_pb_inv": null
+    }
+  ],
+  "cern_resonance_points": [
+    {
+      "energy_gev": 116.0,
+      "cross_section_pb": null,
+      "event_count": 133,
+      "uncertainty": 11.53,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 118.0,
+      "cross_section_pb": null,
+      "event_count": 128,
+      "uncertainty": 11.31,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 120.0,
+      "cross_section_pb": null,
+      "event_count": 123,
+      "uncertainty": 11.11,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 122.0,
+      "cross_section_pb": null,
+      "event_count": 126,
+      "uncertainty": 11.23,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 123.5,
+      "cross_section_pb": null,
+      "event_count": 138,
+      "uncertainty": 11.76,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 124.5,
+      "cross_section_pb": null,
+      "event_count": 145,
+      "uncertainty": 12.06,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 125.09,
+      "cross_section_pb": null,
+      "event_count": 146,
+      "uncertainty": 12.08,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 125.5,
+      "cross_section_pb": null,
+      "event_count": 144,
+      "uncertainty": 12.01,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 126.5,
+      "cross_section_pb": null,
+      "event_count": 134,
+      "uncertainty": 11.56,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 128.0,
+      "cross_section_pb": null,
+      "event_count": 114,
+      "uncertainty": 10.68,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 130.0,
+      "cross_section_pb": null,
+      "event_count": 101,
+      "uncertainty": 10.07,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 132.0,
+      "cross_section_pb": null,
+      "event_count": 97,
+      "uncertainty": 9.83,
+      "bin_width_gev": 1.0
+    },
+    {
+      "energy_gev": 134.0,
+      "cross_section_pb": null,
+      "event_count": 93,
+      "uncertainty": 9.63,
+      "bin_width_gev": 1.0
+    }
+  ],
+  "nasa_observations": null,
+  "nist_constants": null,
+  "metadata": {
+    "lhc_center_of_mass_energy_tev": 13.0,
+    "decay_channel": "H -> gamma gamma"
+  }
+}

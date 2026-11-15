@@ -34,17 +34,17 @@ def audit_docker_compose(compose_path):
     else:
         checks.append(("Service Isolation: frontend on app_net only", False, "frontend service missing"))
 
-    # api should have app_net, data_net, compute_net
+    # api should bridge app_net and data_net (strict Zone 2 isolation without direct compute_net)
     api_block = re.search(r"\n  api:(.*?)(?=\n  [a-z_]+:|\Z)", content, re.DOTALL)
     if api_block:
         a_text = api_block.group(1)
         a_app = "app_net" in a_text
         a_data = "data_net" in a_text
         a_compute = "compute_net" in a_text
-        a_valid = a_app and a_data and a_compute
-        checks.append(("Service Orchestration: api triage gateway", a_valid, f"app={a_app}, data={a_data}, compute={a_compute}"))
+        a_valid = a_app and a_data and not a_compute
+        checks.append(("Service Orchestration: api triage gateway (Zone 1 & 2)", a_valid, f"app={a_app}, data={a_data}, compute={a_compute}"))
     else:
-        checks.append(("Service Orchestration: api triage gateway", False, "api service missing"))
+        checks.append(("Service Orchestration: api triage gateway (Zone 1 & 2)", False, "api service missing"))
 
     # postgres should be on data_net only
     pg_block = re.search(r"\n  postgres:(.*?)(?=\n  [a-z_]+:|\Z)", content, re.DOTALL)

@@ -27,6 +27,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.modules.research_core.models import (
+    Claim,
+    ClaimRelation,
     Equation,
     ResearchActor,
     ResearchProject,
@@ -35,6 +37,7 @@ from app.modules.research_core.models import (
     ValidationRun,
     Variable,
 )
+
 
 VERIFY_BUNDLE_SCRIPT_TEMPLATE = '''#!/usr/bin/env python3
 """Standalone Offline Verification Script for Open Research Cryptographic Bundle.
@@ -261,7 +264,35 @@ def verify_bundle_directory(base_dir: Path, secret_key: str = None) -> bool:
     else:
         print("      No equation directory found or empty (skipping AST node checks).")
 
+    # 6. Verify Epistemic Claims Graph in claims_graph.json if present
+    claims_file = base_dir / "claims_graph.json"
+    if claims_file.exists():
+        print("[6/6] Validating epistemic claims graph in claims_graph.json...")
+        try:
+            cg_data = json.loads(claims_file.read_text(encoding="utf-8"))
+            if not isinstance(cg_data, dict):
+                errors.append("claims_graph.json must be a JSON object")
+            else:
+                if "claims" not in cg_data or not isinstance(cg_data["claims"], list):
+                    errors.append("claims_graph.json missing 'claims' list")
+                else:
+                    for idx, clm in enumerate(cg_data["claims"]):
+                        if not isinstance(clm, dict):
+                            errors.append(f"Claim at index {idx} must be a dictionary")
+                        elif "claim_code" not in clm or "statement" not in clm:
+                            errors.append(f"Claim at index {idx} missing 'claim_code' or 'statement'")
+                        elif clm.get("canonical_ast"):
+                            validate_ast_node(clm["canonical_ast"], path=f"claims[{clm.get('claim_code', idx)}].canonical_ast")
+                if "relations" not in cg_data or not isinstance(cg_data["relations"], list):
+                    errors.append("claims_graph.json missing 'relations' list")
+            print(f"      Verified claims graph with {len(cg_data.get('claims', []))} claim(s).")
+        except Exception as e:
+            errors.append(f"Error validating claims_graph.json: {e}")
+    else:
+        print("      No claims_graph.json found (skipping epistemic claim checks).")
+
     print("=" * 60)
+
     if errors:
         print(f"[FAIL] Bundle verification FAILED with {len(errors)} error(s):")
         for err in errors:
@@ -479,6 +510,16 @@ async def generate_research_zip_bundle(
     res_eq = await db.execute(stmt_eq)
     equations = list(res_eq.scalars().all())
 
+    # 7b. Fetch Claims & Relations
+    stmt_clm = select(Claim).where(Claim.version_id == version.id).order_by(Claim.created_at)
+    res_clm = await db.execute(stmt_clm)
+    claims = list(res_clm.scalars().all())
+
+    stmt_rel = select(ClaimRelation).where(ClaimRelation.version_id == version.id).order_by(ClaimRelation.created_at)
+    res_rel = await db.execute(stmt_rel)
+    claim_relations = list(res_rel.scalars().all())
+
+
     # 8. Fetch Validation Runs & Findings
     stmt_runs = (
         select(ValidationRun)
@@ -599,6 +640,41 @@ async def generate_research_zip_bundle(
         "runs": runs_data,
     }
     bundle_files["validation/validation_report.json"] = json.dumps(validation_dict, indent=2, sort_keys=True).encode("utf-8")
+
+    # Epistemic Claims Graph
+    claims_graph_dict = {
+        "version_id": version.id,
+        "claims": [
+            {
+                "id": c.id,
+                "claim_code": c.claim_code,
+                "statement": c.statement,
+                "claim_type": c.claim_type,
+                "target_variable": c.target_variable,
+                "canonical_ast": c.canonical_ast_json,
+                "assumptions": c.assumptions_json or [],
+                "epistemic_state": c.epistemic_state,
+                "uncertainty_notes": c.uncertainty_notes,
+                "confidence_score": c.confidence_score,
+                "dependency_logic": c.dependency_logic,
+                "metadata": c.metadata_json or {},
+            }
+            for c in claims
+        ],
+        "relations": [
+            {
+                "id": r.id,
+                "source_claim_id": r.source_claim_id,
+                "target_claim_id": r.target_claim_id,
+                "relation_type": r.relation_type,
+                "justification": r.justification,
+                "weight": r.weight,
+            }
+            for r in claim_relations
+        ],
+    }
+    bundle_files["claims_graph.json"] = json.dumps(claims_graph_dict, indent=2, sort_keys=True).encode("utf-8")
+
 
     # Verification script
     bundle_files["verify_bundle.py"] = VERIFY_BUNDLE_SCRIPT_TEMPLATE.strip().encode("utf-8") + b"\n"

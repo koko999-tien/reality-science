@@ -1,0 +1,182 @@
+version: "3.8"
+
+networks:
+  app_net:
+    driver: bridge
+  data_net:
+    driver: bridge
+    internal: true
+  compute_net:
+    driver: bridge
+    internal: true
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "3"
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    container_name: rs_prod_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - app_net
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://reality-science.org/api/v1}
+      - NEXT_PUBLIC_APP_ENV=production
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging: *default-logging
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: rs_prod_backend_api
+    restart: always
+    ports:
+      - "8000:8000"
+    networks:
+      - app_net
+      - data_net
+    environment:
+      - PROJECT_NAME=REALITY SCIENCE API
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND_URL=${CELERY_RESULT_BACKEND_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-["https://reality-science.org"]}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: rs_prod_postgres
+    restart: always
+    networks:
+      - data_net
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-reality_science}
+      POSTGRES_USER: ${POSTGRES_USER:-rs_prod_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - prod_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rs_prod_user} -d ${POSTGRES_DB:-reality_science}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    container_name: rs_prod_redis
+    restart: always
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      - data_net
+      - compute_net
+    volumes:
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+
+  minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: rs_prod_minio
+    restart: always
+    command: server /data --console-address ":9001"
+    networks:
+      - data_net
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - prod_minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+
+  compute_worker:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    container_name: rs_prod_compute_worker
+    restart: always
+    user: "10001:10001"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1024M
+          pids: 100
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+    networks:
+      - compute_net
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND_URL}
+      - LOG_LEVEL=INFO
+      - INTERACTIVE_TIMEOUT_SECONDS=10
+      - BATCH_TIMEOUT_SECONDS=120
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -m worker.core.health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging: *default-logging
+
+volumes:
+  prod_postgres_data:
+  prod_minio_data:

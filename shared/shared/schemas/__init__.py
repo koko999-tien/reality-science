@@ -1,4 +1,4 @@
-"""Shared Pydantic v2 Schemas for Mathematical AST and Compute Contracts."""
+"""Shared Pydantic v2 Schemas for Mathematical AST, Compute Contracts, and Cluster."""
 from shared.schemas.math_ast import (
     AllowedFunction,
     ExprNode,
@@ -15,6 +15,35 @@ from shared.schemas.job_bundle import (
 from shared.schemas.finding_result import (
     FindingResult,
     FindingState,
+    LayerFinding,
+    PipelineValidationReport,
+)
+from shared.schemas.epistemic_logic import (
+    ClaimDependency,
+    ClaimGraph,
+    ClaimGraphValidationResult,
+    ClaimSpec,
+    ClaimType,
+    ContradictionItem,
+    ContradictionReport,
+    ContradictionType,
+    DependencyLogic,
+    EpistemicFinding,
+    RelationType,
+    CycleReport,
+)
+from shared.schemas.cluster import (
+    ClusterNode,
+    ClusterNodeRole,
+    ClusterNodeStatus,
+    ClusterTaskDispatchPayload,
+    ClusterTaskDispatchResponse,
+    HeartbeatPayload,
+    HeartbeatResponse,
+    NodeJoinRequest,
+    NodeJoinResponse,
+    WireGuardConfigResponse,
+    WireGuardPeerConfig,
 )
 
 __all__ = [
@@ -29,4 +58,29 @@ __all__ = [
     "TargetEntityType",
     "FindingResult",
     "FindingState",
+    "LayerFinding",
+    "PipelineValidationReport",
+    "ClusterNode",
+    "ClusterNodeRole",
+    "ClusterNodeStatus",
+    "ClusterTaskDispatchPayload",
+    "ClusterTaskDispatchResponse",
+    "HeartbeatPayload",
+    "HeartbeatResponse",
+    "NodeJoinRequest",
+    "NodeJoinResponse",
+    "WireGuardConfigResponse",
+    "WireGuardPeerConfig",
+    "ClaimDependency",
+    "ClaimGraph",
+    "ClaimGraphValidationResult",
+    "ClaimSpec",
+    "ClaimType",
+    "ContradictionItem",
+    "ContradictionReport",
+    "ContradictionType",
+    "DependencyLogic",
+    "EpistemicFinding",
+    "RelationType",
+    "CycleReport",
 ]
