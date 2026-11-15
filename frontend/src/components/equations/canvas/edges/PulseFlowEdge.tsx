@@ -37,7 +37,8 @@ export const PulseFlowEdge: React.FC<PulseFlowEdgeProps> = ({
 }) => {
   // Distance-dependent catenary tension: dynamic curvature expands as distance increases
   const dist = Math.hypot(targetX - sourceX, targetY - sourceY);
-  const borderRadius = Math.max(16, Math.min(32, Math.round(dist * 0.12)));
+  const safeDist = Number.isFinite(dist) ? dist : 0;
+  const borderRadius = Math.max(16, Math.min(32, Math.round(safeDist * 0.12) || 16));
 
   const [edgePath] = getSmoothStepPath({
     sourceX,

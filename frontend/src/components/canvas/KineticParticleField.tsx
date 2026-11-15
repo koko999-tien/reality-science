@@ -39,7 +39,7 @@ export const KineticParticleField: React.FC<KineticParticleFieldProps> = ({
     if (!ctx) return;
 
     let animationFrameId: number;
-    let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth);
+    let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth || 1);
     let height = (canvas.height = canvas.parentElement?.clientHeight || 600);
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -86,7 +86,7 @@ export const KineticParticleField: React.FC<KineticParticleFieldProps> = ({
 
     const handleResize = () => {
       if (!canvas || !canvas.parentElement) return;
-      width = canvas.parentElement.clientWidth;
+      width = canvas.parentElement.clientWidth || window.innerWidth || 1;
       height = canvas.parentElement.clientHeight || 600;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
@@ -121,10 +121,11 @@ export const KineticParticleField: React.FC<KineticParticleFieldProps> = ({
       mouse.vy = 0;
     };
 
+    const parent = canvas.parentElement;
     window.addEventListener("resize", handleResize);
-    if (interactive) {
-      canvas.parentElement?.addEventListener("mousemove", handleMouseMove, { passive: true });
-      canvas.parentElement?.addEventListener("mouseleave", handleMouseLeave, { passive: true });
+    if (interactive && parent) {
+      parent.addEventListener("mousemove", handleMouseMove, { passive: true });
+      parent.addEventListener("mouseleave", handleMouseLeave, { passive: true });
     }
 
     // Physical constants
@@ -153,7 +154,7 @@ export const KineticParticleField: React.FC<KineticParticleFieldProps> = ({
         const p = particles[i];
 
         // 1. Quantum Wave Equation Modulation
-        if (equationModulation) {
+        if (equationModulation && width > 0) {
           const kx = (p.x0 / width) * Math.PI * 4;
           const wave =
             Math.sin(kx - elapsed * p.waveSpeed + p.phase) *
@@ -260,9 +261,9 @@ export const KineticParticleField: React.FC<KineticParticleFieldProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
-      if (interactive && canvas.parentElement) {
-        canvas.parentElement.removeEventListener("mousemove", handleMouseMove);
-        canvas.parentElement.removeEventListener("mouseleave", handleMouseLeave);
+      if (interactive && parent) {
+        parent.removeEventListener("mousemove", handleMouseMove);
+        parent.removeEventListener("mouseleave", handleMouseLeave);
       }
     };
   }, [density, interactive, equationModulation]);
