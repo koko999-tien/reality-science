@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, use } from "react";
+import React, { useEffect, useState, useCallback, use } from "react";
 import Link from "next/link";
 import {
   fetchProjectBySlug,
@@ -57,7 +57,7 @@ export default function ProjectDetailsPage({
   const activeVersion = project?.versions && project.versions.length > 0 ? project.versions[0] : null;
   const versionId = activeVersion?.id;
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -78,8 +78,9 @@ export default function ProjectDetailsPage({
         if (clms.status === "fulfilled") setClaims(clms.value);
         if (valRuns.status === "fulfilled") setRuns(valRuns.value);
       }
-    } catch (err: any) {
-      setError(err?.message || "Failed to load project details.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to load project details.";
+      setError(msg);
       // Fallback local mock state for offline development
       setProject({
         id: "proj-fallback",
@@ -104,11 +105,11 @@ export default function ProjectDetailsPage({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [slug]);
 
   useEffect(() => {
     loadData();
-  }, [slug]);
+  }, [loadData]);
 
   const handleRunValidation = async () => {
     if (!versionId) return;

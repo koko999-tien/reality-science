@@ -204,8 +204,11 @@ export const FeaturePillars: React.FC = () => {
             <div
               key={pillar.id}
               data-testid={`feature-pillar-${pillar.id}`}
-              className="group relative rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl p-6 sm:p-8 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-xl"
+              className="group relative rounded-2xl border border-white/[0.08] bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 hover:border-white/20 transition-all duration-300 flex flex-col justify-between shadow-tactile-card"
             >
+              {/* Corner Coordinate Crosshair */}
+              <span className="pointer-events-none absolute top-3 right-3 text-[10px] font-mono text-white/15 select-none" aria-hidden="true">+</span>
+
               {/* Subtle accent hover glow overlay */}
               <div
                 className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 ${

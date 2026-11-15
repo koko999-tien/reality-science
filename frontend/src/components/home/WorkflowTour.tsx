@@ -129,7 +129,7 @@ export const WorkflowTour: React.FC = () => {
         <div
           role="tablist"
           aria-label="Workflow step navigation"
-          className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 p-1.5 rounded-xl bg-slate-900/80 border border-white/10 mb-8"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 p-1.5 rounded-xl bg-slate-900/80 border border-white/[0.08] shadow-tactile-card mb-8"
         >
           {WORKFLOW_STEPS.map((step, idx) => {
             const isActive = idx === activeStepIndex;
@@ -222,7 +222,7 @@ export const WorkflowTour: React.FC = () => {
 
           {/* Right Column: Live Interactive Mockup / Telemetry Preview */}
           <div className="lg:col-span-6">
-            <div className="rounded-xl border border-white/10 bg-slate-900/90 backdrop-blur-xl p-5 shadow-inner space-y-4">
+            <div className="rounded-xl border border-white/[0.08] bg-slate-900/90 backdrop-blur-xl p-5 shadow-tactile-card space-y-4">
               {/* Window Controls Bar */}
               <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs font-mono text-slate-400">
                 <div className="flex items-center gap-2">

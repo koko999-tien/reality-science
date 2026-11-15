@@ -3,42 +3,40 @@ import Link from "next/link";
 import {
   Sparkles,
   ArrowRight,
-  ShieldCheck,
-  Cpu,
   Layers,
-  Scale,
   Atom,
   Github,
-  CheckCircle2,
   ExternalLink,
-  Lock,
 } from "lucide-react";
 import { ScientificPresetDemo } from "@/components/home/ScientificPresetDemo";
 import { FeaturePillars } from "@/components/home/FeaturePillars";
 import { WorkflowTour } from "@/components/home/WorkflowTour";
+import { KineticParticleField } from "@/components/canvas/KineticParticleField";
 
 export default function HomePage() {
   return (
     <div className="relative min-h-screen bg-[#030712] text-slate-100 overflow-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* Background Radial Glow Spotlights */}
+      {/* Precision Laboratory Coordinate Grid & Collimated Spotlight Substrate */}
       <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-cyan-500/15 via-blue-600/5 to-transparent blur-3xl pointer-events-none -z-10"
+        className="pointer-events-none absolute inset-0 bg-lab-grid bg-[size:48px_48px] opacity-[0.22] -z-20"
         aria-hidden="true"
       />
       <div
-        className="absolute top-[800px] left-1/4 w-[600px] h-[400px] bg-gradient-to-r from-violet-600/10 to-transparent blur-3xl pointer-events-none -z-10"
-        aria-hidden="true"
-      />
-      <div
-        className="absolute top-[1600px] right-1/4 w-[600px] h-[400px] bg-gradient-to-l from-emerald-600/10 to-transparent blur-3xl pointer-events-none -z-10"
+        className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[640px] bg-radial-spotlight -z-20"
         aria-hidden="true"
       />
 
-      {/* Hero Section */}
+      {/* Hero Section with Living Kinetic Particle Field */}
       <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center space-y-6 max-w-4xl mx-auto">
+        <KineticParticleField density={1.2} interactive={true} equationModulation={true} />
+
+        {/* Laboratory Coordinate Crosshairs */}
+        <span className="pointer-events-none absolute top-8 left-8 text-xs font-mono text-white/20 select-none" aria-hidden="true">+</span>
+        <span className="pointer-events-none absolute top-8 right-8 text-xs font-mono text-white/20 select-none" aria-hidden="true">+</span>
+
+        <div className="text-center space-y-6 max-w-4xl mx-auto relative z-10">
           {/* Status Badge */}
-          <div className="inline-flex items-center gap-2.5 rounded-full border border-cyan-500/30 bg-slate-900/80 backdrop-blur-md px-4 py-1.5 shadow-lg shadow-cyan-950/40">
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-cyan-500/30 bg-slate-900/90 backdrop-blur-md px-4 py-1.5 shadow-tactile-card">
             <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
@@ -54,7 +52,7 @@ export default function HomePage() {
           {/* Main Title & Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight">
             REALITY{" "}
-            <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500 bg-clip-text text-transparent">
+            <span className="text-cyan-400 drop-shadow-[0_0_28px_rgba(14,165,233,0.35)]">
               SCIENCE
             </span>
             <span className="block text-xl sm:text-2xl md:text-3xl font-semibold text-slate-300 mt-4 font-sans tracking-normal">
@@ -73,7 +71,7 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
             <Link
               href="/projects/default-model/editor"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 px-7 py-3.5 text-sm sm:text-base font-bold text-white shadow-xl shadow-cyan-500/25 hover:shadow-cyan-400/35 transition-all duration-200 transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 px-7 py-3.5 text-sm sm:text-base font-bold text-white shadow-tactile-card border border-cyan-400/40 transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98]"
             >
               <Sparkles className="h-4 w-4" />
               <span>Launch Studio Canvas</span>
@@ -82,7 +80,7 @@ export default function HomePage() {
 
             <Link
               href="/projects"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-slate-900/80 hover:bg-slate-800/90 hover:border-white/30 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-200 transition-all duration-200"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-slate-900/80 hover:bg-slate-800/90 hover:border-white/30 px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-200 transition-all duration-200 shadow-tactile-card active:scale-[0.98]"
             >
               <Layers className="h-4 w-4 text-slate-400" />
               <span>Browse Model Catalog</span>
@@ -91,19 +89,19 @@ export default function HomePage() {
 
           {/* Quick Metrics Bar */}
           <div className="pt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto text-left">
-            <div className="p-3 rounded-xl border border-white/10 bg-slate-900/50 backdrop-blur-md">
+            <div className="p-3.5 rounded-xl border border-white/[0.08] bg-slate-900/70 backdrop-blur-md shadow-tactile-card">
               <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Verification Depth</div>
               <div className="text-lg font-bold text-cyan-400 mt-0.5 font-mono">6 Axiomatic Layers</div>
             </div>
-            <div className="p-3 rounded-xl border border-white/10 bg-slate-900/50 backdrop-blur-md">
+            <div className="p-3.5 rounded-xl border border-white/[0.08] bg-slate-900/70 backdrop-blur-md shadow-tactile-card">
               <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Sandbox Isolation</div>
               <div className="text-lg font-bold text-emerald-400 mt-0.5 font-mono">ADR-001 Air-Gapped</div>
             </div>
-            <div className="p-3 rounded-xl border border-white/10 bg-slate-900/50 backdrop-blur-md">
+            <div className="p-3.5 rounded-xl border border-white/[0.08] bg-slate-900/70 backdrop-blur-md shadow-tactile-card">
               <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Dimensional Typing</div>
               <div className="text-lg font-bold text-violet-400 mt-0.5 font-mono">100+ Pint SI Units</div>
             </div>
-            <div className="p-3 rounded-xl border border-white/10 bg-slate-900/50 backdrop-blur-md">
+            <div className="p-3.5 rounded-xl border border-white/[0.08] bg-slate-900/70 backdrop-blur-md shadow-tactile-card">
               <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">Preflight Latency</div>
               <div className="text-lg font-bold text-amber-400 mt-0.5 font-mono">&lt; 5 ms Cached</div>
             </div>
@@ -111,23 +109,23 @@ export default function HomePage() {
         </div>
 
         {/* Embedded Interactive 1-Click Preset Demo Widget */}
-        <div className="mt-12 sm:mt-16">
+        <div className="mt-12 sm:mt-16 relative z-10">
           <ScientificPresetDemo />
         </div>
       </section>
 
       {/* 4 Feature Pillars Section */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
         <FeaturePillars />
       </section>
 
       {/* 4-Step Scientific Workflow Tour Section */}
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
         <WorkflowTour />
       </section>
 
       {/* Bottom High-Conversion Banner */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto relative z-10">
         <div className="rounded-3xl border border-cyan-500/30 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl">
           <div
             className="absolute inset-0 bg-radial-gradient from-cyan-500/10 via-transparent to-transparent pointer-events-none"
@@ -152,7 +150,7 @@ export default function HomePage() {
             <div className="pt-2">
               <Link
                 href="/projects/default-model/editor"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 px-8 py-4 text-base font-bold text-white shadow-xl shadow-cyan-500/25 hover:shadow-cyan-400/35 transition-all duration-200 transform hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 px-8 py-4 text-base font-bold text-white shadow-tactile-card border border-cyan-400/40 transition-all duration-200 transform hover:-translate-y-0.5 active:scale-[0.98]"
               >
                 <span>Open Verification Workspace</span>
                 <ArrowRight className="h-4 w-4" />
@@ -163,7 +161,7 @@ export default function HomePage() {
       </section>
 
       {/* Futuristic High-Tech Footer */}
-      <footer className="border-t border-white/10 bg-slate-950/90 text-slate-400 py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="border-t border-white/10 bg-slate-950/90 text-slate-400 py-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             {/* Brand Logo & Mission */}

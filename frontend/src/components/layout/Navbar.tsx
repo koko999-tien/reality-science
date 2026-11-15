@@ -4,7 +4,7 @@ import { Atom, Layers, Github, ExternalLink, Sparkles } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-slate-950/80 border-b border-white/10 transition-colors">
+    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-slate-950/80 border-b border-white/10 transition-colors shadow-tactile-card">
       <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         {/* Brand identity */}
         <Link
@@ -21,7 +21,7 @@ export const Navbar: React.FC = () => {
               REALITY<span className="text-cyan-400">SCIENCE</span>
             </span>
             <span className="text-[10px] font-mono tracking-widest text-cyan-400/90 uppercase font-semibold">
-              EPITEMIC ENGINE
+              EPISTEMIC ENGINE
             </span>
           </div>
         </Link>
@@ -77,4 +77,3 @@ export const Navbar: React.FC = () => {
     </header>
   );
 };
-

@@ -35,6 +35,10 @@ export const PulseFlowEdge: React.FC<PulseFlowEdgeProps> = ({
   className = "",
   selected = false,
 }) => {
+  // Distance-dependent catenary tension: dynamic curvature expands as distance increases
+  const dist = Math.hypot(targetX - sourceX, targetY - sourceY);
+  const borderRadius = Math.max(16, Math.min(32, Math.round(dist * 0.12)));
+
   const [edgePath] = getSmoothStepPath({
     sourceX,
     sourceY,
@@ -42,7 +46,7 @@ export const PulseFlowEdge: React.FC<PulseFlowEdgeProps> = ({
     targetX,
     targetY,
     targetPosition,
-    borderRadius: 16,
+    borderRadius,
   });
 
   const gradId = `pulse-grad-${id}`;
@@ -89,9 +93,18 @@ export const PulseFlowEdge: React.FC<PulseFlowEdgeProps> = ({
         className={`stroke-cyan-400 stroke-2 fill-none animate-pulse-flow shadow-glow-cyan ${className}`}
       />
 
-      {/* High-speed animated photon / energy quantum traversing the DAG pipeline */}
+      {/* Primary animated energy quantum traversing the DAG pipeline (preserves test assertion) */}
       <circle r={3.5} fill="#38bdf8" filter={`url(#${filterId})`}>
         <animateMotion dur="2.5s" repeatCount="indefinite" path={edgePath} />
+      </circle>
+
+      {/* Staggered quantum energy packet wave (train of trailing photons) */}
+      <circle r={2.5} fill="#38bdf8" opacity={0.65} filter={`url(#${filterId})`}>
+        <animateMotion dur="2.5s" begin="0.8s" repeatCount="indefinite" path={edgePath} />
+      </circle>
+
+      <circle r={2} fill="#818cf8" opacity={0.5} filter={`url(#${filterId})`}>
+        <animateMotion dur="2.5s" begin="1.6s" repeatCount="indefinite" path={edgePath} />
       </circle>
     </>
   );

@@ -133,7 +133,7 @@ export const SymbolicCanvas: React.FC<SymbolicCanvasProps> = ({
 
   return (
     <div
-      className={`relative flex flex-col h-full w-full rounded-2xl border border-slate-700/60 bg-slate-950 shadow-2xl overflow-hidden ${className}`}
+      className={`relative flex flex-col h-full w-full rounded-2xl border border-white/[0.08] bg-slate-950 shadow-tactile-card overflow-hidden ${className}`}
       data-testid="symbolic-canvas-container"
     >
       {/* Canvas Top Toolbar */}

@@ -9,3 +9,9 @@ if (typeof global.ResizeObserver === "undefined") {
   };
 }
 
+// Polyfill HTMLCanvasElement.prototype.getContext for Jest/jsdom environment
+if (typeof HTMLCanvasElement !== "undefined") {
+  HTMLCanvasElement.prototype.getContext = () => null;
+}
+
+

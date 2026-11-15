@@ -25,17 +25,17 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   isValidating = false,
 }) => {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white/95 px-4 py-2.5 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+    <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/[0.08] bg-slate-900/90 px-4 py-2.5 shadow-tactile-card backdrop-blur-xl">
       {/* Node creation palette */}
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <span className="mr-1 text-xs font-mono font-semibold text-slate-400 uppercase tracking-wider">
           Add Node:
         </span>
 
         <button
           type="button"
           onClick={() => onAddNode("constant")}
-          className="inline-flex items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-100 dark:border-blue-900 dark:bg-blue-950/60 dark:text-blue-300"
+          className="inline-flex items-center gap-1 rounded-lg border border-blue-500/30 bg-blue-950/60 px-2.5 py-1 text-xs font-medium text-blue-300 transition-all hover:bg-blue-900/60 hover:border-blue-400/50 active:scale-[0.98]"
         >
           <Plus className="h-3.5 w-3.5" />
           Constant
@@ -44,7 +44,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           type="button"
           onClick={() => onAddNode("variable")}
-          className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300"
+          className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/30 bg-emerald-950/60 px-2.5 py-1 text-xs font-medium text-emerald-300 transition-all hover:bg-emerald-900/60 hover:border-emerald-400/50 active:scale-[0.98]"
         >
           <Plus className="h-3.5 w-3.5" />
           Variable
@@ -53,7 +53,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           type="button"
           onClick={() => onAddNode("binary_op")}
-          className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 transition hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-300"
+          className="inline-flex items-center gap-1 rounded-lg border border-amber-500/30 bg-amber-950/60 px-2.5 py-1 text-xs font-medium text-amber-300 transition-all hover:bg-amber-900/60 hover:border-amber-400/50 active:scale-[0.98]"
         >
           <Plus className="h-3.5 w-3.5" />
           Binary Op
@@ -62,7 +62,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           type="button"
           onClick={() => onAddNode("unary_op")}
-          className="inline-flex items-center gap-1 rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 transition hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-300"
+          className="inline-flex items-center gap-1 rounded-lg border border-indigo-500/30 bg-indigo-950/60 px-2.5 py-1 text-xs font-medium text-indigo-300 transition-all hover:bg-indigo-900/60 hover:border-indigo-400/50 active:scale-[0.98]"
         >
           <Plus className="h-3.5 w-3.5" />
           Unary Op
@@ -71,7 +71,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           type="button"
           onClick={() => onAddNode("function_call")}
-          className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-100 dark:border-rose-900 dark:bg-rose-950/60 dark:text-rose-300"
+          className="inline-flex items-center gap-1 rounded-lg border border-rose-500/30 bg-rose-950/60 px-2.5 py-1 text-xs font-medium text-rose-300 transition-all hover:bg-rose-900/60 hover:border-rose-400/50 active:scale-[0.98]"
         >
           <Plus className="h-3.5 w-3.5" />
           Function
@@ -80,7 +80,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <button
           type="button"
           onClick={() => onAddNode("equation_root")}
-          className="inline-flex items-center gap-1 rounded-md border border-sky-300 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-800 transition hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/80 dark:text-sky-200"
+          className="inline-flex items-center gap-1 rounded-lg border border-sky-400/40 bg-sky-950/80 px-2.5 py-1 text-xs font-semibold text-sky-200 transition-all hover:bg-sky-900/80 hover:border-sky-400/70 shadow-glow-cyan active:scale-[0.98]"
         >
           <Plus className="h-3.5 w-3.5" />
           Equation Root
@@ -93,10 +93,10 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <button
             type="button"
             onClick={onAutoLayout}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+            className="inline-flex items-center gap-1 rounded-lg border border-white/[0.1] bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-200 transition-all hover:bg-slate-700 hover:border-white/20 active:scale-[0.98]"
             title="Auto-organize graph layout"
           >
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
             Auto Layout
           </button>
         )}
@@ -105,7 +105,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <button
             type="button"
             onClick={onClear}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 transition hover:bg-rose-50 hover:text-rose-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-rose-950/40"
+            className="inline-flex items-center gap-1 rounded-lg border border-white/[0.1] bg-slate-800/80 px-2.5 py-1 text-xs font-medium text-slate-300 transition-all hover:bg-rose-950/50 hover:text-rose-300 hover:border-rose-500/40 active:scale-[0.98]"
             title="Clear all nodes and edges"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -118,7 +118,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             type="button"
             onClick={onValidate}
             disabled={isValidating}
-            className="inline-flex items-center gap-1.5 rounded-md bg-sky-600 px-3 py-1 text-xs font-semibold text-white shadow transition hover:bg-sky-500 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-600 hover:bg-cyan-500 border border-cyan-400/40 px-3.5 py-1 text-xs font-semibold text-white shadow-tactile-card transition-all disabled:opacity-50 active:scale-[0.98]"
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
             {isValidating ? "Validating..." : "Validate AST"}

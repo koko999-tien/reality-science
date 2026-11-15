@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
+import { NoiseGrain } from "@/components/ui/NoiseGrain";
 
 export const metadata: Metadata = {
   title: "REALITY SCIENCE — Autonomous Epistemic Verification Studio",
@@ -15,11 +16,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="antialiased min-h-screen flex flex-col bg-[#030712] text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200">
+      <body className="antialiased min-h-screen flex flex-col bg-[#030712] text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200 relative">
+        <NoiseGrain />
         <Navbar />
         <main className="flex-1 flex flex-col">{children}</main>
       </body>
     </html>
   );
 }
-

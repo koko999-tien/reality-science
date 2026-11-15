@@ -10,11 +10,15 @@ export const Button: React.FC<ButtonProps> = ({
   className = "",
   ...props
 }) => {
-  const base = "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-sky-500";
+  const base =
+    "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none shadow-tactile-card";
   const variants = {
-    primary: "bg-sky-600 text-white hover:bg-sky-500",
-    secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100",
-    outline: "border border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800",
+    primary:
+      "bg-cyan-600 text-white hover:bg-cyan-500 border border-cyan-400/30 hover:border-cyan-400/60 shadow-glow-cyan",
+    secondary:
+      "bg-slate-900 text-slate-100 hover:bg-slate-800 border border-white/[0.1] hover:border-white/20",
+    outline:
+      "border border-white/[0.12] bg-transparent text-slate-300 hover:bg-slate-900/60 hover:text-white hover:border-cyan-500/40",
   };
 
   return (

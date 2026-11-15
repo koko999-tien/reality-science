@@ -340,7 +340,7 @@ export const ScientificPresetDemo: React.FC = () => {
   return (
     <div
       data-testid="scientific-preset-demo"
-      className="relative rounded-2xl border border-white/10 bg-slate-950/80 backdrop-blur-2xl shadow-2xl overflow-hidden transition-all duration-300"
+      className="relative rounded-2xl border border-white/[0.08] bg-slate-950/90 backdrop-blur-2xl shadow-tactile-card overflow-hidden transition-all duration-300"
     >
       {/* Top subtle glow banner */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
@@ -405,7 +405,7 @@ export const ScientificPresetDemo: React.FC = () => {
         {/* Top Formula & Verification Status Banner */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           {/* Formula Display Box */}
-          <div className="lg:col-span-7 rounded-xl border border-white/10 bg-slate-900/70 p-5 flex flex-col justify-between">
+          <div className="lg:col-span-7 rounded-xl border border-white/[0.08] bg-slate-900/80 p-5 flex flex-col justify-between shadow-tactile-card">
             <div className="flex items-center justify-between gap-2 mb-3">
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700">
                 {currentPreset.badge}
@@ -416,7 +416,7 @@ export const ScientificPresetDemo: React.FC = () => {
             </div>
 
             {/* KaTeX Formula Box */}
-            <div className="py-4 px-3 flex items-center justify-center bg-slate-950/60 rounded-lg border border-white/5 my-auto overflow-x-auto">
+            <div className="py-4 px-3 flex items-center justify-center bg-[#060a10] rounded-lg border border-white/[0.06] shadow-inner my-auto overflow-x-auto">
               <div className="text-xl sm:text-2xl md:text-3xl font-sans tracking-wide text-white">
                 <KatexFormula math={currentPreset.formulaLatex} block />
               </div>

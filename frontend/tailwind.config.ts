@@ -13,10 +13,12 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
         obsidian: {
-          950: "#030712",
-          900: "#08090a",
-          850: "#0b0f19",
-          800: "#0f172a",
+          950: "#030712", // Kept for exact test match
+          900: "#060911", // Deep cosmic void
+          850: "#0a0e1a", // Surface 1: Panel base
+          800: "#0f1626", // Surface 2: Elevated slate
+          750: "#151d32", // Surface 3: Hover/active slate
+          700: "#1e293b",
         },
         science: {
           50: "#f0f9ff",
@@ -44,6 +46,17 @@ const config: Config = {
         "glow-emerald": "0 0 20px -5px rgba(16, 185, 129, 0.4)",
         "glow-violet": "0 0 20px -5px rgba(139, 92, 246, 0.4)",
         glass: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+        // Precision artisanal tactile shadows
+        "tactile-card": "0 1px 3px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.09)",
+        "bezel-outer": "0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 32px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.14)",
+        "bezel-hover": "0 0 0 1px rgba(56, 189, 248, 0.35), 0 16px 40px -8px rgba(14, 165, 233, 0.18), inset 0 1px 0 0 rgba(255, 255, 255, 0.22)",
+        "node-selected": "0 0 0 1px rgba(56, 189, 248, 0.8), 0 0 20px -2px rgba(14, 165, 233, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.2)",
+        "node-dragging": "0 25px 50px -12px rgba(0, 0, 0, 0.75), 0 0 25px rgba(14, 165, 233, 0.35)",
+        "inner-slate": "inset 0 2px 4px 0 rgba(0, 0, 0, 0.6)",
+      },
+      backgroundImage: {
+        "lab-grid": "linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px)",
+        "radial-spotlight": "radial-gradient(1000px circle at 50% -20%, rgba(14, 165, 233, 0.12), rgba(15, 23, 42, 0.02) 60%, transparent 100%)",
       },
       animation: {
         "pulse-flow": "pulseFlow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
@@ -59,4 +72,3 @@ const config: Config = {
   plugins: [],
 };
 export default config;
-

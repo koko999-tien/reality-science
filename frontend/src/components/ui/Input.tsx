@@ -6,15 +6,15 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const Input: React.FC<InputProps> = ({ label, id, className = "", ...props }) => {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5">
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label htmlFor={id} className="block text-xs font-mono font-medium text-slate-300">
           {label}
         </label>
       )}
       <input
         id={id}
-        className={`w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-900 ${className}`}
+        className={`w-full rounded-lg border border-white/[0.1] bg-[#060a10] px-3 py-2 text-sm text-slate-100 placeholder-slate-500 shadow-inner focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-colors ${className}`}
         {...props}
       />
     </div>
