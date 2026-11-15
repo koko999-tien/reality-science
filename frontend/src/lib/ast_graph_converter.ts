@@ -308,6 +308,8 @@ export function astToGraph(
         sourceHandle: "output",
         target: id,
         targetHandle: "left",
+        type: "pulseFlowEdge",
+        animated: true,
       });
 
       return { id, xLevel, y };
@@ -335,6 +337,8 @@ export function astToGraph(
         sourceHandle: "output",
         target: id,
         targetHandle: "left",
+        type: "pulseFlowEdge",
+        animated: true,
       });
 
       edges.push({
@@ -343,6 +347,8 @@ export function astToGraph(
         sourceHandle: "output",
         target: id,
         targetHandle: "right",
+        type: "pulseFlowEdge",
+        animated: true,
       });
 
       return { id, xLevel, y };
@@ -369,6 +375,8 @@ export function astToGraph(
         sourceHandle: "output",
         target: id,
         targetHandle: "arg0",
+        type: "pulseFlowEdge",
+        animated: true,
       });
 
       return { id, xLevel, y };
@@ -460,6 +468,8 @@ export function astToGraph(
     sourceHandle: "output",
     target: rootId,
     targetHandle: "input",
+    type: "pulseFlowEdge",
+    animated: true,
   });
 
   return { nodes, edges };

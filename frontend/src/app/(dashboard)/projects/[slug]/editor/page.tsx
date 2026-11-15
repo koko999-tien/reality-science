@@ -19,11 +19,16 @@ import { validateEquationAst } from "@/lib/api";
 
 import { SymbolicCanvas } from "@/components/equations/canvas/SymbolicCanvas";
 import { NodeTypeToAdd } from "@/components/equations/canvas/CanvasToolbar";
+import {
+  ScientificPresetsBar,
+  CANONICAL_PRESETS,
+  type ScientificPreset,
+} from "@/components/equations/canvas/ScientificPresetsBar";
 import { VariableDeclarationPanel } from "@/components/equations/VariableDeclarationPanel";
 import { ValidationStatusBar } from "@/components/equations/ValidationStatusBar";
 import { KatexFormula } from "@/components/equations/KatexFormula";
 import { Card } from "@/components/ui/Card";
-import { Code2, Sparkles, BookOpen, Layers } from "lucide-react";
+import { Code2, Sparkles, Layers, Activity } from "lucide-react";
 
 // Default physical variables for demonstration: v = a * t
 const INITIAL_VARIABLES: VariableSpec[] = [
@@ -76,12 +81,60 @@ export default function EquationEditorPage({
   const [translationError, setTranslationError] = useState<string | null>(null);
   const [nodeIdCounter, setNodeIdCounter] = useState<number>(100);
 
-  // Initialize canvas with initial AST layout
+  // Quick-Load Preset Handler
+  const handleSelectPreset = useCallback(async (preset: ScientificPreset) => {
+    setTranslationError(null);
+
+    // 1. Update variables state
+    setVariables(preset.variables);
+
+    // 2. Build graph from preset AST and variables
+    const { nodes: newNodes, edges: newEdges } = astToGraph(preset.ast, preset.variables);
+    const pulseEdges = newEdges.map((e) => ({ ...e, type: "pulseFlow" }));
+    setNodes(newNodes);
+    setEdges(pulseEdges);
+
+    // 3. Update current AST and LaTeX
+    setCurrentAst(preset.ast);
+    const latex = preset.formulaLatex || exprNodeToLatex(preset.ast);
+    setCurrentLatex(latex);
+
+    // 4. Auto-trigger 6-layer scientific validation
+    setIsValidating(true);
+    try {
+      const finding = await validateEquationAst({
+        expression_ast: preset.ast,
+        variables: preset.variables,
+      });
+      setValidationResult(finding);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Validation failed";
+      setTranslationError(msg);
+    } finally {
+      setIsValidating(false);
+    }
+  }, []);
+
+  // Initialize canvas with initial AST layout or query parameter preset
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const presetParam = urlParams.get("preset");
+      if (presetParam) {
+        const found = CANONICAL_PRESETS.find(
+          (p) => p.id === presetParam || p.id.toLowerCase().includes(presetParam.toLowerCase())
+        );
+        if (found) {
+          handleSelectPreset(found);
+          return;
+        }
+      }
+    }
+
     const { nodes: initialNodes, edges: initialEdges } = astToGraph(INITIAL_AST, INITIAL_VARIABLES);
     setNodes(initialNodes);
-    setEdges(initialEdges);
-  }, []);
+    setEdges(initialEdges.map((e) => ({ ...e, type: "pulseFlow" })));
+  }, [handleSelectPreset]);
 
   // Compute set of symbols currently used on canvas
   const usedSymbols = useMemo(() => {
@@ -149,8 +202,9 @@ export default function EquationEditorPage({
         const nextEdges = addEdge(
           {
             ...connection,
+            type: "pulseFlow",
             animated: true,
-            style: { stroke: "#0284c7", strokeWidth: 2 },
+            style: { stroke: "#0ea5e9", strokeWidth: 2 },
           },
           eds
         ) as MathCanvasEdge[];
@@ -250,7 +304,7 @@ export default function EquationEditorPage({
       const ast = graphToAst(nodes, edges, variables);
       const { nodes: layoutNodes, edges: layoutEdges } = astToGraph(ast, variables);
       setNodes(layoutNodes);
-      setEdges(layoutEdges);
+      setEdges(layoutEdges.map((e) => ({ ...e, type: "pulseFlow" })));
       setTranslationError(null);
     } catch (err) {
       if (err instanceof TranslationError) {
@@ -313,30 +367,34 @@ export default function EquationEditorPage({
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
             <Layers className="h-4 w-4" />
-            <span>Interactive Symbolic Canvas</span>
+            <span>Interactive Symbolic Canvas Studio</span>
+            <span className="flex items-center gap-1 text-[10px] bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 px-2 py-0.5 rounded-full font-mono">
+              <Activity className="w-3 h-3 text-cyan-400 animate-pulse" />
+              PulseFlow Active
+            </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-1">
             Mathematical Model Editor — {slug}
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-slate-400">
             Structured symbol-first authoring with live Pint dimensional verification and SymPy simplification.
           </p>
         </div>
 
         {/* Live LaTeX preview badge */}
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-3 rounded-xl border border-slate-700/60 bg-slate-900/90 px-4 py-2.5 shadow-lg backdrop-blur-md">
+          <span className="text-xs font-medium text-slate-400">
             Formula:
           </span>
-          <div className="text-sm font-bold text-slate-900 dark:text-slate-100 min-w-[80px]">
+          <div className="text-sm font-bold text-slate-100 min-w-[80px]">
             {currentLatex ? (
               <KatexFormula math={currentLatex} />
             ) : (
-              <span className="text-xs italic text-slate-400">Empty</span>
+              <span className="text-xs italic text-slate-500">Empty</span>
             )}
           </div>
         </div>
@@ -344,13 +402,16 @@ export default function EquationEditorPage({
 
       {/* Translation Error Alert */}
       {translationError && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 flex items-center justify-between">
+        <div className="rounded-xl border border-rose-800/80 bg-rose-950/60 p-4 text-xs text-rose-300 shadow-lg flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-bold uppercase tracking-wider">Canvas Notice:</span>
+            <span className="font-bold uppercase tracking-wider text-rose-400">Canvas Notice:</span>
             <span>{translationError}</span>
           </div>
         </div>
       )}
+
+      {/* 1-Click Scientific Presets Bar */}
+      <ScientificPresetsBar onSelectPreset={handleSelectPreset} />
 
       {/* Main Authoring Area */}
       <div className="grid grid-cols-1 gap-6">
@@ -362,13 +423,13 @@ export default function EquationEditorPage({
         />
 
         {/* Interactive Node Canvas */}
-        <Card className="p-4">
+        <Card className="p-4 border-slate-700/60 bg-slate-900/80 backdrop-blur-xl shadow-2xl">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-sky-500" />
+            <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-cyan-400" />
               Symbolic Dataflow Canvas
             </h2>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-slate-400">
               Drag connections from output handles to operator inputs
             </span>
           </div>
@@ -398,17 +459,17 @@ export default function EquationEditorPage({
 
         {/* Canonical AST JSON Debug / Export View */}
         {currentAst && (
-          <Card className="p-5">
+          <Card className="p-5 border-slate-700/60 bg-slate-900/80 backdrop-blur-xl shadow-2xl">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <Code2 className="h-4 w-4 text-slate-500" />
+              <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
+                <Code2 className="h-4 w-4 text-slate-400" />
                 Canonical ExprNode JSON Representation
               </h3>
-              <span className="text-xs font-mono text-slate-400">
+              <span className="text-xs font-mono text-cyan-400">
                 Layer 1 Syntax Guard: PASS
               </span>
             </div>
-            <pre className="max-h-60 overflow-y-auto rounded-lg bg-slate-950 p-4 font-mono text-xs text-emerald-400">
+            <pre className="max-h-60 overflow-y-auto rounded-xl bg-slate-950 p-4 font-mono text-xs text-emerald-400 border border-slate-800">
               {JSON.stringify(currentAst, null, 2)}
             </pre>
           </Card>

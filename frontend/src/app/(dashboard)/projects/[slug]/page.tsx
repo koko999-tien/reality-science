@@ -34,6 +34,7 @@ import {
   RefreshCw,
   ArrowLeft,
   FileCheck2,
+  Sparkles,
 } from "lucide-react";
 
 export default function ProjectDetailsPage({
@@ -177,6 +178,14 @@ export default function ProjectDetailsPage({
 
         {/* Global Action Buttons */}
         <div className="flex items-center gap-3 flex-wrap">
+          <Link
+            href={`/projects/${slug}/editor`}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-sky-200" />
+            Open Symbolic Canvas Editor &rarr;
+          </Link>
+
           <button
             onClick={loadData}
             disabled={isLoading}
@@ -324,8 +333,15 @@ export default function ProjectDetailsPage({
       {activeTab === "equations" && (
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden divide-y divide-slate-200 dark:divide-slate-800">
           {equations.length === 0 ? (
-            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-              No equations registered yet. Use the Symbolic Canvas to add mathematical formulations.
+            <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400 flex flex-col items-center justify-center gap-3">
+              <p>No equations registered yet. Use the Symbolic Canvas to add mathematical formulations.</p>
+              <Link
+                href={`/projects/${slug}/editor`}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-sky-200" />
+                Open Symbolic Canvas Editor &rarr;
+              </Link>
             </div>
           ) : (
             equations.map((eq) => (

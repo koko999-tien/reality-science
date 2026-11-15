@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo } from "react";
 import {
   ReactFlow,
   Background,
@@ -21,6 +21,7 @@ import { BinaryOpNode } from "./nodes/BinaryOpNode";
 import { UnaryOpNode } from "./nodes/UnaryOpNode";
 import { FunctionCallNode } from "./nodes/FunctionCallNode";
 import { EquationRootNode } from "./nodes/EquationRootNode";
+import { PulseFlowEdge } from "./edges/PulseFlowEdge";
 import { CanvasToolbar, NodeTypeToAdd } from "./CanvasToolbar";
 
 interface SymbolicCanvasProps {
@@ -46,6 +47,12 @@ const nodeTypes = {
   unaryOpNode: UnaryOpNode,
   functionCallNode: FunctionCallNode,
   equationRootNode: EquationRootNode,
+};
+
+const edgeTypes = {
+  pulseFlow: PulseFlowEdge,
+  default: PulseFlowEdge,
+  smoothstep: PulseFlowEdge,
 };
 
 export const SymbolicCanvas: React.FC<SymbolicCanvasProps> = ({
@@ -125,7 +132,10 @@ export const SymbolicCanvas: React.FC<SymbolicCanvasProps> = ({
   }, [nodes, declaredVariables, onNodeDataChange, onValidate]);
 
   return (
-    <div className={`relative flex flex-col h-full w-full rounded-2xl border border-slate-200 bg-slate-50/50 shadow-inner overflow-hidden dark:border-slate-800 dark:bg-slate-950 ${className}`}>
+    <div
+      className={`relative flex flex-col h-full w-full rounded-2xl border border-slate-700/60 bg-slate-950 shadow-2xl overflow-hidden ${className}`}
+      data-testid="symbolic-canvas-container"
+    >
       {/* Canvas Top Toolbar */}
       <div className="absolute top-4 left-4 right-4 z-10 pointer-events-auto">
         <CanvasToolbar
@@ -137,7 +147,7 @@ export const SymbolicCanvas: React.FC<SymbolicCanvasProps> = ({
         />
       </div>
 
-      {/* Main Flow Canvas */}
+      {/* Main Flow Canvas with Cyber Grid */}
       <div className="flex-1 w-full h-[650px] min-h-[500px]">
         <ReactFlow
           nodes={enrichedNodes}
@@ -146,23 +156,35 @@ export const SymbolicCanvas: React.FC<SymbolicCanvasProps> = ({
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
           attributionPosition="bottom-right"
-          className="bg-dot-pattern"
+          className="bg-slate-950"
           defaultEdgeOptions={{
-            type: "smoothstep",
+            type: "pulseFlow",
             animated: true,
-            style: { stroke: "#0284c7", strokeWidth: 2 },
+            style: { stroke: "#0ea5e9", strokeWidth: 2 },
           }}
         >
-          <Background variant={BackgroundVariant.Dots} gap={16} size={1} color="#cbd5e1" />
-          <Controls position="bottom-left" showInteractive={false} />
+          <Background
+            variant={BackgroundVariant.Dots}
+            gap={20}
+            size={1.2}
+            color="#334155"
+            className="opacity-70"
+          />
+          <Controls
+            position="bottom-left"
+            showInteractive={false}
+            className="!border !border-slate-800 !bg-slate-900/90 !backdrop-blur-md !text-slate-200 !rounded-lg !shadow-xl [&>button]:!border-b-slate-800 [&>button]:!fill-slate-300"
+          />
           <MiniMap
             position="bottom-right"
             nodeStrokeWidth={3}
             zoomable
             pannable
-            className="!border !border-slate-300 dark:!border-slate-700 !rounded-lg"
+            maskColor="rgba(2, 6, 23, 0.75)"
+            className="!border !border-slate-800 !bg-slate-900/80 !backdrop-blur-md !rounded-xl !shadow-2xl overflow-hidden"
           />
         </ReactFlow>
       </div>
