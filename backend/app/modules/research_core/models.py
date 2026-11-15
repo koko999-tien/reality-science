@@ -1,8 +1,17 @@
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import String, Boolean, DateTime, ForeignKey, Text, CheckConstraint
+from datetime import UTC, datetime
+
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.base import Base
+from app.modules.iam_governance.models import ResearchActor
+from app.modules.reality_constraint_engine.models import (
+    Equation,
+    ValidationFinding,
+    ValidationRun,
+    Variable,
+)
 
 
 class ResearchProject(Base):
@@ -20,10 +29,11 @@ class ResearchProject(Base):
     visibility: Mapped[str] = mapped_column(String(30), default="private_draft", nullable=False)
     is_frozen: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
 
     versions: Mapped[list["ResearchVersion"]] = relationship("ResearchVersion", back_populates="project")
+    owner: Mapped[ResearchActor] = relationship("ResearchActor", foreign_keys=[owner_actor_id], lazy="selectin")
 
     def __init__(self, **kwargs):
         kwargs.setdefault("is_frozen", False)
@@ -44,14 +54,29 @@ class ResearchVersion(Base):
     publication_status: Mapped[str] = mapped_column(String(30), default="draft", nullable=False)
     is_frozen: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
 
     project: Mapped[ResearchProject] = relationship("ResearchProject", back_populates="versions")
+    equations: Mapped[list[Equation]] = relationship("Equation", foreign_keys="[Equation.version_id]", cascade="all, delete-orphan", lazy="selectin")
+    variables: Mapped[list[Variable]] = relationship("Variable", foreign_keys="[Variable.version_id]", cascade="all, delete-orphan", lazy="selectin")
+    validation_runs: Mapped[list[ValidationRun]] = relationship("ValidationRun", foreign_keys="[ValidationRun.version_id]", cascade="all, delete-orphan", lazy="selectin")
 
     def __init__(self, **kwargs):
         kwargs.setdefault("is_frozen", False)
         kwargs.setdefault("version_number", 1)
         kwargs.setdefault("publication_status", "draft")
         super().__init__(**kwargs)
+
+
+__all__ = [
+    "Equation",
+    "ResearchActor",
+    "ResearchProject",
+    "ResearchVersion",
+    "ValidationFinding",
+    "ValidationRun",
+    "Variable",
+]
+
 

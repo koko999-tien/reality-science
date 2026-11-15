@@ -1,5 +1,6 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.modules.research_core.models import ResearchProject
 from app.modules.research_core.schemas import ProjectCreate
 

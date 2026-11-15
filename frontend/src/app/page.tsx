@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 text-center">
@@ -9,18 +11,18 @@ export default function HomePage() {
           Evidence-Driven Scientific Hypothesis &amp; Mathematical Verification Engine.
         </p>
         <div className="flex justify-center gap-4 pt-4">
-          <a
+          <Link
             href="/projects"
             className="rounded-lg bg-sky-600 px-6 py-3 font-semibold text-white shadow-md hover:bg-sky-500 transition"
           >
             Explore Projects
-          </a>
-          <a
+          </Link>
+          <Link
             href="/login"
             className="rounded-lg border border-slate-300 px-6 py-3 font-semibold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 transition"
           >
             Sign In
-          </a>
+          </Link>
         </div>
       </div>
     </main>

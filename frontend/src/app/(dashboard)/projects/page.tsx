@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function ProjectsDashboardPage() {
   return (
     <div className="container mx-auto p-8 space-y-6">
@@ -19,9 +21,9 @@ export default function ProjectsDashboardPage() {
           <p className="text-sm text-slate-500">
             Astrophysical null result constraints evaluated against Xenon-1T dataset.
           </p>
-          <a href="/projects/dark-matter-particle/editor" className="text-sm font-semibold text-sky-600 hover:underline">
+          <Link href="/projects/dark-matter-particle/editor" className="text-sm font-semibold text-sky-600 hover:underline">
             Open Editor &rarr;
-          </a>
+          </Link>
         </div>
       </div>
     </div>

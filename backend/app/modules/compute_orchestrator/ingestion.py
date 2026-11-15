@@ -1,11 +1,11 @@
 import json
-from app.core.redis import get_redis_client
+from app.core.redis import get_redis_result_client
 from shared.schemas.finding_result import FindingResult
 
 
 async def fetch_finding_result(job_id: str) -> FindingResult | None:
-    """Retrieves finding result from Redis result backend by job_id."""
-    redis = await get_redis_client()
+    """Retrieves finding result from Redis result backend (DB 1) by job_id."""
+    redis = await get_redis_result_client()
     key = f"celery-task-meta-{job_id}"
     raw = await redis.get(key)
     if not raw:

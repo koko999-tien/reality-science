@@ -1,12 +1,12 @@
+
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
 
 
 class ProjectCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     slug: str
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     visibility: str = "private_draft"
 
 
@@ -15,7 +15,7 @@ class ProjectResponse(BaseModel):
     id: str
     slug: str
     title: str
-    description: Optional[str] = None
+    description: str | None = None
     owner_actor_id: str
     visibility: str
     is_frozen: bool

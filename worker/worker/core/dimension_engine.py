@@ -17,12 +17,45 @@ class DimensionalityCheckError(ValueError):
     pass
 
 
+class TranscendentalDimensionalityError(DimensionalityCheckError):
+    pass
+
+
+def register_custom_unit(unit_spec: UnitSpec) -> None:
+    """Dynamically registers custom UnitSpec from bundle.units via ureg.define()."""
+    if unit_spec.name in ureg or unit_spec.symbol in ureg:
+        return
+    dim = unit_spec.dimensionality
+    replacements = {
+        "[length]": "meter",
+        "[mass]": "kilogram",
+        "[time]": "second",
+        "[current]": "ampere",
+        "[temperature]": "kelvin",
+        "[substance]": "mole",
+        "[luminosity]": "candela",
+        "[dimensionless]": "1",
+    }
+    dim_expr = dim
+    for k, v in replacements.items():
+        dim_expr = dim_expr.replace(k, v)
+    scale = unit_spec.scale_factor if unit_spec.scale_factor else 1.0
+    def_str = f"{unit_spec.name} = {scale} * ({dim_expr}) = {unit_spec.symbol}"
+    try:
+        ureg.define(def_str)
+    except Exception:
+        pass
+
+
 def evaluate_ast_dimensions(
     node: ExprNode,
     var_map: Dict[str, VariableSpec],
     unit_map: Dict[str, UnitSpec],
 ) -> pint.Quantity:
     """Recursively checks physical dimensional consistency of an ExprNode using Pint."""
+    if unit_map:
+        for u in unit_map.values():
+            register_custom_unit(u)
     if node.node_type == NodeType.CONSTANT:
         return 1.0 * ureg.dimensionless
 
@@ -92,7 +125,7 @@ def evaluate_ast_dimensions(
         ):
             if not arg_q.dimensionless:
                 func_name = node.func.value if hasattr(node.func, "value") else str(node.func)
-                raise DimensionalityCheckError(
+                raise TranscendentalDimensionalityError(
                     f"Transcendental function {func_name} requires dimensionless input, got {arg_q.dimensionality}"
                 )
             return 1.0 * ureg.dimensionless

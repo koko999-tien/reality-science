@@ -194,3 +194,35 @@ def test_dimensionful_base_dimensionful_exponent_rejected():
     with pytest.raises(DimensionalityCheckError, match="Exponent must be dimensionless"):
         evaluate_ast_dimensions(node, var_map, {})
 
+
+def test_custom_unit_dynamic_registration():
+    custom_unit = UnitSpec(
+        name="parsec_custom",
+        symbol="pc_custom",
+        dimensionality="[length]",
+        scale_factor=3.0857e16,
+    )
+    var_d = VariableSpec(symbol="d", name="distance", unit="parsec_custom")
+    var_map = {"d": var_d}
+    unit_map = {"parsec_custom": custom_unit}
+
+    node = ExprNode(node_type=NodeType.VARIABLE, value="d")
+    quantity = evaluate_ast_dimensions(node, var_map, unit_map)
+    assert str(quantity.dimensionality) == "[length]"
+
+
+def test_transcendental_dimensional_argument_code():
+    from worker.tasks.dimensional import execute_dimensional_verification
+    from shared.models.enums import DiagnosticCode
+
+    var_m = VariableSpec(symbol="m", name="mass", unit="kilogram")
+    node = ExprNode(
+        node_type=NodeType.FUNCTION_CALL,
+        func=AllowedFunction.SIN,
+        args=[ExprNode(node_type=NodeType.VARIABLE, value="m")],
+    )
+    ok, dim_str, code = execute_dimensional_verification(node, [var_m], [])
+    assert ok is False
+    assert code == DiagnosticCode.DIMENSIONED_TRANSCENDENTAL_ARGUMENT.value
+
+

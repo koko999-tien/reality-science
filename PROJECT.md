@@ -51,16 +51,20 @@ Evidence-Driven Scientific Platform establishing an epistemically sound, mathema
 | 18 | Stage 0 Verification Suite Execution | Execute all unit, integration, and security tests reporting honest results | M5 | Request R5 |
 | 19 | 10-Point Stage 0 Completion Report | Author exhaustive 10-point report halting strictly at Stage 0 | M5 | Request R5 |
 | 20 | Developer Onboarding Documentation | Local setup, testing, and deployment instructions in README.md | M5 | Request R5 |
-| 21 | RCE Layer 1 Syntax Engine | Extended mathematical AST parser for advanced operators | Stage 1+ | Doc 3 §1 |
-| 22 | RCE Layer 2 Dimension Engine | Comprehensive dimensional ontology with 100+ physical units | Stage 1+ | Doc 3 §1 |
-| 23 | RCE Layer 3 Boundary Engine | Numerical stability, asymptote, and singularity detection | Stage 1+ | Doc 3 §1 |
+| 21 | RCE Layer 1 Syntax Engine | Extended mathematical AST parser for advanced operators & symbol-first validation | M6 | Stage 1 (Doc 3 §1) |
+| 22 | RCE Layer 2 Dimension Engine | Comprehensive dimensional ontology with 100+ physical units via Pint | M6 | Stage 1 (Doc 3 §1) |
+| 23 | RCE Layer 3 Boundary Engine | Numerical stability, asymptote, and singularity detection with Richardson's fallback | M6 | Stage 1 (Doc 3 §1) |
 | 24 | RCE Layer 4 Physical Laws | Fundamental physics invariants (energy conservation, speed of light) | Stage 2+ | Doc 3 §1 |
 | 25 | RCE Layer 5 Empirical Data | Observation dataset correlation against CERN, NASA, NIST data | Stage 2+ | Doc 3 §1 |
 | 26 | RCE Layer 6 Epistemic Logic | Cross-claim contradiction graphs and circularity detection | Stage 3+ | Doc 3 §1 |
-| 27 | Interactive Symbolic Canvas UI | Next.js visual node-based mathematical authoring canvas | Stage 1+ | Doc 1 §3 |
-| 28 | Open Research ZIP Exporter | Zero lock-in cryptographic zip bundle export | Stage 1+ | Doc 2 §2 |
-| 29 | Outbox Event Publisher | Debezium / Kafka transactional outbox relay | Stage 1+ | Doc 2 §3 |
+| 27 | Interactive Symbolic Canvas UI | Next.js visual node-based mathematical authoring canvas | M7 | Stage 1 (Doc 1 §3) |
+| 28 | Open Research ZIP Exporter | Zero lock-in cryptographic zip bundle export with SHA-256 and Ed25519 signatures | M8 | Stage 1 (Doc 2 §2) |
+| 29 | Outbox Event Publisher | Transactional outbox relay & asynchronous validation polling contracts | M6 | Stage 1 (Doc 2 §3) |
 | 30 | WireGuard mTLS Private Cluster | Hybrid multi-cloud node orchestration | Stage 2+ | Doc 3 §4 |
+| 31 | Canonical 7-State Finding Taxonomy | Non-collapsible finding states (PASS, FAIL, WARNING, etc.) | M6 | Stage 1 (Doc 3 §1) |
+| 32 | Draft vs Frozen Snapshot Lifecycle | Separation of mutable draft endpoints from immutable version snapshot queries | M8 | Stage 1 (ADR-003) |
+| 33 | Citation-Preserving Erasure Engine | GDPR erasure nullifying user_account_id without breaking citation foreign keys | M8 | Stage 1 (ADR-003) |
+| 34 | Anti-Database Guard & Network Sentinel | Worker runtime check rejecting DB credentials and verifying network isolation | M6 | Stage 1 (ADR-002) |
 
 ---
 
@@ -72,6 +76,10 @@ Evidence-Driven Scientific Platform establishing an epistemically sound, mathema
 | M3 | Environment & Docker Orchestration | .env.example, pinned dependencies, multi-zone Docker Compose, static validations | M2 | DONE |
 | M4 | Math Contracts & RLS Database Schemas | Typed AST models, SymPy/Pint tests, PostgreSQL DDL migrations, RLS test suite | M3 | DONE (commit e6ee932) |
 | M5 | Security QA & Stage 0 Report | SAST scan, health check endpoints, test execution, comprehensive 10-point report | M4 | DONE |
+| M6 | Celery Dimensional & Symbolic Pipeline | Layers 1-3 (AST semantics, singularity/boundary solver, Pint 100+ units, Redis conduit, DB migrations) | M5 | DONE |
+| M7 | Interactive Symbolic Canvas UI | Next.js 15 / React 19 @xyflow/react node canvas, custom nodes, DAG cycle detection, bidirectional AST | M5 | DONE |
+| M8 | Open Research Cryptographic ZIP Export | Zero lock-in ZIP bundle, SHA-256 manifests, Ed25519 signatures, offline verifier, export API | M6 | DONE |
+| M9 | Stage 1 Dual-Track E2E Integration Suite | Opaque-box E2E test suite (Tiers 1-4), TEST_READY.md, full validation & export verification | M6, M7, M8 | DONE |
 
 ---
 
@@ -119,6 +127,46 @@ class ExprNode(BaseModel):
 - Session context: `SET LOCAL app.current_actor_id = '<uuid>';`
 - RLS Policy on `research_projects`:
   - `owner_actor_id = NULLIF(current_setting('app.current_actor_id', true), '')::UUID` OR `visibility = 'public_preprint'`
+
+### 4. Stage 1: Validation & Verification Contracts (Layers 1-3)
+- **Layer 1: Syntax & Semantics**:
+  - Validates `ExprNode` against `VariableSpec` symbol declarations (zero undeclared symbols).
+  - Enforces `complexity_guard`: max depth 15, max node count 100, max polynomial power 20.
+  - Rejects booleans, non-numeric strings, and arbitrary code injection.
+- **Layer 2: Boundary & Singularity Solver**:
+  - Direct SymPy construction via `sp.Add`, `sp.Mul`, `sp.Pow`, `sp.Symbol` (strictly zero `eval()`, `exec()`, or `parse_expr()`).
+  - Pole & singularity detection: Denominator root analysis via `sp.solveset(denom, sym, domain=sp.S.Reals)`.
+  - Boundary limits ($x \to 0^+$, $x \to \infty$) for divergence checks.
+  - Richardson's Theorem 10-point stratified numerical fallback when `sp.simplify(lhs - rhs) != 0`.
+- **Layer 3: Dimensional Engine (100+ Units via Pint)**:
+  - Dynamically registers custom units from `bundle.units` via `ureg.define()`.
+  - Verifies dimensional homogeneity on addition/subtraction.
+  - Enforces strictly dimensionless arguments for transcendental functions (`sin`, `cos`, `exp`, `log`).
+  - Diagnostic code: `DIMENSIONED_TRANSCENDENTAL_ARGUMENT` on violation.
+
+### 5. Stage 1: Open Research Cryptographic ZIP Export Contract
+- **Bundle File Structure**:
+  - `manifest.json`: JSON-LD metadata, author ORCID, license, content SHA-256 hashes table.
+  - `checksums.sha256`: Standard Linux sha256sum file for all bundle contents.
+  - `signature.json`: Platform cryptographic signature over canonical `manifest.json`.
+  - `paper.md`: Generated human-readable Markdown paper with equations & variable table.
+  - `metadata/`: `project.json`, `version.json`, `actor.json` (zero PII: no emails, no passwords).
+  - `math/`: `variables.json`, `units.json`, `equations/eq_*.json` (raw `ExprNode` ASTs).
+  - `validation/`: `validation_report.json` with historical findings across Layers 1–3.
+  - `verify_bundle.py`: Standalone offline verification script verifying hashes and AST validity.
+- **HTTP Endpoint**: `POST /api/v1/versions/{version_id}/export-zip` (enforces `is_frozen = TRUE`).
+
+### 6. Stage 1: Frontend Canvas & Node Contracts
+- **Node Types**:
+  - `ConstantNode`: Numeric constant with inline input.
+  - `VariableNode`: Symbol dropdown referencing active `VariableSpec[]` declarations.
+  - `BinaryOpNode`: Two input handles (`left`, `right`), one output handle (`+`, `-`, `*`, `/`, `**`).
+  - `UnaryOpNode`: One input handle (`left`), one output handle (`neg`).
+  - `FunctionCallNode`: One input handle (`arg0`), one output handle (`sqrt`, `sin`, `cos`, `exp`, `log`).
+  - `EquationRootNode`: Single input handle with live KaTeX preview and validation trigger.
+- **Bidirectional Translation**:
+  - `graphToAst`: DAG cycle detection, depth $\le 15$, node count $\le 100$, strict port connection validation.
+  - `astToGraph`: Tree-to-DAG visual layout algorithm placing nodes and edges.
 
 ---
 
