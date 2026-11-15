@@ -400,7 +400,7 @@ export default function ProjectDetailsPage({
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden divide-y divide-slate-200 dark:divide-slate-800">
           {runs.length === 0 ? (
             <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-              No validation runs recorded. Click "Run Full 6-Layer Validation" above to start a run.
+              No validation runs recorded. Click &quot;Run Full 6-Layer Validation&quot; above to start a run.
             </div>
           ) : (
             runs.map((r) => (
