@@ -1,0 +1,25 @@
+{
+  "pid": 19352,
+  "executable": "C:\\Users\\TIEN PC\\AppData\\Local\\Temp\\opencode\\reality-worker-verification-20261116\\Scripts\\python.exe",
+  "database_env_guard": "PASS",
+  "database_drivers_present": [],
+  "environment_keys": [
+    "APPDATA",
+    "CELERY_BROKER_URL",
+    "CELERY_RESULT_BACKEND",
+    "COMSPEC",
+    "LOCALAPPDATA",
+    "NUMBER_OF_PROCESSORS",
+    "PATH",
+    "PROCESSOR_ARCHITECTURE",
+    "PYTHONIOENCODING",
+    "PYTHONPATH",
+    "SYSTEMDRIVE",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+    "USERPROFILE",
+    "WINDIR"
+  ],
+  "mode": "real Celery solo, local Windows only"
+}

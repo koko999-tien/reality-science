@@ -36,7 +36,7 @@ const STATE_CONFIG: Record<
     label: "PASS",
     icon: CheckCircle2,
     badgeClass: "bg-emerald-950/80 text-emerald-300 border-emerald-700/80 shadow-sm shadow-emerald-500/20",
-    description: "Model passes dimensional homogeneity, boundary stability, and symbolic equivalence checks.",
+    description: "The validation API returned PASS. Only checks represented in this response are reported here.",
   },
   FAIL: {
     label: "FAIL",
@@ -82,9 +82,14 @@ export const ValidationStatusBar: React.FC<ValidationStatusBarProps> = ({
   onValidate,
   className = "",
 }) => {
-  const currentState: FindingState = result ? result.state : "NOT_YET_TESTED";
+  const isPreflight = !isValidating && (
+    result?.diagnostic_code === "PREFLIGHT_OK" || result?.job_id.startsWith("local-") || false
+  );
+  const displayResult = isPreflight || isValidating ? null : result;
+  const currentState: FindingState = isPreflight || isValidating || !result ? "NOT_YET_TESTED" : result.state;
   const config = STATE_CONFIG[currentState] || STATE_CONFIG.NOT_YET_TESTED;
   const StateIcon = config.icon;
+  const statusLabel = isValidating ? "COMPUTING..." : isPreflight ? "PREFLIGHT" : config.label;
 
   return (
     <div
@@ -95,7 +100,9 @@ export const ValidationStatusBar: React.FC<ValidationStatusBarProps> = ({
         <div className="flex items-center gap-3">
           {/* Status Badge */}
           <div
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold tracking-wide uppercase ${config.badgeClass}`}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold tracking-wide uppercase ${
+              isPreflight ? "bg-amber-950/80 text-amber-300 border-amber-700/80" : config.badgeClass
+            }`}
             data-testid="finding-state-badge"
           >
             {isValidating ? (
@@ -103,16 +110,24 @@ export const ValidationStatusBar: React.FC<ValidationStatusBarProps> = ({
             ) : (
               <StateIcon className="h-4 w-4 shrink-0" />
             )}
-            <span>{isValidating ? "COMPUTING..." : config.label}</span>
+            <span>{statusLabel}</span>
           </div>
 
           <div>
             <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
               <Cpu className="w-4 h-4 text-sky-400" />
-              6-Layer Reality Constraint Pipeline Status
+              {isValidating
+                ? "Compute request in progress"
+                : isPreflight
+                ? "Local preflight · limited checks"
+                : "Backend validation response"}
             </h3>
             <p className="text-xs text-slate-400">
-              {config.description}
+              {isValidating
+                ? "Previous results are hidden until this request completes."
+                : isPreflight
+                ? "Client-side checks only. This is not a backend validation finding or a full RCE verdict."
+                : config.description}
             </p>
           </div>
         </div>
@@ -136,7 +151,7 @@ export const ValidationStatusBar: React.FC<ValidationStatusBarProps> = ({
         <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-inner">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              {result?.dimensions_verified ? (
+              {displayResult?.dimensions_verified ? (
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
               ) : (
                 <ShieldAlert className="h-4 w-4 text-slate-500" />
@@ -145,20 +160,29 @@ export const ValidationStatusBar: React.FC<ValidationStatusBarProps> = ({
             </span>
             <span
               className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
-                result?.dimensions_verified
+                displayResult?.dimensions_verified
                   ? "bg-emerald-950/80 text-emerald-300 border-emerald-800/80"
                   : "bg-slate-800 text-slate-400 border-slate-700"
               }`}
             >
-              {result?.dimensions_verified ? "VERIFIED" : "UNVERIFIED"}
+              {displayResult?.dimensions_verified
+                ? "API REPORTED VERIFIED"
+                : "UNVERIFIED"}
             </span>
           </div>
           <p className="text-xs text-slate-400">
-            {result?.message || "Submit formula to verify physical unit consistency."}
+            {isPreflight
+              ? "Limited local checks only; no backend validation result is available."
+              : displayResult?.message || "Submit formula to request backend validation."}
           </p>
-          {result?.diagnostic_code && (
+          {displayResult?.job_id && (
+            <p className="mt-1 text-xs text-slate-500">
+              Result returned by the validation API. Compute environment and worker provenance are not provided in this response.
+            </p>
+          )}
+          {displayResult?.diagnostic_code && (
             <div className="mt-2 text-[11px] font-mono text-slate-300">
-              Code: <span className="font-semibold text-cyan-400">{result.diagnostic_code}</span>
+              Code: <span className="font-semibold text-cyan-400">{displayResult.diagnostic_code}</span>
             </div>
           )}
         </div>
@@ -169,16 +193,16 @@ export const ValidationStatusBar: React.FC<ValidationStatusBarProps> = ({
             <span className="text-xs font-semibold text-slate-300">
               Symbolic Simplification (SymPy CAS)
             </span>
-            {result?.job_id && (
+            {displayResult?.job_id && (
               <span className="text-[10px] font-mono text-slate-500">
-                Job: {result.job_id.slice(0, 8)}
+                Job: {displayResult.job_id.slice(0, 8)}
               </span>
             )}
           </div>
           <div className="min-h-[36px] flex items-center">
-            {result?.symbolic_simplification ? (
+            {displayResult?.symbolic_simplification ? (
               <div className="font-mono text-xs bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-700/80 text-emerald-400">
-                <KatexFormula math={result.symbolic_simplification} />
+                <KatexFormula math={displayResult.symbolic_simplification} />
               </div>
             ) : (
               <span className="text-xs italic text-slate-500">
@@ -190,23 +214,23 @@ export const ValidationStatusBar: React.FC<ValidationStatusBarProps> = ({
       </div>
 
       {/* Diagnostics List (if any) */}
-      {result?.diagnostics && result.diagnostics.length > 0 && (
+      {displayResult?.diagnostics && displayResult.diagnostics.length > 0 && (
         <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950/80 p-3.5 text-xs">
           <span className="font-semibold text-slate-300 block mb-1.5">
-            Sandbox Diagnostics:
+              Validation diagnostics:
           </span>
           <ul className="list-disc list-inside space-y-1 text-slate-400 font-mono text-[11px]">
-            {result.diagnostics.map((diag, idx) => (
+            {displayResult.diagnostics.map((diag, idx) => (
               <li key={idx}>{diag}</li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* 6-Layer Reality Constraint Pipeline Matrix */}
-      {result?.layer_findings && (
+      {/* Backend layer findings are rendered exactly as returned. */}
+      {displayResult?.layer_findings && (
         <div className="mt-4">
-          <LayerPipelineMatrix layers={result.layer_findings} />
+          <LayerPipelineMatrix layers={displayResult.layer_findings} />
         </div>
       )}
     </div>

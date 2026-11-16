@@ -1,0 +1,8 @@
+{
+  "official_memurai": "3 publicly linked MSI URLs returned HTTP403; no installer ran",
+  "url": "https://github.com/redis-windows/redis-windows/releases/download/8.10.3/Redis-8.10.3-Windows-x64-cygwin.zip",
+  "sha256": "8000848c48668c8cd32f21386ce951d0e02c1aefae39443ab9d3de11ff8ebf9e",
+  "bytes": 14802029,
+  "provenance": "Community Windows Cygwin build of Redis, not an official Redis binary",
+  "scope": "Temporary local synthetic verification only; no service/global install"
+}

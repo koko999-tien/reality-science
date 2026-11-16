@@ -1,0 +1,81 @@
+## main...origin/main
+ M .env.example
+ M .reality/DECISIONS.md
+ M .reality/EXECUTION_LOG.md
+ M .reality/MILESTONES.md
+ M .reality/NEXT_ACTION.md
+ M .reality/STATE.md
+ M .reality/TEST_MATRIX.md
+ M backend/app/api/v1/router.py
+ M backend/app/core/config.py
+ M backend/app/core/security.py
+ M backend/app/db/migrations/versions/003_stage3_claims_and_epistemic_logic.py
+ M backend/app/main.py
+ M backend/app/modules/cluster_orchestrator/registry.py
+ M backend/app/modules/cluster_orchestrator/router.py
+ M backend/app/modules/evidence_lab/router.py
+ M backend/app/modules/evidence_lab/service.py
+ M backend/app/modules/iam_governance/router.py
+ M backend/app/modules/iam_governance/schemas.py
+ M backend/app/modules/reality_constraint_engine/router.py
+ M backend/app/modules/research_core/exporter.py
+ M backend/app/modules/research_core/models.py
+ M backend/app/modules/research_core/router.py
+ M backend/app/modules/research_core/schemas.py
+ M backend/app/modules/research_core/service.py
+ M backend/pyproject.toml
+ M backend/requirements.lock
+ M backend/tests/conftest.py
+ M backend/tests/integration/test_decision3_postgres_rls.py
+ M backend/tests/integration/test_export_api.py
+ M backend/tests/integration/test_stage3_epistemic_integration.py
+ M backend/tests/integration/test_stage4_final_e2e_integration.py
+ M backend/tests/unit/test_cluster_orchestration.py
+ M backend/tests/unit/test_evidence_lab.py
+ M backend/tests/unit/test_exporter.py
+ M backend/uv.lock
+ M docker-compose.prod.yml
+ M frontend/jest.setup.ts
+ M frontend/package-lock.json
+ M frontend/package.json
+ M frontend/src/app/(auth)/login/page.tsx
+ M frontend/src/app/(dashboard)/projects/[slug]/editor/page.tsx
+ M frontend/src/app/(dashboard)/projects/[slug]/page.tsx
+ M frontend/src/app/(dashboard)/projects/page.tsx
+ M frontend/src/app/globals.css
+ M frontend/src/app/layout.tsx
+ M frontend/src/app/page.tsx
+ M frontend/src/components/equations/LayerPipelineMatrix.tsx
+ M frontend/src/components/equations/ValidationStatusBar.tsx
+ M frontend/src/components/equations/canvas/ScientificPresetsBar.tsx
+ M frontend/src/components/equations/canvas/nodes/VariableNode.tsx
+ M frontend/src/components/home/FeaturePillars.tsx
+ M frontend/src/components/home/ScientificPresetDemo.tsx
+ M frontend/src/components/home/WorkflowTour.tsx
+ M frontend/src/components/layout/Navbar.tsx
+ M frontend/src/components/layout/Sidebar.tsx
+ M frontend/src/lib/api.ts
+ M frontend/src/lib/ast_graph_converter.ts
+ M frontend/tests/CustomNodes.test.tsx
+ M frontend/tests/LayerPipelineMatrix.test.tsx
+ M frontend/tests/ScientificPresetDemo.test.tsx
+ M frontend/tests/ValidationStatusBar.test.tsx
+ M frontend/tests/ast_graph_converter.test.ts
+ M frontend/tests/e2e_modernization.test.tsx
+ M worker/pyproject.toml
+ M worker/requirements.lock
+ M worker/worker/core/semantic_validator.py
+?? .reality/evidence/
+?? backend/app/modules/iam_governance/dependencies.py
+?? backend/scripts/
+?? backend/tests/postgres_target.py
+?? backend/tests/unit/test_postgres_target_guard.py
+?? backend/tests/unit/test_research_project_auth.py
+?? frontend/src/components/home/ResearchProjectLookup.tsx
+?? frontend/src/components/home/ScientificModelExample.tsx
+?? frontend/src/hooks/
+?? frontend/tests/api_auth.test.ts
+?? frontend/tests/api_offline.test.ts
+?? frontend/tests/editor_validation_integrity.test.tsx
+?? frontend/tests/equation_canvas_state.test.tsx
+?? frontend/tests/research_workspace_components.test.tsx

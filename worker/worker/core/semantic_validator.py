@@ -60,6 +60,9 @@ def extract_referenced_symbols(node: ExprNode, symbols: Optional[Set[str]] = Non
     return symbols
 
 
+Tuple_Validation = tuple[bool, str, str]
+
+
 def validate_variable_declarations(
     variables: List[VariableSpec],
 ) -> Tuple_Validation:
@@ -88,9 +91,6 @@ def validate_variable_declarations(
         seen_symbols[var.symbol] = var
 
     return True, "", ""
-
-
-Tuple_Validation = tuple[bool, str, str]
 
 
 def validate_ast_semantics(

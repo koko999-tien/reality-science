@@ -1,0 +1,13 @@
+{
+  "instance_id": "74caee9603bb4ea986e62cb223864982",
+  "database": "rs_test_74caee9603bb4ea986e62cb223864982",
+  "port": 60655,
+  "data": "C:\\Users\\TIEN PC\\AppData\\Local\\Temp\\opencode\\reality-postgres-83c0e945\\data",
+  "bin": "C:\\Users\\TIEN PC\\AppData\\Local\\Temp\\opencode\\reality-postgres-83c0e945\\pgsql\\bin",
+  "stopped": true,
+  "system_id": "7708747722773675460",
+  "version": "17.12",
+  "previous_postmaster_pid": 11164,
+  "lifecycle_state": "stopped",
+  "postmaster_pid": 38736
+}

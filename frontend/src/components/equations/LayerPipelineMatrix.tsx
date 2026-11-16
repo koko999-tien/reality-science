@@ -44,7 +44,7 @@ const LAYER_METADATA: Record<
   },
   3: {
     title: "Layer 3: Dimensional Analysis",
-    description: "Strict physical dimension homogeneity across 100+ SI/derived units via Pint.",
+    description: "Dimensional findings for declared variables and units, when returned by the backend.",
     icon: Ruler,
   },
   4: {
@@ -58,9 +58,9 @@ const LAYER_METADATA: Record<
     icon: LineChart,
   },
   6: {
-    title: "Layer 6: Epistemic Logic",
-    description: "Cross-claim acyclicity (Tarjan SCC), contradiction detection, antecedent propagation.",
-    icon: GitBranch,
+    title: "Layer 6: Definition Pending",
+    description: "The project documentation has conflicting definitions for this layer.",
+    icon: Layers,
   },
 };
 
@@ -131,11 +131,11 @@ export const LayerPipelineMatrix: React.FC<LayerPipelineMatrixProps> = ({
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
           <h3 className="font-semibold text-sm text-slate-900 dark:text-slate-100">
-            Reality Constraint Engine — 6-Layer Validation Matrix
+            Validation Findings by Layer
           </h3>
         </div>
         <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-          Layers 1–6 End-to-End
+          Layer definitions follow project requirements
         </span>
       </div>
 

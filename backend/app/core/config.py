@@ -22,9 +22,11 @@ class Settings(BaseSettings):
     celery_result_backend_url: str = "redis://:redis_secret_pw@localhost:6379/1"
 
     # Security & Tokens
-    jwt_secret_key: str = "dev_jwt_secret_change_in_production_min_32_bytes_long"
+    jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+    cluster_join_token: str | None = None
+    cluster_admin_token: str | None = None
 
     # CORS
     backend_cors_origins: List[str] = ["http://localhost:3000"]

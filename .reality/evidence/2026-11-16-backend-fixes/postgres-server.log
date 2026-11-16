@@ -1,0 +1,115 @@
+2026-11-16 19:38:27.640 +07 [40820] LOG:  starting PostgreSQL 17.12 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-11-16 19:38:27.642 +07 [40820] LOG:  listening on IPv4 address "127.0.0.1", port 60655
+2026-11-16 19:38:27.753 +07 [36760] LOG:  database system was shut down at 2026-11-16 19:38:20 +07
+2026-11-16 19:38:27.812 +07 [40820] LOG:  database system is ready to accept connections
+2026-11-16 19:40:51.707 +07 [11164] LOG:  starting PostgreSQL 17.12 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-11-16 19:40:51.709 +07 [11164] LOG:  listening on IPv4 address "127.0.0.1", port 60655
+2026-11-16 19:40:51.837 +07 [39744] LOG:  database system was interrupted; last known up at 2026-11-16 19:38:27 +07
+2026-11-16 19:40:51.952 +07 [39744] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-16 19:40:51.955 +07 [39744] LOG:  redo starts at 0/1586310
+2026-11-16 19:40:51.970 +07 [39744] LOG:  invalid record length at 0/1586380: expected at least 24, got 0
+2026-11-16 19:40:51.970 +07 [39744] LOG:  redo done at 0/1586348 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.01 s
+2026-11-16 19:40:51.975 +07 [34224] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-16 19:40:51.999 +07 [34224] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.003 s, total=0.027 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/1586380, redo lsn=0/1586380
+2026-11-16 19:40:52.044 +07 [11164] LOG:  database system is ready to accept connections
+2026-11-16 19:42:28.695 +07 [37040] ERROR:  value too long for type character varying(32)
+2026-11-16 19:45:52.009 +07 [34224] LOG:  checkpoint starting: time
+2026-11-16 19:47:48.064 +07 [34224] LOG:  checkpoint complete: wrote 1049 buffers (6.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=115.935 s, sync=0.105 s, total=116.055 s; sync files=409, longest=0.003 s, average=0.001 s; distance=5296 kB, estimate=5296 kB; lsn=0/1AB2758, redo lsn=0/1AB26C8
+2026-11-16 19:49:17.157 +07 [36448] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 19:49:23.836 +07 [17452] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-11-16 19:49:29.596 +07 [27456] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-11-16 19:50:52.128 +07 [34224] LOG:  checkpoint starting: time
+2026-11-16 19:51:03.611 +07 [34224] LOG:  checkpoint complete: wrote 107 buffers (0.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=11.465 s, sync=0.011 s, total=11.483 s; sync files=55, longest=0.002 s, average=0.001 s; distance=389 kB, estimate=4806 kB; lsn=0/1B13E48, redo lsn=0/1B13DB8
+2026-11-16 20:00:52.628 +07 [34224] LOG:  checkpoint starting: time
+2026-11-16 20:00:56.563 +07 [34224] LOG:  checkpoint complete: wrote 37 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=3.915 s, sync=0.010 s, total=3.935 s; sync files=33, longest=0.002 s, average=0.001 s; distance=174 kB, estimate=4342 kB; lsn=0/1B3F870, redo lsn=0/1B3F818
+2026-11-16 20:52:04.345 +07 [32100] LOG:  starting PostgreSQL 17.12 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-11-16 20:52:04.347 +07 [32100] LOG:  listening on IPv4 address "127.0.0.1", port 60655
+2026-11-16 20:52:04.420 +07 [21944] LOG:  database system was interrupted; last known up at 2026-11-16 20:00:56 +07
+2026-11-16 20:52:07.886 +07 [21944] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-16 20:52:07.897 +07 [21944] LOG:  redo starts at 0/1B3F818
+2026-11-16 20:52:07.897 +07 [21944] LOG:  invalid record length at 0/1B3F920: expected at least 24, got 0
+2026-11-16 20:52:07.898 +07 [21944] LOG:  redo done at 0/1B3F8E8 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-11-16 20:52:07.920 +07 [41024] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-16 20:52:07.969 +07 [41024] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.003 s, total=0.062 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/1B3F920, redo lsn=0/1B3F920
+2026-11-16 20:52:08.025 +07 [32100] LOG:  database system is ready to accept connections
+2026-11-16 20:52:08.545 +07 [32100] LOG:  received fast shutdown request
+2026-11-16 20:52:08.546 +07 [32100] LOG:  aborting any active transactions
+2026-11-16 20:52:08.555 +07 [32100] LOG:  background worker "logical replication launcher" (PID 13228) exited with exit code 1
+2026-11-16 20:52:08.555 +07 [41024] LOG:  shutting down
+2026-11-16 20:52:08.556 +07 [41024] LOG:  checkpoint starting: shutdown immediate
+2026-11-16 20:52:08.591 +07 [41024] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.012 s, sync=0.004 s, total=0.036 s; sync files=9, longest=0.001 s, average=0.001 s; distance=3 kB, estimate=3 kB; lsn=0/1B408D8, redo lsn=0/1B408D8
+2026-11-16 20:52:08.610 +07 [32100] LOG:  database system is shut down
+2026-11-16 21:21:43.052 +07 [32660] LOG:  starting PostgreSQL 17.12 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-11-16 21:21:43.053 +07 [32660] LOG:  listening on IPv4 address "127.0.0.1", port 60655
+2026-11-16 21:21:43.127 +07 [21676] LOG:  database system was shut down at 2026-11-16 20:52:08 +07
+2026-11-16 21:21:43.167 +07 [32660] LOG:  database system is ready to accept connections
+2026-11-16 21:21:58.307 +07 [5984] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 21:21:58.435 +07 [34912] ERROR:  new row violates row-level security policy for table "research_projects"
+2026-11-16 21:21:58.439 +07 [34912] ERROR:  new row violates row-level security policy for table "research_projects"
+2026-11-16 21:21:58.442 +07 [34912] ERROR:  new row violates row-level security policy for table "research_projects"
+2026-11-16 21:21:58.455 +07 [34912] ERROR:  new row violates row-level security policy for table "research_projects"
+2026-11-16 21:21:58.458 +07 [34912] ERROR:  new row violates row-level security policy for table "research_projects"
+2026-11-16 21:21:58.461 +07 [34912] ERROR:  new row violates row-level security policy for table "research_projects"
+2026-11-16 21:21:58.603 +07 [33548] ERROR:  new row violates row-level security policy for table "research_versions"
+2026-11-16 21:21:58.608 +07 [33548] ERROR:  new row violates row-level security policy for table "research_versions"
+2026-11-16 21:21:58.613 +07 [33548] ERROR:  new row violates row-level security policy for table "research_versions"
+2026-11-16 21:21:58.647 +07 [33548] ERROR:  new row violates row-level security policy for table "research_versions"
+2026-11-16 21:21:58.651 +07 [33548] ERROR:  new row violates row-level security policy for table "research_versions"
+2026-11-16 21:21:58.655 +07 [33548] ERROR:  new row violates row-level security policy for table "research_versions"
+2026-11-16 21:21:58.800 +07 [38928] ERROR:  new row violates row-level security policy for table "equations"
+2026-11-16 21:21:58.808 +07 [38928] ERROR:  new row violates row-level security policy for table "equations"
+2026-11-16 21:21:58.815 +07 [38928] ERROR:  new row violates row-level security policy for table "equations"
+2026-11-16 21:21:58.838 +07 [38928] ERROR:  new row violates row-level security policy for table "equations"
+2026-11-16 21:21:58.845 +07 [38928] ERROR:  new row violates row-level security policy for table "equations"
+2026-11-16 21:21:58.850 +07 [38928] ERROR:  new row violates row-level security policy for table "equations"
+2026-11-16 21:21:59.005 +07 [16356] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 21:21:59.014 +07 [16356] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 21:21:59.021 +07 [16356] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 21:21:59.045 +07 [16356] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 21:21:59.051 +07 [16356] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 21:21:59.058 +07 [16356] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 21:21:59.205 +07 [32796] ERROR:  new row violates row-level security policy for table "claims"
+2026-11-16 21:21:59.213 +07 [32796] ERROR:  new row violates row-level security policy for table "claims"
+2026-11-16 21:21:59.221 +07 [32796] ERROR:  new row violates row-level security policy for table "claims"
+2026-11-16 21:21:59.249 +07 [32796] ERROR:  new row violates row-level security policy for table "claims"
+2026-11-16 21:21:59.257 +07 [32796] ERROR:  new row violates row-level security policy for table "claims"
+2026-11-16 21:21:59.263 +07 [32796] ERROR:  new row violates row-level security policy for table "claims"
+2026-11-16 21:21:59.521 +07 [31540] ERROR:  new row violates row-level security policy for table "claim_relations"
+2026-11-16 21:21:59.528 +07 [31540] ERROR:  new row violates row-level security policy for table "claim_relations"
+2026-11-16 21:21:59.536 +07 [31540] ERROR:  new row violates row-level security policy for table "claim_relations"
+2026-11-16 21:21:59.560 +07 [31540] ERROR:  new row violates row-level security policy for table "claim_relations"
+2026-11-16 21:21:59.567 +07 [31540] ERROR:  new row violates row-level security policy for table "claim_relations"
+2026-11-16 21:21:59.575 +07 [31540] ERROR:  new row violates row-level security policy for table "claim_relations"
+2026-11-16 21:21:59.722 +07 [7384] ERROR:  new row violates row-level security policy for table "validation_runs"
+2026-11-16 21:21:59.730 +07 [7384] ERROR:  new row violates row-level security policy for table "validation_runs"
+2026-11-16 21:21:59.737 +07 [7384] ERROR:  new row violates row-level security policy for table "validation_runs"
+2026-11-16 21:21:59.763 +07 [7384] ERROR:  new row violates row-level security policy for table "validation_runs"
+2026-11-16 21:21:59.771 +07 [7384] ERROR:  new row violates row-level security policy for table "validation_runs"
+2026-11-16 21:21:59.777 +07 [7384] ERROR:  new row violates row-level security policy for table "validation_runs"
+2026-11-16 21:21:59.941 +07 [41532] ERROR:  new row violates row-level security policy for table "validation_findings"
+2026-11-16 21:21:59.964 +07 [41532] ERROR:  new row violates row-level security policy for table "validation_findings"
+2026-11-16 21:21:59.981 +07 [41532] ERROR:  new row violates row-level security policy for table "validation_findings"
+2026-11-16 21:22:00.045 +07 [41532] ERROR:  new row violates row-level security policy for table "validation_findings"
+2026-11-16 21:22:00.064 +07 [41532] ERROR:  new row violates row-level security policy for table "validation_findings"
+2026-11-16 21:22:00.080 +07 [41532] ERROR:  new row violates row-level security policy for table "validation_findings"
+2026-11-16 21:22:00.232 +07 [29164] ERROR:  new row violates row-level security policy for table "research_versions"
+2026-11-16 21:22:00.371 +07 [5520] ERROR:  new row violates row-level security policy for table "equations"
+2026-11-16 21:22:00.531 +07 [11776] ERROR:  new row violates row-level security policy for table "variables"
+2026-11-16 21:22:00.688 +07 [22824] ERROR:  new row violates row-level security policy for table "claims"
+2026-11-16 21:22:00.943 +07 [12340] ERROR:  new row violates row-level security policy for table "claim_relations"
+2026-11-16 21:22:01.155 +07 [10664] ERROR:  new row violates row-level security policy for table "validation_runs"
+2026-11-16 21:22:01.343 +07 [6168] ERROR:  new row violates row-level security policy for table "validation_findings"
+2026-11-16 21:22:01.705 +07 [40364] ERROR:  duplicate key value violates unique constraint "variables_pkey"
+2026-11-16 21:22:05.612 +07 [36816] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-11-16 21:22:11.617 +07 [13836] LOG:  could not receive data from client: An existing connection was forcibly closed by the remote host.
+	
+2026-11-16 21:22:12.988 +07 [32660] LOG:  received fast shutdown request
+2026-11-16 21:22:12.989 +07 [32660] LOG:  aborting any active transactions
+2026-11-16 21:22:12.997 +07 [32660] LOG:  background worker "logical replication launcher" (PID 19176) exited with exit code 1
+2026-11-16 21:22:12.998 +07 [29548] LOG:  shutting down
+2026-11-16 21:22:12.999 +07 [29548] LOG:  checkpoint starting: shutdown immediate
+2026-11-16 21:22:13.110 +07 [29548] LOG:  checkpoint complete: wrote 211 buffers (1.3%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.053 s, sync=0.018 s, total=0.113 s; sync files=56, longest=0.002 s, average=0.001 s; distance=1422 kB, estimate=1422 kB; lsn=0/1CA4460, redo lsn=0/1CA4460
+2026-11-16 21:22:13.147 +07 [32660] LOG:  database system is shut down

@@ -26,6 +26,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.security import jwt_signing_is_configured
 from app.modules.research_core.models import (
     Claim,
     ClaimRelation,
@@ -37,6 +38,10 @@ from app.modules.research_core.models import (
     ValidationRun,
     Variable,
 )
+
+
+class BundleSigningUnavailableError(RuntimeError):
+    pass
 
 
 VERIFY_BUNDLE_SCRIPT_TEMPLATE = '''#!/usr/bin/env python3
@@ -466,11 +471,7 @@ async def generate_research_zip_bundle(
     if not version:
         raise ValueError(f"Version not found: {version_id}")
 
-    # 2. Strict freeze check
-    if not version.is_frozen:
-        raise ValueError("CANNOT_EXPORT_UNFROZEN_DRAFT: Research version must be frozen before export.")
-
-    # 3. Fetch project
+    # 2. Fetch project before checking exportability so private metadata stays hidden.
     stmt_p = select(ResearchProject).where(ResearchProject.id == version.project_id)
     res_p = await db.execute(stmt_p)
     project = res_p.scalar_one_or_none()
@@ -482,6 +483,15 @@ async def generate_research_zip_bundle(
         not current_actor_id or current_actor_id != project.owner_actor_id
     ):
         raise PermissionError("ACCESS_DENIED: Private drafts can only be exported by the owner.")
+
+    # 3. Strict freeze check after authorization.
+    if not version.is_frozen:
+        raise ValueError("CANNOT_EXPORT_UNFROZEN_DRAFT: Research version must be frozen before export.")
+
+    if not jwt_signing_is_configured():
+        raise BundleSigningUnavailableError(
+            "Research bundle signing requires valid JWT signing configuration"
+        )
 
     # 5. Fetch actor (owner)
     stmt_a = select(ResearchActor).where(ResearchActor.id == project.owner_actor_id)

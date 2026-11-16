@@ -24,10 +24,74 @@ export class TranslationError extends Error {
 const MAX_AST_DEPTH = 15;
 const MAX_AST_NODES = 100;
 
+export function assertCanonicalAst(value: unknown): asserts value is ExprNode {
+  let nodeCount = 0;
+
+  function visit(node: unknown, depth: number): asserts node is ExprNode {
+    if (!node || typeof node !== "object" || Array.isArray(node)) {
+      throw new TranslationError("Stored equation contains an invalid AST node.");
+    }
+    if (depth > MAX_AST_DEPTH) {
+      throw new TranslationError(`AST recursion depth exceeded guardrail limit (max ${MAX_AST_DEPTH}).`);
+    }
+    nodeCount += 1;
+    if (nodeCount > MAX_AST_NODES) {
+      throw new TranslationError(`AST node count exceeded guardrail limit (max ${MAX_AST_NODES}).`);
+    }
+
+    const candidate = node as Record<string, unknown>;
+    switch (candidate.node_type) {
+      case "constant": {
+        const numericValue = typeof candidate.value === "number"
+          ? candidate.value
+          : typeof candidate.value === "string" && candidate.value.trim() !== ""
+            ? Number(candidate.value)
+            : Number.NaN;
+        if (!Number.isFinite(numericValue)) {
+          throw new TranslationError("Stored equation contains an invalid constant.");
+        }
+        return;
+      }
+      case "variable":
+        if (typeof candidate.value !== "string" || !candidate.value.trim()) {
+          throw new TranslationError("Stored equation contains a variable without a symbol.");
+        }
+        return;
+      case "unary_op":
+        if (candidate.op !== "neg") {
+          throw new TranslationError("Stored equation contains an unsupported unary operator.");
+        }
+        visit(candidate.left, depth + 1);
+        return;
+      case "binary_op":
+        if (!["+", "-", "*", "/", "**"].includes(String(candidate.op))) {
+          throw new TranslationError("Stored equation contains an unsupported binary operator.");
+        }
+        visit(candidate.left, depth + 1);
+        visit(candidate.right, depth + 1);
+        return;
+      case "function_call":
+        if (!["sqrt", "sin", "cos", "exp", "log"].includes(String(candidate.func))) {
+          throw new TranslationError("Stored equation contains an unsupported function.");
+        }
+        if (!Array.isArray(candidate.args) || candidate.args.length !== 1) {
+          throw new TranslationError("Stored equation contains an invalid function argument list.");
+        }
+        visit(candidate.args[0], depth + 1);
+        return;
+      default:
+        throw new TranslationError("Stored equation contains an unknown AST node type.");
+    }
+  }
+
+  visit(value, 1);
+}
+
 /**
  * Traverses a canvas DAG and converts it into a canonical ExprNode JSON tree.
  * Enforces cycle detection, depth limits (<= 15), total node limits (<= 100),
- * variable symbol declaration checks, and complete port connections.
+ * variable declarations and every node/edge in the single-expression canvas.
+ * Shared operands are expanded into the AST tree and count toward its limits.
  */
 export function graphToAst(
   nodes: MathCanvasNode[],
@@ -39,14 +103,62 @@ export function graphToAst(
   }
 
   const declaredSymbols = new Set(declaredVariables.map((v) => v.symbol));
+  const nodeMap = new Map<string, MathCanvasNode>();
+  const incomingEdges = new Map<string, Map<string, MathCanvasEdge>>();
+  const ports: Record<string, string[]> = {
+    constantNode: [], variableNode: [], binaryOpNode: ["left", "right"],
+    unaryOpNode: ["left"], functionCallNode: ["arg0"], equationRootNode: ["input"],
+  };
+  for (const node of nodes) {
+    if (nodeMap.has(node.id)) throw new TranslationError(`Duplicate node ID '${node.id}'.`, node.id);
+    if (!node.type || !Object.hasOwn(ports, node.type)) {
+      throw new TranslationError(`Unknown node type: ${node.type ?? "unknown"}`, node.id);
+    }
+    nodeMap.set(node.id, node);
+    incomingEdges.set(node.id, new Map());
+  }
 
-  // 1. Identify Root node:
-  // An EquationRootNode takes priority. If absent, identify a sink node with no outgoing edges.
+  const edgeIds = new Set<string>();
+  for (const edge of edges) {
+    if (edgeIds.has(edge.id)) throw new TranslationError(`Duplicate edge ID '${edge.id}'.`, edge.target);
+    edgeIds.add(edge.id);
+    const source = nodeMap.get(edge.source);
+    const target = nodeMap.get(edge.target);
+    if (!source || !target) {
+      const missingId = !source ? edge.source : edge.target;
+      throw new TranslationError(`Edge '${edge.id}' references missing node '${missingId}'.`, missingId);
+    }
+    if (source.type === "equationRootNode") {
+      throw new TranslationError(`Equation root '${source.id}' has no output port.`, source.id);
+    }
+    if (edge.sourceHandle != null && edge.sourceHandle !== "output") {
+      throw new TranslationError(`Invalid source port '${edge.sourceHandle}' on node '${source.id}'.`, source.id);
+    }
+    const allowed = ports[target.type!];
+    if (allowed.length === 0) {
+      throw new TranslationError(`Node '${target.id}' has no input port.`, target.id);
+    }
+    // Older graphs may omit the sole handle; a binary input is never inferred.
+    const port = edge.targetHandle ?? (allowed.length === 1 ? allowed[0] : "");
+    if (!allowed.includes(port)) {
+      throw new TranslationError(`Invalid target port '${edge.targetHandle ?? "unspecified"}' on node '${target.id}'.`, target.id);
+    }
+    const inputs = incomingEdges.get(target.id)!;
+    if (inputs.has(port)) {
+      throw new TranslationError(`Multiple edges connect to input '${port}' on node '${target.id}'. Keep one operand per input.`, target.id);
+    }
+    inputs.set(port, edge);
+  }
+
+  // An explicit root is optional, but every canvas must have exactly one sink.
   const outgoingSourceIds = new Set(edges.map((e) => e.source));
   const equationRootNodes = nodes.filter((n) => n.type === "equationRootNode");
 
   let rootNode: MathCanvasNode;
-  if (equationRootNodes.length > 0) {
+  if (equationRootNodes.length > 1) {
+    throw new TranslationError("Multiple equation roots found. This canvas supports one expression; remove extra roots.", equationRootNodes[1].id);
+  }
+  if (equationRootNodes.length === 1) {
     rootNode = equationRootNodes[0];
   } else {
     const candidateRoots = nodes.filter((n) => !outgoingSourceIds.has(n.id));
@@ -55,7 +167,24 @@ export function graphToAst(
         "Cyclic graph detected. Mathematical AST must be a directed acyclic tree."
       );
     }
+    if (candidateRoots.length > 1) {
+      throw new TranslationError("Multiple expression roots found. Connect all nodes into one expression.", candidateRoots[1].id);
+    }
     rootNode = candidateRoots[0];
+  }
+
+  // An isolated cycle has no sink, so root counting alone cannot detect it.
+  const reachable = new Set<string>();
+  const pending = [rootNode.id];
+  while (pending.length) {
+    const id = pending.pop()!;
+    if (reachable.has(id)) continue;
+    reachable.add(id);
+    for (const edge of incomingEdges.get(id)!.values()) pending.push(edge.source);
+  }
+  const disconnected = nodes.find((node) => !reachable.has(node.id));
+  if (disconnected) {
+    throw new TranslationError(`Disconnected node '${disconnected.id}' is outside the expression. Connect or remove it before validation.`, disconnected.id);
   }
 
   const visitedOnPath = new Set<string>();
@@ -76,7 +205,9 @@ export function graphToAst(
       );
     }
 
-    totalTraversedNodes += 1;
+    const node = nodeMap.get(nodeId)!;
+    // The visual result node is not a canonical AST node.
+    if (node.type !== "equationRootNode") totalTraversedNodes += 1;
     if (totalTraversedNodes > MAX_AST_NODES) {
       throw new TranslationError(
         `AST node count exceeded guardrail limit (max ${MAX_AST_NODES}).`,
@@ -86,16 +217,10 @@ export function graphToAst(
 
     visitedOnPath.add(nodeId);
 
-    const node = nodes.find((n) => n.id === nodeId);
-    if (!node) {
-      visitedOnPath.delete(nodeId);
-      throw new TranslationError(`Node '${nodeId}' not found on canvas.`, nodeId);
-    }
-
     try {
       // Equation Root Node (sink node)
       if (node.type === "equationRootNode") {
-        const incoming = edges.find((e) => e.target === nodeId);
+        const incoming = incomingEdges.get(nodeId)!.get("input");
         if (!incoming) {
           throw new TranslationError(
             "Root node is not connected to an expression.",
@@ -108,7 +233,7 @@ export function graphToAst(
       // Constant Node (leaf)
       if (node.type === "constantNode") {
         const raw = node.data?.value;
-        if (raw === undefined || raw === null || raw === "") {
+        if (raw === undefined || raw === null || (typeof raw === "string" && raw.trim() === "")) {
           throw new TranslationError("Constant node is missing a value.", nodeId);
         }
         const num = Number(raw);
@@ -147,13 +272,8 @@ export function graphToAst(
 
       // Unary Operator Node
       if (node.type === "unaryOpNode") {
-        const incoming = edges.find(
-          (e) =>
-            e.target === nodeId &&
-            (e.targetHandle === "left" ||
-              e.targetHandle === "arg0" ||
-              !e.targetHandle)
-        );
+        if (node.data.op !== "neg") throw new TranslationError("Unsupported unary operator.", nodeId);
+        const incoming = incomingEdges.get(nodeId)!.get("left");
         if (!incoming) {
           throw new TranslationError(
             "Unary operator node is missing operand.",
@@ -169,13 +289,10 @@ export function graphToAst(
 
       // Binary Operator Node
       if (node.type === "binaryOpNode") {
-        const op = (node.data?.op ?? "+") as OperatorType;
-        const leftEdge = edges.find(
-          (e) => e.target === nodeId && e.targetHandle === "left"
-        );
-        const rightEdge = edges.find(
-          (e) => e.target === nodeId && e.targetHandle === "right"
-        );
+        const op = node.data.op as OperatorType;
+        if (!["+", "-", "*", "/", "**"].includes(op)) throw new TranslationError("Unsupported binary operator.", nodeId);
+        const leftEdge = incomingEdges.get(nodeId)!.get("left");
+        const rightEdge = incomingEdges.get(nodeId)!.get("right");
 
         if (!leftEdge) {
           throw new TranslationError(
@@ -200,14 +317,9 @@ export function graphToAst(
 
       // Function Call Node
       if (node.type === "functionCallNode") {
-        const func = (node.data?.func ?? "sqrt") as AllowedFunction;
-        const argEdge = edges.find(
-          (e) =>
-            e.target === nodeId &&
-            (e.targetHandle === "arg0" ||
-              e.targetHandle === "left" ||
-              !e.targetHandle)
-        );
+        const func = node.data.func as AllowedFunction;
+        if (!["sqrt", "sin", "cos", "exp", "log"].includes(func)) throw new TranslationError("Unsupported function.", nodeId);
+        const argEdge = incomingEdges.get(nodeId)!.get("arg0");
 
         if (!argEdge) {
           throw new TranslationError(

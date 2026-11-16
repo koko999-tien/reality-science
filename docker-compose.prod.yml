@@ -63,6 +63,8 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - CLUSTER_JOIN_TOKEN=${CLUSTER_JOIN_TOKEN}
+      - CLUSTER_ADMIN_TOKEN=${CLUSTER_ADMIN_TOKEN}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-["https://reality-science.org"]}
     depends_on:
       postgres:

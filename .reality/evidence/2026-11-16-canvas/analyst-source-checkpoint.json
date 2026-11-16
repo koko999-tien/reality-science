@@ -1,0 +1,62 @@
+﻿[
+    {
+        "Path":  "frontend/src/hooks/useEquationCanvas.ts",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "02528EF6B13A80DBA9BB1E910E7EB90F6C52E82137CE7781D53334457D5E7814"
+    },
+    {
+        "Path":  "frontend/src/lib/ast_graph_converter.ts",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "A3D64433C0D96EE64E1CFFAABFAA1EBB27544D490CA60079F6296B8DC1E0BF0A"
+    },
+    {
+        "Path":  "frontend/src/components/equations/canvas/nodes/VariableNode.tsx",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "0E8803B4BA8B9C402F36B0CE99DA49E8835E6FED1DDF4B8113850EFFCC0A10C8"
+    },
+    {
+        "Path":  "frontend/src/app/(dashboard)/projects/[slug]/editor/page.tsx",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "0805ABA95E07721631815BEA57F366C7D9A583B4D126E6ADDE4A3F0D213F9B5A"
+    },
+    {
+        "Path":  "frontend/src/components/layout/Navbar.tsx",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "F89E22A041AD304FFA4B3574EA041CD57D4A9533E3C960DDD45CDD501D92D715"
+    },
+    {
+        "Path":  "frontend/src/app/(auth)/login/page.tsx",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "154C248D69D54987D74E818394AA1633AD245819F4D0A7AE38287BEE4B7AF4EE"
+    },
+    {
+        "Path":  "frontend/tests/equation_canvas_state.test.tsx",
+        "MatchesPreviousCheckpoint":  false,
+        "CurrentSHA256":  "BCB6DB4D270441095BE578CE7DDD9B563D87745E571D0E9CC8E0C4933194D2BD"
+    },
+    {
+        "Path":  "frontend/tests/editor_validation_integrity.test.tsx",
+        "MatchesPreviousCheckpoint":  false,
+        "CurrentSHA256":  "98FDAFE55131CC0263ABDBE76EC74886E59C9B498CC3E2400F61874FFD9B52A3"
+    },
+    {
+        "Path":  "frontend/tests/CustomNodes.test.tsx",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "F38AC46B4C461B180350D67C9E6C772825CE41C432DA81637BFAE9441E8A4EFC"
+    },
+    {
+        "Path":  "frontend/tests/ast_graph_converter.test.ts",
+        "MatchesPreviousCheckpoint":  false,
+        "CurrentSHA256":  "EE42C978EF4643692C738A952420834E2FA4FCDC623B165AF5FD0EDA6B298982"
+    },
+    {
+        "Path":  "frontend/package.json",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "150975807EAB6F1CB6C17381657FFE818C666A753DC9CA8E343B1467A0C30D6F"
+    },
+    {
+        "Path":  "frontend/package-lock.json",
+        "MatchesPreviousCheckpoint":  true,
+        "CurrentSHA256":  "0197C59328829DDDBB45E1934E6E9A42470A3E446A6F5B66B567852069EE588C"
+    }
+]

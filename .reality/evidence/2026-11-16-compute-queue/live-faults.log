@@ -1,0 +1,26 @@
+D:\Reality_Science\backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts =============================
+platform win32 -- Python 3.11.18, pytest-9.2.0, pluggy-1.7.0 -- D:\Reality_Science\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Reality_Science\backend
+configfile: pyproject.toml
+plugins: anyio-4.16.0, platformdirs-4.14.5, asyncio-1.5.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 20 items / 9 deselected / 11 selected
+
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[bad-json] PASSED [  9%]
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[task] PASSED [ 18%]
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[job] PASSED [ 27%]
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[version] PASSED [ 36%]
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[target] PASSED [ 45%]
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[hash] PASSED [ 54%]
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[layers] PASSED [ 63%]
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[failure] PASSED [ 72%]
+tests/integration/test_compute_queue_live.py::test_fault_result_is_rejected_without_persistence[revoked] PASSED [ 81%]
+tests/integration/test_compute_queue_live.py::test_fault_late_result_cannot_attach_to_a_new_job PASSED [ 90%]
+tests/integration/test_compute_queue_live.py::test_fault_duplicate_dispatch_is_claimed_once PASSED [100%]
+
+====================== 11 passed, 9 deselected in 52.78s ======================

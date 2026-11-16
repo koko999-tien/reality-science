@@ -1,0 +1,7 @@
+Offline identity verified; old PID absent and port closed. Recovering task-owned cluster for clean shutdown.
+pg_ctl: another server might be running; trying to start server anyway
+waiting for server to start....... done
+server started
+waiting for server to shut down.... done
+server stopped
+Postmaster marker absent; port closed; cluster state shut down.

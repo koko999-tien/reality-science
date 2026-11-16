@@ -9,7 +9,7 @@ import {
   fetchVersionClaims,
   fetchVersionRuns,
   validateVersion,
-  getExportVersionZipUrl,
+  exportVersionZip,
 } from "@/lib/api";
 import {
   ResearchProjectModel,
@@ -21,9 +21,8 @@ import {
 } from "@/types/contracts";
 import { LayerPipelineMatrix } from "@/components/equations/LayerPipelineMatrix";
 import {
-  ShieldCheck,
-  ShieldAlert,
   Download,
+  FileCheck2,
   Play,
   Layers,
   Variable as VariableIcon,
@@ -33,7 +32,6 @@ import {
   Loader2,
   RefreshCw,
   ArrowLeft,
-  FileCheck2,
   Sparkles,
 } from "lucide-react";
 
@@ -52,6 +50,8 @@ export default function ProjectDetailsPage({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isValidating, setIsValidating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [dataErrors, setDataErrors] = useState<string[]>([]);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "equations" | "variables" | "claims" | "history">("overview");
 
   const activeVersion = project?.versions && project.versions.length > 0 ? project.versions[0] : null;
@@ -60,48 +60,36 @@ export default function ProjectDetailsPage({
   const loadData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setDataErrors([]);
+    setProject(null);
+    setEquations([]);
+    setVariables([]);
+    setClaims([]);
+    setRuns([]);
     try {
       const proj = await fetchProjectBySlug(slug);
       setProject(proj);
 
       const vId = proj.versions && proj.versions.length > 0 ? proj.versions[0].id : null;
       if (vId) {
-        const [eqs, vars, clms, valRuns] = await Promise.allSettled([
+        const results = await Promise.allSettled([
           fetchVersionEquations(vId),
           fetchVersionVariables(vId),
           fetchVersionClaims(vId),
           fetchVersionRuns(vId),
         ]);
-
+        const [eqs, vars, clms, valRuns] = results;
         if (eqs.status === "fulfilled") setEquations(eqs.value);
         if (vars.status === "fulfilled") setVariables(vars.value);
         if (clms.status === "fulfilled") setClaims(clms.value);
         if (valRuns.status === "fulfilled") setRuns(valRuns.value);
+        setDataErrors(results.flatMap((result, index) => result.status === "rejected"
+          ? [`${["Equations", "Variables", "Claims", "Validation history"][index]} could not be loaded.`]
+          : []));
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to load project details.";
       setError(msg);
-      // Fallback local mock state for offline development
-      setProject({
-        id: "proj-fallback",
-        slug,
-        title: slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-        description: "Scientific research project registered in Reality Science RCE repository.",
-        visibility: "public_preprint",
-        is_frozen: false,
-        created_at: new Date().toISOString(),
-        versions: [
-          {
-            id: `ver-${slug}-v1`,
-            project_id: "proj-fallback",
-            version_number: 1,
-            title: "Version 1.0 (Draft)",
-            publication_status: "draft",
-            is_frozen: false,
-            created_at: new Date().toISOString(),
-          },
-        ],
-      });
     } finally {
       setIsLoading(false);
     }
@@ -114,11 +102,12 @@ export default function ProjectDetailsPage({
   const handleRunValidation = async () => {
     if (!versionId) return;
     setIsValidating(true);
+    setActionError(null);
     try {
       const newRun = await validateVersion(versionId);
       setRuns((prev) => [newRun, ...prev]);
     } catch (err: any) {
-      alert(`Validation failed: ${err.message}`);
+      setActionError(`Validation was not completed: ${err.message}`);
     } finally {
       setIsValidating(false);
     }
@@ -145,6 +134,20 @@ export default function ProjectDetailsPage({
     }
   }
 
+  if (isLoading && !project) {
+    return <div role="status" className="container mx-auto max-w-7xl p-6 text-sm text-slate-600 dark:text-slate-300">Loading project records…</div>;
+  }
+
+  if (error && !project) {
+    return (
+      <div className="container mx-auto max-w-3xl space-y-4 p-6">
+        <h1 className="text-2xl font-semibold">Project data unavailable</h1>
+        <p role="alert" className="border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">{error}</p>
+        <button type="button" onClick={loadData} disabled={isLoading} className="min-h-11 border border-slate-400 px-4 font-semibold disabled:opacity-50">Retry</button>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-7xl space-y-6">
       {/* Navigation & Header */}
@@ -160,12 +163,14 @@ export default function ProjectDetailsPage({
           </div>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-              {project?.title || slug}
+              {project?.title || (isLoading ? "Loading project" : "Project unavailable")}
             </h1>
-            <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-              <Globe className="w-3 h-3" />
-              {project?.visibility || "private_draft"}
-            </span>
+            {project?.visibility && (
+              <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                <Globe className="w-3 h-3" />
+                {project.visibility}
+              </span>
+            )}
             {project?.is_frozen && (
               <span className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                 <Lock className="w-3 h-3" /> Frozen Immutable
@@ -173,7 +178,7 @@ export default function ProjectDetailsPage({
             )}
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            {project?.description || "Scientific hypothesis, mathematical formulations, and epistemic proof graph."}
+            {project?.description || "No project description provided."}
           </p>
         </div>
 
@@ -184,7 +189,7 @@ export default function ProjectDetailsPage({
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400"
           >
             <Sparkles className="w-3.5 h-3.5 text-sky-200" />
-            Open Symbolic Canvas Editor &rarr;
+            Open equation editor &rarr;
           </Link>
 
           <button
@@ -197,15 +202,27 @@ export default function ProjectDetailsPage({
           </button>
 
           {versionId && (
-            <a
-              href={getExportVersionZipUrl(versionId)}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={async () => {
+                setActionError(null);
+                try {
+                  const blob = await exportVersionZip(versionId);
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = `research_bundle_${versionId}.zip`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                } catch (err) {
+                  setActionError(err instanceof Error ? err.message : "Export failed.");
+                }
+              }}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition"
             >
               <Download className="w-3.5 h-3.5" />
               Export Bundle (.ZIP)
-            </a>
+            </button>
           )}
 
           <button
@@ -218,10 +235,32 @@ export default function ProjectDetailsPage({
             ) : (
               <Play className="w-3.5 h-3.5 fill-current" />
             )}
-            {isValidating ? "Validating 6 Layers..." : "Run Full 6-Layer Validation"}
+            {isValidating ? "Validating version..." : "Run version validation"}
           </button>
         </div>
       </div>
+
+      {error && (
+        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
+          <div><strong>Project data unavailable.</strong> {error}</div>
+          <button type="button" onClick={loadData} disabled={isLoading} className="min-h-10 border border-current px-3 font-semibold disabled:opacity-50">
+            {isLoading ? "Retrying…" : "Retry"}
+          </button>
+        </div>
+      )}
+      {dataErrors.length > 0 && (
+        <div role="status" className="border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+          Some project records are unavailable: {dataErrors.join(" ")}
+        </div>
+      )}
+      {actionError && <p role="alert" className="border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">{actionError}</p>}
+
+      {/* Status axes remain independent; unprovided fields are shown as unrecorded. */}
+      <section aria-label="Research status" className="grid gap-3 border-y border-slate-200 py-4 dark:border-slate-800 sm:grid-cols-3">
+        <div><div className="text-xs text-slate-500">Publication</div><strong className="text-sm">{activeVersion?.publication_status || "Not recorded"}</strong></div>
+        <div><div className="text-xs text-slate-500">Validation</div><strong className="text-sm">{latestRun?.overall_state || "Not tested"}</strong></div>
+        <div><div className="text-xs text-slate-500">Evidence maturity</div><strong className="text-sm">Not recorded by API</strong></div>
+      </section>
 
       {/* Summary Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -257,7 +296,7 @@ export default function ProjectDetailsPage({
 
         <div className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 flex items-center justify-between">
           <div>
-            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">RCE Engine State</div>
+            <div className="text-xs font-medium text-slate-500 dark:text-slate-400">Latest validation state</div>
             <div className="text-lg font-bold text-slate-900 dark:text-slate-100">
               {latestRun ? latestRun.overall_state : "NOT TESTED"}
             </div>
@@ -279,7 +318,7 @@ export default function ProjectDetailsPage({
                 : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
             }`}
           >
-            6-Layer RCE Matrix
+            Validation findings by layer
           </button>
           <button
             onClick={() => setActiveTab("equations")}
@@ -335,13 +374,13 @@ export default function ProjectDetailsPage({
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden divide-y divide-slate-200 dark:divide-slate-800">
           {equations.length === 0 ? (
             <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400 flex flex-col items-center justify-center gap-3">
-              <p>No equations registered yet. Use the Symbolic Canvas to add mathematical formulations.</p>
+              <p>No equations are recorded for this version. The editor opens a local draft; its changes are not saved to project records.</p>
               <Link
                 href={`/projects/${slug}/editor`}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all"
               >
                 <Sparkles className="w-3.5 h-3.5 text-sky-200" />
-                Open Symbolic Canvas Editor &rarr;
+                Open local equation editor &rarr;
               </Link>
             </div>
           ) : (
@@ -364,7 +403,7 @@ export default function ProjectDetailsPage({
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden">
           {variables.length === 0 ? (
             <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-              No variables declared. Add variable definitions in the Variable Declaration Panel.
+              No variables are recorded for this version. The editor can hold a local draft, but its changes are not saved to project records.
             </div>
           ) : (
             <table className="w-full text-left text-xs text-slate-600 dark:text-slate-400">
@@ -417,7 +456,7 @@ export default function ProjectDetailsPage({
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden divide-y divide-slate-200 dark:divide-slate-800">
           {runs.length === 0 ? (
             <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-              No validation runs recorded. Click &quot;Run Full 6-Layer Validation&quot; above to start a run.
+              No validation runs recorded. Run validation on this version to create a persisted history entry.
             </div>
           ) : (
             runs.map((r) => (

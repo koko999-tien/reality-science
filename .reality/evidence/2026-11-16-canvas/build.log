@@ -1,0 +1,35 @@
+
+> reality-science-frontend@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.29
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 16.8s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    9.61 kB         116 kB
+├ ○ /_not-found                            995 B         104 kB
+├ ○ /login                               3.29 kB         110 kB
+├ ○ /projects                            2.67 kB         106 kB
+├ ƒ /projects/[slug]                     6.25 kB         115 kB
+├ ƒ /projects/[slug]/editor               155 kB         261 kB
+└ ○ /register                              162 B         106 kB
++ First Load JS shared by all             103 kB
+  ├ chunks/255-73938ce8a8eac1ad.js       46.6 kB
+  ├ chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB
+  └ other shared chunks (total)          2.01 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

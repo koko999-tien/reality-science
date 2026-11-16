@@ -1,0 +1,218 @@
+D:\Reality_Science\backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE                                           [100%]
+=================================== ERRORS ====================================
+_____________ ERROR at setup of test_all_project_tables_force_rls _____________
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_owner_positive_outsider_negative_and_public_read[research_projects] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_owner_positive_outsider_negative_and_public_read[research_versions] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_owner_positive_outsider_negative_and_public_read[equations] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_owner_positive_outsider_negative_and_public_read[variables] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_owner_positive_outsider_negative_and_public_read[claims] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_owner_positive_outsider_negative_and_public_read[claim_relations] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_owner_positive_outsider_negative_and_public_read[validation_runs] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_owner_positive_outsider_negative_and_public_read[validation_findings] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[private_draft-research_projects] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[private_draft-research_versions] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[private_draft-equations] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[private_draft-variables] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[private_draft-claims] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[private_draft-claim_relations] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[private_draft-validation_runs] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[private_draft-validation_findings] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[public_preprint-research_projects] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[public_preprint-research_versions] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[public_preprint-equations] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[public_preprint-variables] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[public_preprint-claims] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[public_preprint-claim_relations] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[public_preprint-validation_runs] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_nonowner_cannot_delete_any_project_record[public_preprint-validation_findings] _
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_________ ERROR at setup of test_public_project_cannot_be_taken_over __________
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+__ ERROR at setup of test_nonowner_insert_rejected_and_owner_write_persists ___
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+_ ERROR at setup of test_actor_context_commit_rollback_and_reused_connection __
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+___ ERROR at setup of test_live_login_project_create_and_read_after_commit ____
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+________ ERROR at setup of test_live_version_writes_history_and_access ________
+tests\integration\test_decision3_postgres_rls.py:36: in pg
+    await verify_disposable_connection(connection, target)
+tests\postgres_target.py:71: in verify_disposable_connection
+    raise UnsafePostgresTarget("Connected instance identity or unprivileged role guard failed")
+E   tests.postgres_target.UnsafePostgresTarget: Connected instance identity or unprivileged role guard failed
+=========================== short test summary info ===========================
+ERROR tests/integration/test_decision3_postgres_rls.py::test_all_project_tables_force_rls
+ERROR tests/integration/test_decision3_postgres_rls.py::test_owner_positive_outsider_negative_and_public_read[research_projects]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_owner_positive_outsider_negative_and_public_read[research_versions]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_owner_positive_outsider_negative_and_public_read[equations]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_owner_positive_outsider_negative_and_public_read[variables]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_owner_positive_outsider_negative_and_public_read[claims]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_owner_positive_outsider_negative_and_public_read[claim_relations]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_owner_positive_outsider_negative_and_public_read[validation_runs]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_owner_positive_outsider_negative_and_public_read[validation_findings]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[private_draft-research_projects]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[private_draft-research_versions]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[private_draft-equations]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[private_draft-variables]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[private_draft-claims]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[private_draft-claim_relations]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[private_draft-validation_runs]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[private_draft-validation_findings]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-research_projects]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-research_versions]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-equations]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-variables]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-claims]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-claim_relations]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-validation_runs]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-validation_findings]
+ERROR tests/integration/test_decision3_postgres_rls.py::test_public_project_cannot_be_taken_over
+ERROR tests/integration/test_decision3_postgres_rls.py::test_nonowner_insert_rejected_and_owner_write_persists
+ERROR tests/integration/test_decision3_postgres_rls.py::test_actor_context_commit_rollback_and_reused_connection
+ERROR tests/integration/test_decision3_postgres_rls.py::test_live_login_project_create_and_read_after_commit
+ERROR tests/integration/test_decision3_postgres_rls.py::test_live_version_writes_history_and_access
+30 errors in 4.14s

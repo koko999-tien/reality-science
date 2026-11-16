@@ -1,0 +1,2 @@
+RuntimeError: FATAL SECURITY VIOLATION: Compute worker started with forbidden database credentials: ['DATABASE_URL', 'REALITY_TEST_DATABASE_URL']. Compute workers must run in Zone 3 with zero database access!
+Verified: DB-configured API environment is rejected before worker execution; no guard bypass

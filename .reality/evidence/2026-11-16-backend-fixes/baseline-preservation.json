@@ -1,0 +1,21 @@
+{
+  "baseline_snapshot_valid": true,
+  "baseline_unchanged": [
+    "backend/tests/postgres_target.py",
+    "backend/tests/unit/test_postgres_target_guard.py",
+    "backend/tests/integration/test_decision3_postgres_rls.py"
+  ],
+  "changed_from_baseline": [
+    "backend/scripts/disposable_postgres.py",
+    "backend/app/modules/research_core/service.py",
+    "backend/app/modules/reality_constraint_engine/router.py",
+    "backend/tests/integration/test_stage4_final_e2e_integration.py",
+    "backend/tests/unit/test_research_project_auth.py"
+  ],
+  "previous_owned_files_preserved": [
+    "backend/tests/postgres_target.py",
+    "backend/tests/unit/test_postgres_target_guard.py",
+    "backend/tests/integration/test_decision3_postgres_rls.py",
+    "backend/app/db/migrations/versions/003_stage3_claims_and_epistemic_logic.py"
+  ]
+}

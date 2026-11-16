@@ -29,7 +29,381 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* High-Tech Scientific Utilities (Preserving exact test assertions) */
+/* ===== REALITY SCIENCE Design Tokens ===== */
+.reality-home {
+  --ink: #ecf2ed;
+  --muted: #b3c0b8;
+  --line: #34463e;
+  --green: #a9c7ae;
+  --green-bright: #c1d8c4;
+  --yellow: #d7c477;
+  --yellow-dim: #b8a566;
+  --emerald: #10b981;
+  --emerald-dim: #059669;
+  --bg-deep: #07100f;
+  --bg-panel: #0b1512;
+  --bg-raised: #101d18;
+  --bg-input: #0d1915;
+  --focus: #d7c477;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+
+  background-color: var(--bg-deep);
+  color: var(--ink);
+  background-image:
+    linear-gradient(90deg, transparent 49.95%, rgba(169, 199, 174, 0.025) 50%, transparent 50.05%),
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(169, 199, 174, 0.03) 0%, transparent 70%);
+  background-size: 80px 100%, cover;
+}
+
+/* ===== Navigation ===== */
+.home-nav {
+  border-bottom: 1px solid var(--line);
+  background: rgba(7, 16, 15, 0.8);
+  backdrop-filter: blur(20px);
+}
+.home-nav .home-nav-link {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  transition: color var(--transition), background-color var(--transition);
+}
+.home-nav .home-nav-link:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.04);
+}
+.home-nav .home-nav-link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ===== Hero ===== */
+.home-hero-grid {
+  display: grid;
+  gap: 40px;
+}
+.home-intro { max-width: 720px; }
+.home-kicker {
+  margin: 0 0 12px;
+  color: var(--green);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.home-title {
+  margin: 0;
+  font-size: clamp(2.5rem, 6.5vw, 4.5rem);
+  font-weight: 650;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+.home-lede {
+  max-width: 580px;
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.home-primary,
+.home-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+}
+.home-primary {
+  border-color: var(--green);
+  background: var(--green);
+  color: #102018;
+}
+.home-primary:hover {
+  background: var(--green-bright);
+  border-color: var(--green-bright);
+}
+.home-primary:focus-visible,
+.home-secondary:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.home-secondary {
+  color: var(--ink);
+  background: var(--bg-input);
+}
+.home-secondary:hover {
+  border-color: var(--green);
+  background: #12221b;
+}
+.home-note {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* ===== Model View ===== */
+.home-model {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+}
+.model-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.model-badge {
+  color: var(--muted);
+  font: 600 0.62rem ui-monospace, SFMono-Regular, "Geist Mono", Menlo, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.model-context {
+  color: var(--yellow);
+  font: 600 0.62rem ui-monospace, SFMono-Regular, "Geist Mono", Menlo, monospace;
+}
+.model-grid {
+  display: grid;
+}
+.equation-panel,
+.plot-panel {
+  min-width: 0;
+  padding: 24px;
+}
+.equation-panel {
+  border-bottom: 1px solid var(--line);
+}
+.model-label {
+  margin: 0 0 8px;
+  color: var(--green);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.equation {
+  margin: 18px 0;
+  font: 500 clamp(1.6rem, 3.5vw, 2.4rem) Georgia, "Times New Roman", serif;
+  color: #f4f2df;
+  line-height: 1.3;
+}
+.term-list {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.term-list span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 8px;
+  border-right: 1px solid var(--line);
+}
+.term-list span:last-child { border-right: 0; }
+.term-list b {
+  color: var(--green);
+  font: 600 0.9rem ui-monospace, SFMono-Regular, "Geist Mono", Menlo, monospace;
+}
+.term-list small {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font: 0.65rem ui-monospace, SFMono-Regular, "Geist Mono", Menlo, monospace;
+}
+.dimension-proof {
+  margin: 12px 0 0;
+  color: var(--yellow);
+  font: 0.72rem ui-monospace, SFMono-Regular, "Geist Mono", Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+.plot-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.plot-heading strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.plot-unit {
+  color: var(--muted);
+  font: 0.7rem ui-monospace, SFMono-Regular, "Geist Mono", Menlo, monospace;
+}
+.model-plot {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  overflow: visible;
+}
+.model-plot text {
+  fill: var(--muted);
+  font: 10px ui-monospace, SFMono-Regular, "Geist Mono", Menlo, monospace;
+}
+.plot-caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+.evidence-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-raised);
+}
+.evidence-mark {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  border: 1px solid var(--green);
+  border-radius: 50%;
+  color: var(--green);
+  font: 600 0.7rem Georgia, serif;
+}
+.evidence-strip p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+.evidence-strip strong { color: var(--ink); }
+.evidence-sep { color: #74857a; }
+
+/* ===== Sections common ===== */
+.home-close {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.home-close-content { flex: 1; min-width: 280px; }
+.home-close h2 {
+  margin: 6px 0 0;
+  font-size: clamp(1.3rem, 2.8vw, 1.85rem);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.home-footer {
+  border-top: 1px solid var(--line);
+  background: #09120f;
+  color: var(--ink);
+  font-size: 0.8rem;
+}
+.footer-note { color: var(--muted); }
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+.footer-link:hover { color: var(--green); }
+.footer-link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ===== Responsive ===== */
+@media (min-width: 900px) {
+  .home-hero-grid {
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+    align-items: start;
+    gap: 56px;
+  }
+  .model-grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+  .equation-panel {
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+  .home-close { padding-right: 40px; }
+}
+
+@media (max-width: 380px) {
+  .model-header,
+  .evidence-strip { padding-right: 12px; padding-left: 12px; }
+  .equation-panel,
+  .plot-panel { padding: 18px 12px; }
+  .term-list span { padding-right: 4px; padding-left: 4px; }
+  .term-list small { font-size: 0.6rem; }
+  .home-actions { flex-direction: column; }
+  .home-primary,
+  .home-secondary { width: 100%; }
+}
+
+/* ===== Focus & Reduced Motion ===== */
+.reality-home a:focus-visible,
+.reality-home button:focus-visible,
+.reality-home [href]:focus-visible,
+.reality-home input:focus-visible,
+.reality-home select:focus-visible,
+.reality-home textarea:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reality-home *,
+  .reality-home *::before,
+  .reality-home *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ===== Utility: mono-spec for technical text ===== */
+.mono-spec {
+  font-family: ui-monospace, SFMono-Regular, "Geist Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-feature-settings: "tnum" on, "zero" on;
+}
+
+/* ===== Ensure the rest of the app uses sensible defaults ===== */
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+/* ===== Legacy utility classes (preserved for existing components) ===== */
 .glass-panel {
   @apply backdrop-blur-xl bg-slate-900/80 border border-white/10 shadow-2xl;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.07), 0 16px 36px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
@@ -67,7 +441,7 @@ body {
   animation: pulseFlow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Artisanal Laboratory Scientific Accents */
+/* ===== Legacy lab accents (preserved for existing components) ===== */
 .lab-border {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -81,9 +455,4 @@ body {
   background: #080c14;
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-}
-
-.mono-spec {
-  font-family: ui-monospace, SFMono-Regular, "Geist Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-  font-feature-settings: "tnum" on, "zero" on;
 }

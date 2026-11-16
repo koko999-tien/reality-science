@@ -8,6 +8,7 @@ detects stale nodes (> 30s threshold), and enforces zero-trust rogue node blocki
 from __future__ import annotations
 
 import datetime
+import hmac
 import threading
 import uuid
 from typing import Dict, Iterable, List, Optional
@@ -36,7 +37,7 @@ class ClusterNodeRegistry:
     def __init__(
         self,
         ca: Optional[ClusterCertificateAuthority] = None,
-        cluster_secret: str = "reality-cluster-dev-token-secret-2026",
+        cluster_secret: Optional[str] = None,
         controller_ip: str = "10.42.0.1",
         controller_endpoint: str = "127.0.0.1:8443",
         subnet: str = "10.42.0.0/24",
@@ -92,7 +93,7 @@ class ClusterNodeRegistry:
         """
         with self._lock:
             # 1. Validate join token
-            if request.join_token != self.cluster_secret:
+            if not self.cluster_secret or not hmac.compare_digest(request.join_token, self.cluster_secret):
                 raise PermissionError("Invalid cluster join token: access denied")
 
             # 2. Validate WireGuard public key

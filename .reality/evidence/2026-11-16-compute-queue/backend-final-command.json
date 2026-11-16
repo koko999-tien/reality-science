@@ -1,0 +1,12 @@
+{
+  "command": [
+    "D:\\Reality_Science\\backend\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "tests"
+  ],
+  "cwd": "D:\\Reality_Science\\backend",
+  "exit": 0
+}

@@ -1,0 +1,106 @@
+{
+  "claim_relations": {
+    "commands": [
+      "DELETE",
+      "INSERT",
+      "SELECT",
+      "UPDATE"
+    ],
+    "read_expression_identical": true,
+    "insert_owner_identical": true,
+    "update_old_owner": true,
+    "update_new_owner": true,
+    "delete_owner": true
+  },
+  "claims": {
+    "commands": [
+      "DELETE",
+      "INSERT",
+      "SELECT",
+      "UPDATE"
+    ],
+    "read_expression_identical": true,
+    "insert_owner_identical": true,
+    "update_old_owner": true,
+    "update_new_owner": true,
+    "delete_owner": true
+  },
+  "equations": {
+    "commands": [
+      "DELETE",
+      "INSERT",
+      "SELECT",
+      "UPDATE"
+    ],
+    "read_expression_identical": true,
+    "insert_owner_identical": true,
+    "update_old_owner": true,
+    "update_new_owner": true,
+    "delete_owner": true
+  },
+  "research_projects": {
+    "commands": [
+      "DELETE",
+      "INSERT",
+      "SELECT",
+      "UPDATE"
+    ],
+    "read_expression_identical": true,
+    "insert_owner_identical": true,
+    "update_old_owner": true,
+    "update_new_owner": true,
+    "delete_owner": true
+  },
+  "research_versions": {
+    "commands": [
+      "DELETE",
+      "INSERT",
+      "SELECT",
+      "UPDATE"
+    ],
+    "read_expression_identical": true,
+    "insert_owner_identical": true,
+    "update_old_owner": true,
+    "update_new_owner": true,
+    "delete_owner": true
+  },
+  "validation_findings": {
+    "commands": [
+      "DELETE",
+      "INSERT",
+      "SELECT",
+      "UPDATE"
+    ],
+    "read_expression_identical": true,
+    "insert_owner_identical": true,
+    "update_old_owner": true,
+    "update_new_owner": true,
+    "delete_owner": true
+  },
+  "validation_runs": {
+    "commands": [
+      "DELETE",
+      "INSERT",
+      "SELECT",
+      "UPDATE"
+    ],
+    "read_expression_identical": true,
+    "insert_owner_identical": true,
+    "update_old_owner": true,
+    "update_new_owner": true,
+    "delete_owner": true
+  },
+  "variables": {
+    "commands": [
+      "DELETE",
+      "INSERT",
+      "SELECT",
+      "UPDATE"
+    ],
+    "read_expression_identical": true,
+    "insert_owner_identical": true,
+    "update_old_owner": true,
+    "update_new_owner": true,
+    "delete_owner": true
+  }
+}

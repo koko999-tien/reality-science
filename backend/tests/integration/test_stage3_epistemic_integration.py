@@ -29,6 +29,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.db.session import get_db
+from app.modules.iam_governance.dependencies import get_accessible_version, get_owned_version
 from app.main import app
 from app.modules.reality_constraint_engine.models import (
     Claim,
@@ -152,6 +153,11 @@ async def test_claim_creation_and_listing(stage3_test_entities):
         yield db
 
     app.dependency_overrides[get_db] = override_get_db
+    async def _owned_version(version_id: str):
+        return e["version_draft"] if version_id == e["version_draft"].id else e["version_frozen"]
+
+    app.dependency_overrides[get_owned_version] = _owned_version
+    app.dependency_overrides[get_accessible_version] = _owned_version
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         # Create Axiom Claim
@@ -224,6 +230,11 @@ async def test_claim_mutation_rejected_on_frozen_version(stage3_test_entities):
         yield db
 
     app.dependency_overrides[get_db] = override_get_db
+    async def _owned_version(version_id: str):
+        return e["version_frozen"]
+
+    app.dependency_overrides[get_owned_version] = _owned_version
+    app.dependency_overrides[get_accessible_version] = _owned_version
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.post(
@@ -272,6 +283,11 @@ async def test_epistemic_verification_clean_dag(stage3_test_entities):
         yield db
 
     app.dependency_overrides[get_db] = override_get_db
+    async def _owned_version(version_id: str):
+        return e["version_draft"]
+
+    app.dependency_overrides[get_owned_version] = _owned_version
+    app.dependency_overrides[get_accessible_version] = _owned_version
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.post(f"/api/v1/versions/{e['version_draft'].id}/claims/verify-epistemic")
@@ -331,6 +347,11 @@ async def test_epistemic_verification_detects_circular_dependency(stage3_test_en
         yield db
 
     app.dependency_overrides[get_db] = override_get_db
+    async def _owned_version(version_id: str):
+        return e["version_draft"]
+
+    app.dependency_overrides[get_owned_version] = _owned_version
+    app.dependency_overrides[get_accessible_version] = _owned_version
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.post(f"/api/v1/versions/{e['version_draft'].id}/claims/verify-epistemic")
@@ -379,6 +400,11 @@ async def test_epistemic_verification_detects_contradiction(stage3_test_entities
         yield db
 
     app.dependency_overrides[get_db] = override_get_db
+    async def _owned_version(version_id: str):
+        return e["version_draft"]
+
+    app.dependency_overrides[get_owned_version] = _owned_version
+    app.dependency_overrides[get_accessible_version] = _owned_version
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.post(f"/api/v1/versions/{e['version_draft'].id}/claims/verify-epistemic")

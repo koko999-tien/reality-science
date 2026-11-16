@@ -31,13 +31,13 @@ export const FEATURE_PILLARS: FeaturePillarItem[] = [
   {
     id: "pillar-6-layer",
     pillarNumber: "PILLAR 01",
-    title: "6-Layer Epistemic Verification Pipeline",
-    tagline: "Formal multi-stage mathematical constraint evaluation",
-    badge: "Multi-Stage Truth Engine",
+    title: "Structured Model Validation",
+    tagline: "Review model checks alongside evidence and recorded runs",
+    badge: "Validation Workspace",
     icon: <Layers className="h-6 w-6 text-cyan-400" />,
     accentColor: "cyan",
     description:
-      "Every scientific hypothesis undergoes an automated 6-stage gauntlet verifying syntax bounds, asymptotic singularities, Pint SI dimensional homogeneity, conserved physical Noether invariants, empirical benchmark correlation, and acyclic epistemic DAG consistency.",
+      "Validation findings depend on the model, declared context, evidence, and available backend services. Inspect each returned result with its inputs and recorded run history; a successful check alone does not establish scientific truth.",
     capabilities: [
       {
         title: "AST Syntax & Complexity Guard",
@@ -48,26 +48,26 @@ export const FEATURE_PILLARS: FeaturePillarItem[] = [
         description: "Evaluates symbolic limits at zero, infinity, and pole boundaries via SymPy limit analysis.",
       },
       {
-        title: "Pint SI Dimensional Homogeneity",
-        description: "Strict algebraic dimensional verification across 100+ fundamental and derived Pint physical units.",
+        title: "Dimensional Analysis",
+        description: "Review dimensional findings returned for the declared variables and units.",
       },
       {
-        title: "Physical Law Invariants & Noether Symmetry",
-        description: "Verifies energy-momentum conservation, Galilean/Lorentz invariance, and thermodynamic bounds.",
+        title: "Physical Context",
+        description: "Provide model context before interpreting context-dependent physical checks.",
       },
       {
-        title: "Empirical Dataset Correlation",
-        description: "Chi-square and R^2 regression testing against published physical benchmark repositories.",
+        title: "Empirical Evidence",
+        description: "Review supplied datasets, methods, and findings where empirical analysis is available.",
       },
       {
-        title: "Epistemic Logic DAG Consistency",
-        description: "Tarjan strongly connected components (SCC) analysis to ensure acyclic, contradiction-free theory DAGs.",
+        title: "Additional Layer",
+        description: "The project's authoritative definition for Layer 6 is pending resolution.",
       },
     ],
     technicalSpecs: [
-      { label: "Verification Latency", value: "< 12 ms" },
-      { label: "Dimensional Coverage", value: "100+ Pint Units" },
-      { label: "Axiomatic Engine", value: "SymPy + Pint Core" },
+      { label: "Run provenance", value: "Available by recorded version" },
+      { label: "Evidence", value: "Inspect supplied materials" },
+      { label: "Layer 6", value: "Definition pending" },
     ],
   },
   {
@@ -135,35 +135,35 @@ export const FEATURE_PILLARS: FeaturePillarItem[] = [
     technicalSpecs: [
       { label: "Canvas Engine", value: "@xyflow/react v12" },
       { label: "Math Typography", value: "KaTeX 0.16" },
-      { label: "Sync Latency", value: "< 4 ms React 19" },
+      { label: "Canvas", value: "Local AST editing" },
     ],
   },
   {
     id: "pillar-crypto-bundles",
     pillarNumber: "PILLAR 04",
-    title: "Cryptographic Verification Bundles",
-    tagline: "Tamper-evident ZIP export containing AST, logs, and SHA-256 manifests",
-    badge: "Audit-Ready Provenance",
+    title: "Research Bundle Export",
+    tagline: "Download the available records for a project version",
+    badge: "Version Export",
     icon: <PackageCheck className="h-6 w-6 text-amber-400" />,
     accentColor: "amber",
     description:
-      "Export reproducible, self-contained scientific verification archives. Bundles contain canonical AST JSON, execution logs, SHA-256 digests, and epistemic proof manifests ready for peer-review preprint inclusion or archival replication.",
+      "Export a bundle for a recorded version and inspect the included files before using it in further analysis. An export does not by itself establish reproducibility, immutability, or scientific validity.",
     capabilities: [
       {
         title: "Self-Contained ZIP Export",
-        description: "Single-click download bundling all model specifications, variable definitions, and validation telemetry.",
+        description: "Download a ZIP archive for a recorded version when export is available.",
       },
       {
         title: "SHA-256 Cryptographic Hashes",
-        description: "Every equation AST and execution log is hashed with SHA-256 to guarantee immutable, tamper-evident lineage.",
+        description: "Review any checksums included in the exported files; a checksum does not establish who created or preserved a file.",
       },
       {
-        title: "Preprint Evidence Manifest",
-        description: "Structured JSON and Markdown summaries designed for arXiv and journal supplementary material submission.",
+        title: "Included Project Records",
+        description: "Inspect the records supplied by the version export before citing or sharing them.",
       },
       {
-        title: "Instant Re-Verification",
-        description: "Any researcher can drag a bundle into the Canvas Studio to reproduce the exact 6-layer verification result.",
+        title: "Independent Review",
+        description: "Re-running a model may require compatible software, inputs, data, and compute services.",
       },
     ],
     technicalSpecs: [

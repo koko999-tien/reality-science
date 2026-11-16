@@ -1,13 +1,21 @@
 import io
 
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.modules.research_core.exporter import generate_research_zip_bundle
+from app.modules.research_core.exporter import (
+    BundleSigningUnavailableError,
+    generate_research_zip_bundle,
+)
 from app.modules.research_core.schemas import ProjectCreate, ProjectResponse
 from app.modules.research_core.service import create_project, get_project_by_slug
+from app.modules.iam_governance.dependencies import (
+    get_current_actor,
+    get_optional_current_actor,
+)
+from app.modules.iam_governance.models import ResearchActor
 
 projects_router = APIRouter(prefix="/projects", tags=["projects"])
 versions_router = APIRouter(prefix="/versions", tags=["versions"])
@@ -16,16 +24,22 @@ versions_router = APIRouter(prefix="/versions", tags=["versions"])
 @projects_router.post("", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
 async def create_new_project(
     payload: ProjectCreate,
-    owner_actor_id: str = "default_actor",
+    actor: ResearchActor = Depends(get_current_actor),
     db: AsyncSession = Depends(get_db),  # noqa: B008
 ):
-    return await create_project(db, owner_actor_id, payload)
+    return await create_project(db, actor.id, payload)
 
 
 @projects_router.get("/{slug}", response_model=ProjectResponse)
-async def get_project(slug: str, db: AsyncSession = Depends(get_db)):  # noqa: B008
+async def get_project(
+    slug: str,
+    actor: ResearchActor | None = Depends(get_optional_current_actor),
+    db: AsyncSession = Depends(get_db),  # noqa: B008
+):
     project = await get_project_by_slug(db, slug)
     if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    if project.visibility == "private_draft" and (actor is None or actor.id != project.owner_actor_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return project
 
@@ -33,8 +47,7 @@ async def get_project(slug: str, db: AsyncSession = Depends(get_db)):  # noqa: B
 @versions_router.post("/{version_id}/export-zip")
 async def export_version_zip(
     version_id: str,
-    x_actor_id: str | None = Header(None, alias="X-Actor-Id"),
-    actor_id: str | None = None,
+    actor: ResearchActor | None = Depends(get_optional_current_actor),
     db: AsyncSession = Depends(get_db),  # noqa: B008
 ):
     """Generates and streams an immutable Open Research Cryptographic ZIP bundle.
@@ -42,12 +55,11 @@ async def export_version_zip(
     Rejects unfrozen drafts with HTTP 400 'CANNOT_EXPORT_UNFROZEN_DRAFT'.
     Enforces project visibility and owner access controls.
     """
-    current_actor = x_actor_id or actor_id
     try:
         zip_bytes = await generate_research_zip_bundle(
             version_id=version_id,
             db=db,
-            current_actor_id=current_actor,
+            current_actor_id=actor.id if actor else None,
         )
     except ValueError as ve:
         err_msg = str(ve)
@@ -66,11 +78,16 @@ async def export_version_zip(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=err_msg,
             )
-    except PermissionError as pe:
+    except PermissionError:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=str(pe),
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Version not found",
         )
+    except BundleSigningUnavailableError as error:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Research bundle signing is unavailable because its signing configuration is invalid.",
+        ) from error
 
     return StreamingResponse(
         io.BytesIO(zip_bytes),

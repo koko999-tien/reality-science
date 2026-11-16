@@ -1,0 +1,29 @@
+{
+  "node": "v26.13.1",
+  "versions": [
+    {
+      "name": "next",
+      "manifest": "15.5.29",
+      "lock": "15.5.29",
+      "installed": "15.5.29"
+    },
+    {
+      "name": "eslint-config-next",
+      "manifest": "15.5.29",
+      "lock": "15.5.29",
+      "installed": "15.5.29"
+    },
+    {
+      "name": "react",
+      "manifest": "19.0.9",
+      "lock": "19.0.9",
+      "installed": "19.0.9"
+    },
+    {
+      "name": "react-dom",
+      "manifest": "19.0.9",
+      "lock": "19.0.9",
+      "installed": "19.0.9"
+    }
+  ]
+}

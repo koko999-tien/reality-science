@@ -1,0 +1,14 @@
+{
+  "checked_at": "2026-11-16T16:42:02.287216+00:00",
+  "current_files": 19,
+  "current_hash_mismatches": [],
+  "baseline_files": 13,
+  "baseline_hash_mismatches": [],
+  "slice_patch_regenerated_identically": false,
+  "slice_patch_sha256": "184c787c28bcea8663b95c45aec093ec75003fffa4b487008c0bdf1154673cdd",
+  "original_live85_ast_equal_excluding_docstrings": true,
+  "stage1_matches_baseline": true,
+  "patch_format_correction": "Canonical LF output; prior CRLF patch and failed roundtrip retained in slice-initial-crlf.patch and patch-format-first.json.",
+  "product_test_and_runner_hashes_unchanged": true,
+  "patch_roundtrip": "PASS: 19 reconstructed files match current text"
+}

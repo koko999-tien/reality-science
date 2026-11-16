@@ -1,0 +1,18 @@
+﻿[
+    {
+        "package":  "next",
+        "version":  "15.5.29"
+    },
+    {
+        "package":  "react",
+        "version":  "19.0.9"
+    },
+    {
+        "package":  "react-dom",
+        "version":  "19.0.9"
+    },
+    {
+        "package":  "eslint-config-next",
+        "version":  "15.5.29"
+    }
+]

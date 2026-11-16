@@ -1,0 +1,12 @@
+{
+  "checked_at": "2026-11-16T16:39:02.893539+00:00",
+  "current_files": 19,
+  "current_hash_mismatches": [],
+  "baseline_files": 13,
+  "baseline_hash_mismatches": [],
+  "slice_patch_regenerated_identically": true,
+  "slice_patch_sha256": "079c9b0a9d139e4c92cb6eb8b2d724d85edb9c11f16267861c9f9db0f8a22339",
+  "original_live85_ast_equal_excluding_docstrings": true,
+  "stage1_matches_baseline": true,
+  "finalize_stdout": "{\"files\": 19, \"hashed\": 19, \"patch_bytes\": 58480}"
+}

@@ -16,6 +16,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    # Preserve the existing revision ID, which exceeds Alembic's default 32 chars.
+    # This also supports databases already at revision002; no history is renamed.
+    op.alter_column("alembic_version", "version_num", type_=sa.String(64), existing_type=sa.String(32))
     # 1. Claims table
     op.create_table(
         "claims",

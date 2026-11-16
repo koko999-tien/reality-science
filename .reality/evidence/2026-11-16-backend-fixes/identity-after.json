@@ -1,0 +1,322 @@
+{
+  "cluster_identity": {
+    "data": "C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-postgres-83c0e945/data",
+    "cluster": "rs_test_74caee9603bb4ea986e62cb223864982",
+    "system_id": "7708747722773675460",
+    "database": "rs_test_74caee9603bb4ea986e62cb223864982",
+    "role": "rs_test_admin",
+    "host": "127.0.0.1",
+    "port": 60655
+  },
+  "app_identity": {
+    "database": "rs_test_74caee9603bb4ea986e62cb223864982",
+    "role": "rs_test_app",
+    "host": "127.0.0.1",
+    "port": 60655,
+    "cluster": "rs_test_74caee9603bb4ea986e62cb223864982",
+    "version": "17.12",
+    "rolsuper": false,
+    "rolbypassrls": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "database_owner": "rs_test_admin",
+    "has_memberships": false,
+    "owns_tables": false
+  },
+  "revision": "004_owner_only_dml",
+  "policies": [
+    {
+      "tablename": "claim_relations",
+      "policyname": "rls_claim_relations_delete",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claim_relations.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": null
+    },
+    {
+      "tablename": "claim_relations",
+      "policyname": "rls_claim_relations_insert",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claim_relations.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "claim_relations",
+      "policyname": "rls_claim_relations_select",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claim_relations.version_id)::text) AND (((p.visibility)::text = 'public_preprint'::text) OR ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)) OR ((p.organization_id IS NOT NULL) AND ((p.organization_id)::text = NULLIF(current_setting('app.current_org_id'::text, true), ''::text)))))))",
+      "with_check": null
+    },
+    {
+      "tablename": "claim_relations",
+      "policyname": "rls_claim_relations_update",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claim_relations.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claim_relations.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "claims",
+      "policyname": "rls_claims_delete",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claims.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": null
+    },
+    {
+      "tablename": "claims",
+      "policyname": "rls_claims_insert",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claims.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "claims",
+      "policyname": "rls_claims_select",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claims.version_id)::text) AND (((p.visibility)::text = 'public_preprint'::text) OR ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)) OR ((p.organization_id IS NOT NULL) AND ((p.organization_id)::text = NULLIF(current_setting('app.current_org_id'::text, true), ''::text)))))))",
+      "with_check": null
+    },
+    {
+      "tablename": "claims",
+      "policyname": "rls_claims_update",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claims.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (claims.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "equations",
+      "policyname": "rls_equations_delete",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (equations.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": null
+    },
+    {
+      "tablename": "equations",
+      "policyname": "rls_equations_insert",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (equations.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "equations",
+      "policyname": "rls_equations_select",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (equations.version_id)::text) AND (((p.visibility)::text = 'public_preprint'::text) OR ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)) OR ((p.organization_id IS NOT NULL) AND ((p.organization_id)::text = NULLIF(current_setting('app.current_org_id'::text, true), ''::text)))))))",
+      "with_check": null
+    },
+    {
+      "tablename": "equations",
+      "policyname": "rls_equations_update",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (equations.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (equations.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "research_projects",
+      "policyname": "rls_research_projects_delete",
+      "cmd": "DELETE",
+      "qual": "((owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text))",
+      "with_check": null
+    },
+    {
+      "tablename": "research_projects",
+      "policyname": "rls_research_projects_insert",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "((owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text))"
+    },
+    {
+      "tablename": "research_projects",
+      "policyname": "rls_research_projects_select",
+      "cmd": "SELECT",
+      "qual": "(((visibility)::text = 'public_preprint'::text) OR ((owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)) OR ((organization_id IS NOT NULL) AND ((organization_id)::text = NULLIF(current_setting('app.current_org_id'::text, true), ''::text))))",
+      "with_check": null
+    },
+    {
+      "tablename": "research_projects",
+      "policyname": "rls_research_projects_update",
+      "cmd": "UPDATE",
+      "qual": "((owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text))",
+      "with_check": "((owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text))"
+    },
+    {
+      "tablename": "research_versions",
+      "policyname": "rls_research_versions_delete",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM research_projects p\n  WHERE (((p.id)::text = (research_versions.project_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": null
+    },
+    {
+      "tablename": "research_versions",
+      "policyname": "rls_research_versions_insert",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM research_projects p\n  WHERE (((p.id)::text = (research_versions.project_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "research_versions",
+      "policyname": "rls_research_versions_select",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM research_projects p\n  WHERE (((p.id)::text = (research_versions.project_id)::text) AND (((p.visibility)::text = 'public_preprint'::text) OR ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)) OR ((p.organization_id IS NOT NULL) AND ((p.organization_id)::text = NULLIF(current_setting('app.current_org_id'::text, true), ''::text)))))))",
+      "with_check": null
+    },
+    {
+      "tablename": "research_versions",
+      "policyname": "rls_research_versions_update",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM research_projects p\n  WHERE (((p.id)::text = (research_versions.project_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM research_projects p\n  WHERE (((p.id)::text = (research_versions.project_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "validation_findings",
+      "policyname": "rls_validation_findings_delete",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM ((validation_runs r\n     JOIN research_versions v ON (((v.id)::text = (r.version_id)::text)))\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((r.id)::text = (validation_findings.run_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": null
+    },
+    {
+      "tablename": "validation_findings",
+      "policyname": "rls_validation_findings_insert",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM ((validation_runs r\n     JOIN research_versions v ON (((v.id)::text = (r.version_id)::text)))\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((r.id)::text = (validation_findings.run_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "validation_findings",
+      "policyname": "rls_validation_findings_select",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM ((validation_runs r\n     JOIN research_versions v ON (((v.id)::text = (r.version_id)::text)))\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((r.id)::text = (validation_findings.run_id)::text) AND (((p.visibility)::text = 'public_preprint'::text) OR ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)) OR ((p.organization_id IS NOT NULL) AND ((p.organization_id)::text = NULLIF(current_setting('app.current_org_id'::text, true), ''::text)))))))",
+      "with_check": null
+    },
+    {
+      "tablename": "validation_findings",
+      "policyname": "rls_validation_findings_update",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM ((validation_runs r\n     JOIN research_versions v ON (((v.id)::text = (r.version_id)::text)))\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((r.id)::text = (validation_findings.run_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM ((validation_runs r\n     JOIN research_versions v ON (((v.id)::text = (r.version_id)::text)))\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((r.id)::text = (validation_findings.run_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "validation_runs",
+      "policyname": "rls_validation_runs_delete",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (validation_runs.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": null
+    },
+    {
+      "tablename": "validation_runs",
+      "policyname": "rls_validation_runs_insert",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (validation_runs.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "validation_runs",
+      "policyname": "rls_validation_runs_select",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (validation_runs.version_id)::text) AND (((p.visibility)::text = 'public_preprint'::text) OR ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)) OR ((p.organization_id IS NOT NULL) AND ((p.organization_id)::text = NULLIF(current_setting('app.current_org_id'::text, true), ''::text)))))))",
+      "with_check": null
+    },
+    {
+      "tablename": "validation_runs",
+      "policyname": "rls_validation_runs_update",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (validation_runs.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (validation_runs.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "variables",
+      "policyname": "rls_variables_delete",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (variables.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": null
+    },
+    {
+      "tablename": "variables",
+      "policyname": "rls_variables_insert",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (variables.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    },
+    {
+      "tablename": "variables",
+      "policyname": "rls_variables_select",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (variables.version_id)::text) AND (((p.visibility)::text = 'public_preprint'::text) OR ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)) OR ((p.organization_id IS NOT NULL) AND ((p.organization_id)::text = NULLIF(current_setting('app.current_org_id'::text, true), ''::text)))))))",
+      "with_check": null
+    },
+    {
+      "tablename": "variables",
+      "policyname": "rls_variables_update",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (variables.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (research_versions v\n     JOIN research_projects p ON (((p.id)::text = (v.project_id)::text)))\n  WHERE (((v.id)::text = (variables.version_id)::text) AND ((p.owner_actor_id)::text = NULLIF(current_setting('app.current_actor_id'::text, true), ''::text)))))"
+    }
+  ],
+  "tables": [
+    {
+      "relname": "alembic_version",
+      "owner": "rs_test_admin",
+      "relrowsecurity": false,
+      "relforcerowsecurity": false
+    },
+    {
+      "relname": "claim_relations",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "claims",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "equations",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "research_actors",
+      "owner": "rs_test_admin",
+      "relrowsecurity": false,
+      "relforcerowsecurity": false
+    },
+    {
+      "relname": "research_projects",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "research_versions",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "user_accounts",
+      "owner": "rs_test_admin",
+      "relrowsecurity": false,
+      "relforcerowsecurity": false
+    },
+    {
+      "relname": "validation_findings",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "validation_runs",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "variables",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    }
+  ],
+  "marker_writable": false
+}

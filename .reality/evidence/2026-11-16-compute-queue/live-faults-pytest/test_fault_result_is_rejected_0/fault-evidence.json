@@ -1,0 +1,9 @@
+{
+  "kind": "bad-json",
+  "injected": true,
+  "job_id": "9d3a42ce-da72-4d54-8187-e3f14e18e340",
+  "version_id": "5c42f29f-1c7f-47e3-8652-633195ad65a7",
+  "response_status": 503,
+  "persisted_runs": 0,
+  "result_key_removed": true
+}

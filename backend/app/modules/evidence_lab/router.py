@@ -7,6 +7,7 @@ benchmark listing, and dataset retrieval.
 from __future__ import annotations
 
 import json
+from uuid import uuid4
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Query, Request, status
 
@@ -29,6 +30,34 @@ from app.modules.evidence_lab.service import (
 from shared.schemas.empirical_data import EmpiricalDatasetSpec, EmpiricalDatasetType
 
 router = APIRouter(prefix="/evidence", tags=["evidence-lab"])
+MAX_DATASET_REQUEST_BYTES = 10 * 1024 * 1024
+
+
+async def read_limited_request_body(request: Request) -> bytes:
+    """Read dataset requests incrementally and reject oversized payloads."""
+    content_length = request.headers.get("content-length")
+    if content_length:
+        try:
+            if int(content_length) > MAX_DATASET_REQUEST_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail="Dataset request exceeds the 10 MiB limit",
+                )
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid Content-Length header",
+            ) from exc
+
+    body = bytearray()
+    async for chunk in request.stream():
+        if len(body) + len(chunk) > MAX_DATASET_REQUEST_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail="Dataset request exceeds the 10 MiB limit",
+            )
+        body.extend(chunk)
+    return bytes(body)
 
 
 @router.post(
@@ -53,7 +82,7 @@ async def upload_dataset(
     Calculates cryptographic SHA-256 fingerprint, performs schema validation,
     and registers dataset for RCE Layer 5 correlation.
     """
-    raw_body = await request.body()
+    raw_body = await read_limited_request_body(request)
     if not raw_body:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -126,7 +155,14 @@ async def upload_dataset(
         ) from e
 
     # Register in runtime repository
-    register_empirical_dataset(dataset, sha256_hash)
+    dataset.dataset_id = f"dataset-{uuid4().hex}"
+    try:
+        register_empirical_dataset(dataset, sha256_hash)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Dataset ID already exists",
+        ) from exc
     x, y, s = dataset.to_xy_sigma()
 
     return DatasetIngestResponse(
@@ -148,7 +184,7 @@ async def validate_dataset(
     request: Request,
 ) -> ValidationReportResponse:
     """Dry-run validation reporting schema compliance, coordinate ranges, and warnings."""
-    raw_body = await request.body()
+    raw_body = await read_limited_request_body(request)
     if not raw_body:
         return ValidationReportResponse(
             is_valid=False,

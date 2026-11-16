@@ -1,0 +1,590 @@
+--- a/backend/scripts/disposable_postgres.py
++++ b/backend/scripts/disposable_postgres.py
+@@ -1,4 +1,4 @@
+-"""Local-only PostgreSQL verification runner. Never attaches to an existing cluster.
++"""Local-only PostgreSQL verification runner for clusters this task created.
+ 
+ Uses unpacked official binaries; no service registration or global installation.
+ Only the generated manifest may select a cluster for migration, tests or shutdown.
+@@ -10,6 +10,7 @@
+ import json
+ import os
+ from pathlib import Path
++import re
+ import socket
+ import subprocess
+ import sys
+@@ -19,6 +20,72 @@
+ 
+ 
+ BACKEND = Path(__file__).resolve().parents[1]
++
++
++def validate_manifest(manifest):
++    token = manifest.get("instance_id", "")
++    port = manifest.get("port")
++    if (not re.fullmatch(r"[a-f0-9]{32}", token)
++            or manifest.get("database") != f"rs_test_{token}"
++            or type(port) is not int or not 1024 <= port <= 65535 or port == 5432):
++        raise RuntimeError("Invalid disposable cluster manifest")
++    data = Path(manifest["data"])
++    binaries = Path(manifest["bin"])
++    if not data.is_absolute() or not binaries.is_absolute() or data.name != "data":
++        raise RuntimeError("Disposable cluster paths must be explicit and absolute")
++
++
++def control_data(manifest):
++    env = os.environ.copy()
++    env["LC_ALL"] = "C"
++    output = subprocess.check_output([
++        str(Path(manifest["bin"]) / "pg_controldata.exe"), manifest["data"]
++    ], text=True, env=env)
++    values = dict(line.split(":", 1) for line in output.splitlines() if ":" in line)
++    return {key.strip(): value.strip() for key, value in values.items()}
++
++
++def verify_stopped_cluster(manifest):
++    """No stale PID is trusted or removed; only a clean, identified cluster starts."""
++    validate_manifest(manifest)
++    data = Path(manifest["data"]).resolve()
++    if not manifest.get("stopped") or not manifest.get("system_id"):
++        raise RuntimeError("Restart requires a provisioned, cleanly stopped cluster")
++    if (data / "postmaster.pid").exists():
++        raise RuntimeError("Postmaster marker exists; refusing restart")
++    control = control_data(manifest)
++    if (control.get("Database system identifier") != manifest["system_id"]
++            or control.get("Database cluster state") != "shut down"):
++        raise RuntimeError("Offline cluster identity or clean shutdown check failed")
++    env = os.environ.copy()
++    env["LC_ALL"] = "C"
++    actual = {}
++    for name in ("data_directory", "port", "listen_addresses", "cluster_name"):
++        actual[name] = subprocess.check_output([
++            str(Path(manifest["bin"]) / "postgres.exe"), "-D", str(data), "-C", name
++        ], text=True, env=env).strip()
++    if (Path(actual["data_directory"]).resolve() != data
++            or actual["port"] != str(manifest["port"])
++            or actual["listen_addresses"] != "127.0.0.1"
++            or actual["cluster_name"] != manifest["database"]):
++        raise RuntimeError("Disposable cluster configuration mismatch")
++    # Binding is an availability check, never evidence of cluster ownership.
++    with socket.socket() as sock:
++        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
++            sock.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
++        sock.bind(("127.0.0.1", manifest["port"]))
++    return {"data": str(data), "system_id": manifest["system_id"],
++            "state": control["Database cluster state"], "config": actual,
++            "postmaster_marker_absent": True, "port_available": True}
++
++
++def current_postmaster(manifest):
++    lines = (Path(manifest["data"]) / "postmaster.pid").read_text().splitlines()
++    if (len(lines) < 8 or Path(lines[1]).resolve() != Path(manifest["data"]).resolve()
++            or int(lines[3]) != manifest["port"] or lines[5] != "127.0.0.1"
++            or lines[7].strip() != "ready" or int(lines[0]) <= 0):
++        raise RuntimeError("Current postmaster marker does not match disposable target")
++    return int(lines[0])
+ 
+ 
+ def execute(command, log, env=None):
+@@ -40,18 +107,120 @@
+     return env
+ 
+ 
+-async def admin_connection(manifest, database=None):
++async def cluster_connection(manifest, database=None):
++    """Verify the server identity even when a damaged DB marker needs cleanup."""
++    validate_manifest(manifest)
+     conn = await asyncpg.connect(host="127.0.0.1", port=manifest["port"],
+                                  user="rs_test_admin", database=database or manifest["database"], timeout=10)
+-    identity = await conn.fetchrow("""SELECT current_setting('data_directory') AS data,
+-        current_setting('cluster_name') AS cluster, system_identifier::text AS system_id
+-        FROM pg_control_system()""")
+-    if (Path(identity["data"]).resolve() != Path(manifest["data"]).resolve()
+-            or identity["cluster"] != manifest["database"]
+-            or (manifest.get("system_id") and identity["system_id"] != manifest["system_id"])):
+-        await conn.close()
+-        raise RuntimeError("Disposable cluster identity mismatch; refusing mutation")
++    try:
++        identity = await conn.fetchrow("""SELECT current_setting('data_directory') AS data,
++            current_setting('cluster_name') AS cluster, system_identifier::text AS system_id,
++            current_database() AS database, current_user AS role,
++            host(inet_server_addr()) AS host, inet_server_port() AS port
++            FROM pg_control_system()""")
++        if (Path(identity["data"]).resolve() != Path(manifest["data"]).resolve()
++                or identity["cluster"] != manifest["database"]
++                or identity["database"] != (database or manifest["database"])
++                or identity["role"] != "rs_test_admin" or identity["host"] != "127.0.0.1"
++                or identity["port"] != manifest["port"]
++                or (manifest.get("system_id") and identity["system_id"] != manifest["system_id"])):
++            raise RuntimeError("Disposable cluster identity mismatch; refusing mutation")
++    except BaseException:
++        await conn.close()
++        raise
+     return conn, dict(identity)
++
++
++async def admin_connection(manifest, database=None):
++    conn, identity = await cluster_connection(manifest, database)
++    try:
++        if manifest.get("system_id"):
++            markers = await conn.fetch("SELECT instance_id FROM test_control.instance_identity")
++            if [row["instance_id"] for row in markers] != [manifest["instance_id"]]:
++                raise RuntimeError("Disposable database marker mismatch; refusing mutation")
++    except BaseException:
++        await conn.close()
++        raise
++    return conn, identity
++
++
++def verify_clean_shutdown(manifest):
++    if (Path(manifest["data"]) / "postmaster.pid").exists():
++        raise RuntimeError("Postmaster marker survived shutdown")
++    control = control_data(manifest)
++    if (control.get("Database system identifier") != manifest["system_id"]
++            or control.get("Database cluster state") != "shut down"):
++        raise RuntimeError("Clean shutdown identity check failed")
++    with socket.socket() as sock:
++        sock.settimeout(1)
++        if sock.connect_ex(("127.0.0.1", manifest["port"])) == 0:
++            raise RuntimeError("Disposable port remains open after shutdown")
++
++
++def stop_cluster(manifest, log):
++    if current_postmaster(manifest) != manifest["postmaster_pid"]:
++        raise RuntimeError("Postmaster PID changed; refusing shutdown")
++    code = execute([str(Path(manifest["bin"]) / "pg_ctl.exe"), "-D", manifest["data"],
++                    "-m", "fast", "-w", "-t", "30", "stop"], log)
++    if code == 0:
++        verify_clean_shutdown(manifest)
++        manifest.update(stopped=True, lifecycle_state="stopped")
++    return code
++
++
++def start_cluster(manifest, manifest_path, evidence):
++    offline = verify_stopped_cluster(manifest)
++    (evidence / "restart-preflight.json").write_text(json.dumps(offline, indent=2), encoding="utf-8")
++    data = Path(manifest["data"])
++
++    def save():
++        manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
++
++    async def online(check_marker=True):
++        connect = admin_connection if check_marker else cluster_connection
++        conn, identity = await connect(manifest)
++        await conn.close()
++        return identity
++
++    # Record uncertain launch state before spawning, never retain a historical PID
++    # as the running PID if verification is interrupted.
++    manifest.pop("postmaster_pid", None)
++    manifest.pop("cleanup", None)
++    manifest.update(stopped=False, lifecycle_state="starting")
++    save()
++    try:
++        if execute([str(Path(manifest["bin"]) / "pg_ctl.exe"), "-D", str(data),
++                    "-l", str(data.parent / "postgres.log"), "-w", "-t", "30", "start"],
++                   evidence / "restart.log"):
++            raise RuntimeError("PostgreSQL start failed; checking owned cluster cleanup")
++        manifest.update(postmaster_pid=current_postmaster(manifest), lifecycle_state="verifying")
++        save()
++        identity = asyncio.run(online())
++        manifest["lifecycle_state"] = "running"
++        save()
++        (evidence / "restart-identity.json").write_text(json.dumps(identity, indent=2), encoding="utf-8")
++    except BaseException:
++        manifest["lifecycle_state"] = "cleanup_required"
++        save()
++        try:
++            if (data / "postmaster.pid").exists():
++                # A DB marker failure blocks DB writes, but the independently
++                # verified system ID/path/port identify our server for shutdown.
++                asyncio.run(online(check_marker=False))
++                manifest["postmaster_pid"] = current_postmaster(manifest)
++                save()
++                if stop_cluster(manifest, evidence / "restart-cleanup.log"):
++                    raise RuntimeError("Restart cleanup shutdown failed")
++            else:
++                verify_clean_shutdown(manifest)
++                manifest.update(stopped=True, lifecycle_state="stopped")
++            save()
++        except Exception as cleanup_error:
++            save()
++            raise RuntimeError("Restart verification failed; identity-checked cleanup requires recovery") from cleanup_error
++        raise
++    print("Restart verified: current system ID, data path, port and database marker match")
++    return 0
+ 
+ 
+ async def provision(manifest):
+@@ -86,7 +255,7 @@
+ 
+ def main():
+     parser = argparse.ArgumentParser(description=__doc__)
+-    parser.add_argument("action", choices=["init", "resume-init", "migrate", "test", "stop"])
++    parser.add_argument("action", choices=["init", "resume-init", "start", "migrate", "test", "stop"])
+     parser.add_argument("--evidence", type=Path, required=True)
+     parser.add_argument("--bin", type=Path)
+     parser.add_argument("--work", type=Path)
+@@ -127,6 +296,8 @@
+         print(json.dumps(manifest, indent=2))
+         return 0
+     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
++    if args.action == "start":
++        return start_cluster(manifest, manifest_path, args.evidence)
+     if args.action == "resume-init":
+         if manifest.get("system_id"):
+             raise RuntimeError("Provisioning already completed")
+@@ -156,17 +327,8 @@
+     if args.action == "test":
+         return execute([sys.executable, "-m", "pytest", *pytest_args], args.evidence / args.log, environment(manifest))
+     if args.action == "stop":
+-        current_pid = int((Path(manifest["data"]) / "postmaster.pid").read_text().splitlines()[0])
+-        if current_pid != manifest["postmaster_pid"]:
+-            raise RuntimeError("Postmaster PID changed; refusing shutdown")
+-        code = execute([str(Path(manifest["bin"]) / "pg_ctl.exe"), "-D", manifest["data"],
+-                        "-m", "fast", "-w", "-t", "30", "stop"], args.evidence / "stop.log")
++        code = stop_cluster(manifest, args.evidence / "stop.log")
+         if code == 0:
+-            with socket.socket() as sock:
+-                sock.settimeout(1)
+-                assert sock.connect_ex(("127.0.0.1", manifest["port"])) != 0
+-            assert not (Path(manifest["data"]) / "postmaster.pid").exists()
+-            manifest["stopped"] = True
+             manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+         return code
+ 
+--- a/backend/app/modules/research_core/service.py
++++ b/backend/app/modules/research_core/service.py
+@@ -17,8 +17,15 @@
+     )
+     db.add(project)
+     await db.commit()
+-    await db.refresh(project)
+-    return project
++    # Response serialization cannot issue lazy SQL outside an awaited session call.
++    # Query after commit so the response also reflects persisted server defaults.
++    result = await db.execute(
++        select(ResearchProject)
++        .options(selectinload(ResearchProject.versions))
++        .where(ResearchProject.slug == payload.slug)
++        .execution_options(populate_existing=True)
++    )
++    return result.scalar_one()
+ 
+ 
+ async def get_project_by_slug(db: AsyncSession, slug: str) -> ResearchProject | None:
+--- a/backend/app/modules/reality_constraint_engine/router.py
++++ b/backend/app/modules/reality_constraint_engine/router.py
+@@ -384,9 +384,6 @@
+             db.add(vf)
+             persisted_findings.append(vf)
+ 
+-    if finding_res.state == FindingState.PASS and version.publication_status == "draft":
+-        version.publication_status = "verified"
+-
+     await db.commit()
+     return _serialize_run(run, persisted_findings)
+ 
+--- a/backend/tests/integration/test_stage4_final_e2e_integration.py
++++ b/backend/tests/integration/test_stage4_final_e2e_integration.py
+@@ -372,9 +372,13 @@
+ 
+ @pytest.mark.asyncio
+ @pytest.mark.parametrize("declare_acceleration", [True, False])
+-async def test_tier3_full_version_validate_and_persistence(stage4_test_entities, declare_acceleration):
++@pytest.mark.parametrize("publication_status", ["draft", "preprint", "published", "retracted"])
++async def test_tier3_full_version_validate_and_persistence(
++    stage4_test_entities, declare_acceleration, publication_status
++):
+     """Persist real worker findings for complete and undeclared-symbol formulations."""
+     v_draft = stage4_test_entities["version_draft"]
++    v_draft.publication_status = publication_status
+     eq1 = Equation(
+         id="eq_stage4_01",
+         version_id=v_draft.id,
+@@ -418,6 +422,7 @@
+         expected_state = "PASS" if declare_acceleration else "FAIL"
+         assert data_val["overall_state"] == expected_state
+         assert len(data_val["findings"]) == 6
++        assert v_draft.publication_status == publication_status
+         if not declare_acceleration:
+             assert data_val["findings"][0]["diagnostic_code"] == DiagnosticCode.UNDECLARED_SYMBOL.value
+ 
+@@ -429,6 +434,7 @@
+         assert runs_list[0]["id"] == data_val["id"]
+         assert runs_list[0]["overall_state"] == expected_state
+         assert len(runs_list[0]["findings"]) == 6
++        assert v_draft.publication_status == publication_status
+ 
+ 
+ @pytest.mark.asyncio
+--- a/backend/tests/unit/test_research_project_auth.py
++++ b/backend/tests/unit/test_research_project_auth.py
+@@ -23,6 +23,10 @@
+ 
+     def scalar_one_or_none(self) -> Any | None:
+         return self.items[0] if self.items else None
++
++    def scalar_one(self) -> Any:
++        assert len(self.items) == 1
++        return self.items[0]
+ 
+     def scalars(self) -> MockResult:
+         return self
+--- /dev/null
++++ b/backend/app/db/migrations/versions/004_owner_only_dml.py
+@@ -0,0 +1,73 @@
++"""Separate read visibility from owner-only project mutations.
++
++Revision ID: 004_owner_only_dml
++Revises: 003_stage3_claims_and_epistemic_logic
++
++Master Brief section5 makes public preprints read-only. The earlier FOR ALL
++policy's visibility predicate also authorized DELETE and the old UPDATE row.
++Keep its SELECT semantics, but check ownership for both sides of every UPDATE.
++"""
++
++from alembic import op
++
++
++revision = "004_owner_only_dml"
++down_revision = "003_stage3_claims_and_epistemic_logic"
++branch_labels = None
++depends_on = None
++
++TABLES = (
++    "research_projects", "research_versions", "equations", "variables",
++    "claims", "claim_relations", "validation_runs", "validation_findings",
++)
++
++
++def predicates(table: str) -> tuple[str, str]:
++    prefix = "" if table == "research_projects" else "p."
++    owner = f"{prefix}owner_actor_id = NULLIF(current_setting('app.current_actor_id', true), '')"
++    visible = f"""{prefix}visibility = 'public_preprint' OR {owner} OR (
++        {prefix}organization_id IS NOT NULL AND
++        {prefix}organization_id = NULLIF(current_setting('app.current_org_id', true), '')
++    )"""
++    if table == "research_projects":
++        return visible, owner
++    if table == "research_versions":
++        parent = "research_projects p"
++        link = "p.id = research_versions.project_id"
++    elif table == "validation_findings":
++        parent = """validation_runs r
++            JOIN research_versions v ON v.id = r.version_id
++            JOIN research_projects p ON p.id = v.project_id"""
++        link = "r.id = validation_findings.run_id"
++    else:
++        parent = "research_versions v JOIN research_projects p ON p.id = v.project_id"
++        link = f"v.id = {table}.version_id"
++    return tuple(
++        f"EXISTS (SELECT 1 FROM {parent} WHERE {link} AND ({condition}))"
++        for condition in (visible, owner)
++    )
++
++
++def upgrade() -> None:
++    for table in TABLES:
++        visible, owner = predicates(table)
++        op.execute(f"DROP POLICY rls_{table} ON {table}")
++        op.execute(f"CREATE POLICY rls_{table}_select ON {table} FOR SELECT USING ({visible})")
++        op.execute(f"CREATE POLICY rls_{table}_insert ON {table} FOR INSERT WITH CHECK ({owner})")
++        op.execute(
++            f"CREATE POLICY rls_{table}_update ON {table} FOR UPDATE "
++            f"USING ({owner}) WITH CHECK ({owner})"
++        )
++        op.execute(f"CREATE POLICY rls_{table}_delete ON {table} FOR DELETE USING ({owner})")
++        # ENABLE/FORCE RLS from migrations001-003 remain in force.
++
++
++def downgrade() -> None:
++    for table in reversed(TABLES):
++        visible, owner = predicates(table)
++        for command in ("select", "insert", "update", "delete"):
++            op.execute(f"DROP POLICY rls_{table}_{command} ON {table}")
++        op.execute(
++            f"CREATE POLICY rls_{table} ON {table} FOR ALL "
++            f"USING ({visible}) WITH CHECK ({owner})"
++        )
+--- /dev/null
++++ b/backend/tests/unit/test_disposable_postgres_runner.py
+@@ -0,0 +1,150 @@
++"""Fail closed before starting or mutating an incorrectly identified cluster."""
++
++import json
++from pathlib import Path
++from unittest.mock import AsyncMock, MagicMock
++
++import pytest
++
++from scripts import disposable_postgres as runner
++
++
++@pytest.fixture
++def manifest(tmp_path):
++    token = "a" * 32
++    data = tmp_path / "data"
++    data.mkdir()
++    return {"instance_id": token, "database": f"rs_test_{token}", "port": 60655,
++            "data": str(data), "bin": str(tmp_path / "pgsql/bin"), "stopped": True,
++            "system_id": "1234567890", "postmaster_pid": 99999}
++
++
++@pytest.mark.parametrize("change", [
++    {"instance_id": "invalid"}, {"database": "reality_science"},
++    {"port": 5432}, {"port": "60655"}, {"data": "relative/data"},
++])
++@pytest.mark.asyncio
++async def test_bad_manifest_does_not_connect(manifest, monkeypatch, change):
++    manifest.update(change)
++    connect = AsyncMock()
++    monkeypatch.setattr(runner.asyncpg, "connect", connect)
++    with pytest.raises(RuntimeError):
++        await runner.admin_connection(manifest)
++    connect.assert_not_called()
++
++
++@pytest.mark.parametrize("fault", ["not_stopped", "missing_identity", "pid_marker", "wrong_identity", "unclean"])
++def test_restart_rejects_unsafe_offline_state_before_config_or_socket(manifest, monkeypatch, fault):
++    from pathlib import Path
++
++    control = {"Database system identifier": manifest["system_id"], "Database cluster state": "shut down"}
++    if fault == "not_stopped":
++        manifest["stopped"] = False
++    elif fault == "missing_identity":
++        manifest.pop("system_id")
++    elif fault == "pid_marker":
++        (Path(manifest["data"]) / "postmaster.pid").write_text("untrusted stale or live pid")
++    elif fault == "wrong_identity":
++        control["Database system identifier"] = "other-cluster"
++    else:
++        control["Database cluster state"] = "in production"
++    monkeypatch.setattr(runner, "control_data", lambda _: control)
++    read_config = MagicMock(side_effect=AssertionError("Should not inspect config"))
++    socket_factory = MagicMock(side_effect=AssertionError("Should not open socket"))
++    monkeypatch.setattr(runner.subprocess, "check_output", read_config)
++    monkeypatch.setattr(runner.socket, "socket", socket_factory)
++    with pytest.raises(RuntimeError):
++        runner.verify_stopped_cluster(manifest)
++    read_config.assert_not_called()
++    socket_factory.assert_not_called()
++
++
++@pytest.mark.parametrize("setting", ["data_directory", "port", "listen_addresses", "cluster_name"])
++def test_restart_rejects_config_redirect_before_port_check(manifest, monkeypatch, setting):
++    control = {"Database system identifier": manifest["system_id"], "Database cluster state": "shut down"}
++    config = {"data_directory": manifest["data"], "port": str(manifest["port"]),
++              "listen_addresses": "127.0.0.1", "cluster_name": manifest["database"]}
++    config[setting] = "incorrect"
++    monkeypatch.setattr(runner, "control_data", lambda _: control)
++    monkeypatch.setattr(runner.subprocess, "check_output", lambda command, **_: config[command[-1]])
++    socket_factory = MagicMock(side_effect=AssertionError("Should not open socket"))
++    monkeypatch.setattr(runner.socket, "socket", socket_factory)
++    with pytest.raises(RuntimeError, match="configuration mismatch"):
++        runner.verify_stopped_cluster(manifest)
++    socket_factory.assert_not_called()
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("fault", ["system_id", "port", "marker", "missing_marker_table"])
++async def test_online_identity_or_marker_failure_closes_connection(manifest, monkeypatch, fault):
++    identity = {"data": manifest["data"], "cluster": manifest["database"],
++                "system_id": manifest["system_id"], "database": manifest["database"],
++                "role": "rs_test_admin", "host": "127.0.0.1", "port": manifest["port"]}
++    if fault in identity:
++        identity[fault] = "incorrect"
++    conn = AsyncMock()
++    conn.fetchrow.return_value = identity
++    conn.fetch.return_value = [{"instance_id": "incorrect" if fault == "marker" else manifest["instance_id"]}]
++    if fault == "missing_marker_table":
++        conn.fetch.side_effect = RuntimeError("marker table absent")
++    monkeypatch.setattr(runner.asyncpg, "connect", AsyncMock(return_value=conn))
++    with pytest.raises(RuntimeError):
++        await runner.admin_connection(manifest)
++    conn.close.assert_awaited_once()
++    conn.execute.assert_not_called()
++
++
++@pytest.mark.parametrize("outcome", ["success", "marker_failure", "pid_read_failure", "identity_failure"])
++def test_restart_lifecycle_records_current_pid_and_cleans_failed_verification(manifest, monkeypatch, tmp_path, outcome):
++    manifest_path = tmp_path / "instance.json"
++    marker = Path(manifest["data"]) / "postmaster.pid"
++    commands = []
++    monkeypatch.setattr(runner, "verify_stopped_cluster", lambda _: {"verified": True})
++
++    def execute(command, *_):
++        commands.append(command[-1])
++        saved = json.loads(manifest_path.read_text())
++        assert saved["stopped"] is False
++        if command[-1] == "start":
++            assert "postmaster_pid" not in saved  # historical PID was discarded before launch
++            marker.write_text("task test marker")
++        else:
++            assert saved["postmaster_pid"] == 1234
++            marker.unlink()
++        return 0
++
++    monkeypatch.setattr(runner, "execute", execute)
++    pid = MagicMock(return_value=1234)
++    if outcome == "pid_read_failure":
++        pid.side_effect = [RuntimeError("PID temporarily unreadable"), 1234, 1234]
++    monkeypatch.setattr(runner, "current_postmaster", pid)
++    connection = AsyncMock()
++    admin = AsyncMock(return_value=(connection, {"system_id": manifest["system_id"]}))
++    if outcome in ("marker_failure", "identity_failure"):
++        admin.side_effect = RuntimeError("Online verification failed")
++    cluster = AsyncMock(return_value=(connection, {"system_id": manifest["system_id"]}))
++    if outcome == "identity_failure":
++        cluster.side_effect = RuntimeError("Server identity mismatch")
++    monkeypatch.setattr(runner, "admin_connection", admin)
++    monkeypatch.setattr(runner, "cluster_connection", cluster)
++    clean = MagicMock()
++    monkeypatch.setattr(runner, "verify_clean_shutdown", clean)
++
++    if outcome == "success":
++        assert runner.start_cluster(manifest, manifest_path, tmp_path) == 0
++    else:
++        with pytest.raises(RuntimeError):
++            runner.start_cluster(manifest, manifest_path, tmp_path)
++    saved = json.loads(manifest_path.read_text())
++    assert saved["postmaster_pid"] == 1234
++    if outcome in ("marker_failure", "pid_read_failure"):
++        assert commands == ["start", "stop"]
++        assert saved["stopped"] is True and saved["lifecycle_state"] == "stopped"
++        assert not marker.exists()
++        cluster.assert_awaited_once()
++        clean.assert_called_once()
++    else:
++        assert commands == ["start"]
++        assert saved["stopped"] is False
++        assert saved["lifecycle_state"] == ("running" if outcome == "success" else "cleanup_required")
++        clean.assert_not_called()
+--- /dev/null
++++ b/backend/tests/integration/test_decision3_project_owner_transfer.py
+@@ -0,0 +1,24 @@
++"""Additional NEW-owner regression; the original85 live cases stay unchanged."""
++
++import pytest
++from sqlalchemy import text
++from sqlalchemy.exc import DBAPIError
++
++from tests.integration.test_decision3_postgres_rls import context, pg, records
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("visibility", ["private_draft", "public_preprint"])
++async def test_owner_cannot_transfer_project_ownership(pg, records, visibility):
++    row_id = records[visibility]["research_projects"]
++    async with pg.connect() as conn:
++        await context(conn, records["owner"], records["org"])
++        with pytest.raises(DBAPIError) as exc:
++            await conn.execute(text("UPDATE research_projects SET owner_actor_id=:outsider WHERE id=:id"),
++                               {"outsider": records["outsider"], "id": row_id})
++        assert exc.value.orig.sqlstate == "42501"
++        await conn.rollback()
++    async with pg.begin() as fresh:
++        await context(fresh, records["owner"])
++        assert (await fresh.execute(text("SELECT owner_actor_id FROM research_projects WHERE id=:id"),
++                                    {"id": row_id})).scalar_one() == records["owner"]

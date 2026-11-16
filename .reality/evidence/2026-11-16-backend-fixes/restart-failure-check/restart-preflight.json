@@ -1,0 +1,13 @@
+{
+  "data": "C:\\Users\\TIEN PC\\AppData\\Local\\Temp\\opencode\\reality-postgres-83c0e945\\data",
+  "system_id": "7708747722773675460",
+  "state": "shut down",
+  "config": {
+    "data_directory": "C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-postgres-83c0e945/data",
+    "port": "60655",
+    "listen_addresses": "127.0.0.1",
+    "cluster_name": "rs_test_74caee9603bb4ea986e62cb223864982"
+  },
+  "postmaster_marker_absent": true,
+  "port_available": true
+}

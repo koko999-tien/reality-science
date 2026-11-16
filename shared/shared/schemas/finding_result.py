@@ -36,6 +36,11 @@ class LayerFinding(BaseModel):
 class FindingResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
     job_id: str
+    # Optional for legacy/non-queue producers; mandatory at queue ingestion.
+    version_id: Optional[str] = None
+    target_entity_type: Optional[TargetEntityType] = None
+    target_entity_id: Optional[str] = None
+    bundle_sha256: Optional[str] = None
     state: FindingState
     diagnostic_code: str
     message: str

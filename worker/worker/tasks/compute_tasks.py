@@ -24,6 +24,19 @@ LAYER_NAMES = {
 
 @celery_app.task(name="worker.tasks.verify_equation_ast", bind=True)
 def verify_equation_ast(self, bundle_data: dict) -> dict:
+    """Celery transport boundary: correlate task, staged input and output."""
+    bundle = JobBundle.model_validate(bundle_data)
+    if not self.request.is_eager and self.request.id is not None and self.request.id != bundle.job_id:
+        raise ValueError("Celery task ID does not match staged job ID")
+    result = _verify_equation_ast(bundle_data)
+    result.update(version_id=bundle.version_id,
+                  target_entity_type=bundle.target_entity_type.value,
+                  target_entity_id=bundle.target_entity_id,
+                  bundle_sha256=bundle.fingerprint())
+    return result
+
+
+def _verify_equation_ast(bundle_data: dict) -> dict:
     """Executes the full 6-layer Reality Constraint Engine (RCE) validation pipeline:
     - Layer 1: Syntax & Semantics
     - Layer 2: Boundary & Singularities
@@ -518,13 +531,5 @@ def verify_equation_ast(self, bundle_data: dict) -> dict:
         )
         return finding.model_dump()
     except Exception as e:
-        finding = FindingResult(
-            job_id=bundle.job_id,
-            state=FindingState.FAIL,
-            diagnostic_code=DiagnosticCode.INVALID_AST.value,
-            message=f"Computation encountered unexpected error: {str(e)}",
-            dimensions_verified=False,
-            diagnostics=[str(e)],
-            layer_findings=layer_findings or None,
-        )
-        return finding.model_dump()
+        # Operational failures are Celery failures, never scientific verdicts.
+        raise RuntimeError("Scientific compute execution failed") from e

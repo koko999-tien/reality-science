@@ -1,0 +1,286 @@
+﻿[
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\.eslintrc.json",
+        "SHA256":  "1589A15E55FBEBC6519C95D91D8F0A090618F20DC78E479858B9C27552484961"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\__mocks__\\styleMock.js",
+        "SHA256":  "8222B8169EE86F25CDCCD84D340340060AE3F0CFF55E2EA9D344D7C332733B71"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\jest.config.js",
+        "SHA256":  "1545ADFD4E89198A46E963D5674AFD828066EAB1552A3F235DD5C2CAA1AF2D99"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\jest.setup.ts",
+        "SHA256":  "3D1021C2E67ABB06AABF0027A1410CE3A1383B5CECAC770A610580D479EF3732"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\next.config.ts",
+        "SHA256":  "331FEDC8EB052F50D2691B4232D62F0A58D1BDD7477FE13EF5087D66E8261829"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\next-env.d.ts",
+        "SHA256":  "F4E8976C19FC926644D72610BF1058BD6BF52ADD97E46A02BC0B912A751625C0"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\package.json",
+        "SHA256":  "150975807EAB6F1CB6C17381657FFE818C666A753DC9CA8E343B1467A0C30D6F"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\package-lock.json",
+        "SHA256":  "0197C59328829DDDBB45E1934E6E9A42470A3E446A6F5B66B567852069EE588C"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\postcss.config.mjs",
+        "SHA256":  "EFA65C65E17D51D58570EDCE9D702B0604FDF6A9B8DB65AFAED8F075AF8867C7"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\public\\.gitkeep",
+        "SHA256":  "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\app\\(auth)\\login\\page.tsx",
+        "SHA256":  "154C248D69D54987D74E818394AA1633AD245819F4D0A7AE38287BEE4B7AF4EE"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\app\\(auth)\\register\\page.tsx",
+        "SHA256":  "05AE5BC69B53B717D64152D040410084296C9F0BEBEE6986918820ED83EFA6D6"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\app\\(dashboard)\\projects\\[slug]\\editor\\page.tsx",
+        "SHA256":  "0805ABA95E07721631815BEA57F366C7D9A583B4D126E6ADDE4A3F0D213F9B5A"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\app\\(dashboard)\\projects\\[slug]\\page.tsx",
+        "SHA256":  "349ED0DE6A53F737A321B5E877FCC6D7ADE8F6ACE1B05B664CBF408FE8AB3963"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\app\\(dashboard)\\projects\\page.tsx",
+        "SHA256":  "3E8E22F1E5A1677323C0B1509E20749D6F9FA35E4242CB9399BFD7C0401D76B6"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\app\\globals.css",
+        "SHA256":  "D28510ADE051D51BB568275BF0BDB00979E676CAF7BA2EF7E68D90EDD8E82EC1"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\app\\layout.tsx",
+        "SHA256":  "235A68477CC95B53613C4CCA1DC3D4A1D09FD73659109E03D59B19E71CD6E826"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\app\\page.tsx",
+        "SHA256":  "D6FE62DE4047996072412B2395A98173DA2C689D5A8A3A970FF852B0DCD204FC"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\canvas\\KineticParticleField.tsx",
+        "SHA256":  "5CCEB5AE44C2AD2D9E41A82D7B6E0762E70505BF5E4C03B141ECD24300451B4E"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\AstVisualizer.tsx",
+        "SHA256":  "049BCE74920A7BF0E3F1F58FEA941EDB414F3D78F6FBFF9EAD2A2162E2D28DFF"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\CanvasToolbar.tsx",
+        "SHA256":  "60F35A7A23AD0CE27DC53F6CC63900692D357A01CB198FC612959BEEA1BACD53"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\edges\\PulseFlowEdge.tsx",
+        "SHA256":  "1DB3F4EE4F1934992EBF4AF275A35576FB8DFE94ED16A7EE800B5662FB725C70"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\nodes\\BinaryOpNode.tsx",
+        "SHA256":  "D7EA52E98B53D26655383C3D5A4703C65D08BE91B5BD643B2CB186A9741563E8"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\nodes\\ConstantNode.tsx",
+        "SHA256":  "966B45F72FCE5B5CF86143FEC5C86A95B4CFABB6C59491650690EB5F610C640A"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\nodes\\EquationRootNode.tsx",
+        "SHA256":  "14D7450A1425C9A5F3AB5B9F6C77FFE4FDDB1C2AAF0FCA5362497B8ABCCBDEA1"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\nodes\\FunctionCallNode.tsx",
+        "SHA256":  "475C6DCBC7C692830DB159F42BEB5CA6D3FFD363E9D16163E3FF5C91B00CC353"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\nodes\\UnaryOpNode.tsx",
+        "SHA256":  "FDAED044285788C638FF0084B083B1F85D74D29F66CC18D2B626EB2D0E99D23D"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\nodes\\VariableNode.tsx",
+        "SHA256":  "0E8803B4BA8B9C402F36B0CE99DA49E8835E6FED1DDF4B8113850EFFCC0A10C8"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\ScientificPresetsBar.tsx",
+        "SHA256":  "CAB9631BC2F1DD5D628D680F4AF7A4729FF4477FCEB302F674CAE2D34DB80DCD"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\canvas\\SymbolicCanvas.tsx",
+        "SHA256":  "A1B3108C5E2AF3A6CD422DA6A5836965E77A238407B964F239C59872C82258F1"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\KatexFormula.tsx",
+        "SHA256":  "15CFBE2B88BC844FA7C40AB92F691F5EFD74288AFB477FB8811D9018FFFA1B50"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\LayerPipelineMatrix.tsx",
+        "SHA256":  "B1F9CC13C371A7207E1F3897BB2C0E5A1C63E416128FC20F861F0F22EDFC8126"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\ValidationStatusBar.tsx",
+        "SHA256":  "BBD8A8381420AC0B6147C2EEB2924950A937790B482E8E04AE6084ECC900ADE3"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\VariableDeclarationPanel.tsx",
+        "SHA256":  "4EA01BCDC1727FE802DCAC587294BFE57215DF145C1CCD635DE87DFC6B460FC2"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\equations\\VariableTable.tsx",
+        "SHA256":  "B034EA070D28FF72B29EB417EF3456165B5A9F1291485C2D0584F40CECE0C845"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\home\\FeaturePillars.tsx",
+        "SHA256":  "A472E7B0AA958E32FD28ED77F0DF553FBBBCF8F00B73FD58843934843248B9EC"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\home\\ResearchProjectLookup.tsx",
+        "SHA256":  "7EB09B6C4307F03DBE389E29CD0687842E02AA4DB9B970D430715D8A3F3D82FC"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\home\\ScientificModelExample.tsx",
+        "SHA256":  "74B7D8D138FAEFCAC6CEFC6C050ECAF77958B288AE8801FCC8893F11A0CE4C79"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\home\\ScientificPresetDemo.tsx",
+        "SHA256":  "4DFE3E839223760105C2D0CE86C94BD66F661C78F9FE40CCF5A52C57D88F72B7"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\home\\WorkflowTour.tsx",
+        "SHA256":  "ABBC77603361F1E9FDE2CCC6CEF021E5550F2383E2517FDA4F375EC3E9DE622A"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\layout\\Navbar.tsx",
+        "SHA256":  "F89E22A041AD304FFA4B3574EA041CD57D4A9533E3C960DDD45CDD501D92D715"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\layout\\Sidebar.tsx",
+        "SHA256":  "959567A828E60A2B83B427C74C4C1EC06D46122D2F7863212FEAD7DF27B66DB4"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\ui\\Button.tsx",
+        "SHA256":  "BBE80581FBEEAA14A82DB350E430AE48307E95C1D90FF3F2F1D47FE680A157E3"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\ui\\Card.tsx",
+        "SHA256":  "98540EF024CDD211847B54D749205119FB58661DDED4D9204CA147AB4DFDF52A"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\ui\\Input.tsx",
+        "SHA256":  "2897456919C52E23D2AE6BCB16DF47EF43027627CCDE74C61E3B7E0C2E758370"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\components\\ui\\NoiseGrain.tsx",
+        "SHA256":  "A59369037268A8F6DB0DEC609AABD4FDFC0431D6B3D9C45428E10C5EB35862B1"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\hooks\\useEquationCanvas.ts",
+        "SHA256":  "02528EF6B13A80DBA9BB1E910E7EB90F6C52E82137CE7781D53334457D5E7814"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\lib\\api.ts",
+        "SHA256":  "599D42ABE0D593D7623A23A080E0D7512225F231C5550CB94A93AB9518FFFC68"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\lib\\ast.ts",
+        "SHA256":  "51D297C205A448549B2C2DEDE384EFA7E70788E13D8E34082DD5BA4512C04C14"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\lib\\ast_graph_converter.ts",
+        "SHA256":  "A3D64433C0D96EE64E1CFFAABFAA1EBB27544D490CA60079F6296B8DC1E0BF0A"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\lib\\formula_evaluator.ts",
+        "SHA256":  "600D45FA57EEA085D2F8823EFA0C27A6211E474F02F49E01AD7B5E44166021EF"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\lib\\presets.ts",
+        "SHA256":  "FE3BC25C091BFFAE2DEF119D8F9CD6E44B2EDF2DB8D658B37E88A86B996850B5"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\types\\canvas.ts",
+        "SHA256":  "5A6DBE72BBB61C020B628AAB15FEAC09AD2AEC5436971CA0B072D19A183309F5"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\src\\types\\contracts.ts",
+        "SHA256":  "44137AF3326C6E35680CE039D292872471B70532D4A993CAE561A8E8B3B23C78"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tailwind.config.ts",
+        "SHA256":  "53AD3BFBB32CAD747DF044E5687F1ADE978D4E1A671838C79B3DBCF8E96622FB"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\api_auth.test.ts",
+        "SHA256":  "02059260F5DD040AC97A26CE74D5B1EE3D0DBCC2009731C553B426AC5EC09A9B"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\api_offline.test.ts",
+        "SHA256":  "981378C1019DC4F05ED465F1F0E190C97B1C2E02757E2B73217E4A1CA94E28F4"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\ast_graph_converter.test.ts",
+        "SHA256":  "EE42C978EF4643692C738A952420834E2FA4FCDC623B165AF5FD0EDA6B298982"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\AstVisualizer.test.tsx",
+        "SHA256":  "638C2F60DDD145F8E6355B35017B58D0354596C0B2DD2C198C27B1E4E95A7D72"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\CustomNodes.test.tsx",
+        "SHA256":  "F38AC46B4C461B180350D67C9E6C772825CE41C432DA81637BFAE9441E8A4EFC"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\e2e_modernization.test.tsx",
+        "SHA256":  "17D4DBFEFB19284B89A03DE1356FC5BB9D8E45F2F697DD7CCEAC746C5A4A7106"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\editor_validation_integrity.test.tsx",
+        "SHA256":  "0C9DDEEED1213DCEC6378EA908195A3833938671EAC44C29EF8F1BBACA2EA29A"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\equation_canvas_state.test.tsx",
+        "SHA256":  "BCB6DB4D270441095BE578CE7DDD9B563D87745E571D0E9CC8E0C4933194D2BD"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\formula_evaluator.test.ts",
+        "SHA256":  "83A9F88DAE3EEE7C18FE0793AB180E2E2E53310058793CD14EB136DA2DF587A7"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\KatexFormula.test.tsx",
+        "SHA256":  "438DFE7AE13BC4B1C1E2C855F685339E3D0D786BA86B70A83F8B1EDFA4C6D500"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\LayerPipelineMatrix.test.tsx",
+        "SHA256":  "54FBBB11F7B306D0D0324773487B6D0567A8F3AA5920C1702BAC9FB6FCAD91A5"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\research_workspace_components.test.tsx",
+        "SHA256":  "A2C5BABCF68F7AE8F8AE9030DD4E5E658A49002CD794A562ECC5C529D6022D9D"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\ScientificPresetDemo.test.tsx",
+        "SHA256":  "B01826B3CBCF233B36BBAFFA58D5CB18AE368FE51DA5602DA19536EF3E229699"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\ValidationStatusBar.test.tsx",
+        "SHA256":  "077B0191897262A9299B42507E8A425B8C29D6A12D7D6C573593924E71E03C73"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tests\\VariableDeclarationPanel.test.tsx",
+        "SHA256":  "5647CB3CF8C4D81787D220B6E61B402D49F2BD86C1495FBD8D7F983920E5B622"
+    },
+    {
+        "Path":  "D:\\Reality_Science\\frontend\\tsconfig.json",
+        "SHA256":  "B2550A84FB50C462C38B7245C9755CDF1943BAC210C19193A9C83AB08AADC78A"
+    }
+]

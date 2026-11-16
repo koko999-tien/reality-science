@@ -3,23 +3,18 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import {
-  applyNodeChanges,
-  applyEdgeChanges,
-  addEdge,
-  Connection,
-  type OnNodesChange,
-  type OnEdgesChange,
-} from "@xyflow/react";
-
-import { VariableSpec, ExprNode, FindingResult } from "@/types/contracts";
-import { MathCanvasNode, MathCanvasEdge } from "@/types/canvas";
-import { graphToAst, astToGraph, TranslationError } from "@/lib/ast_graph_converter";
-import { exprNodeToLatex } from "@/lib/ast";
-import { validateEquationAst } from "@/lib/api";
-import { evaluateAstNumeric, formatEvaluatedValue, type EvaluationResult } from "@/lib/formula_evaluator";
+  VariableSpec,
+  ExprNode,
+  ResearchProjectModel,
+  EquationModel,
+  VariableModel,
+} from "@/types/contracts";
+import { assertCanonicalAst } from "@/lib/ast_graph_converter";
+import { fetchProjectBySlug, fetchVersionEquations, fetchVersionVariables } from "@/lib/api";
+import { formatEvaluatedValue } from "@/lib/formula_evaluator";
+import { useEquationCanvas } from "@/hooks/useEquationCanvas";
 
 import { SymbolicCanvas } from "@/components/equations/canvas/SymbolicCanvas";
-import { NodeTypeToAdd } from "@/components/equations/canvas/CanvasToolbar";
 import {
   ScientificPresetsBar,
   CANONICAL_PRESETS,
@@ -30,7 +25,7 @@ import { ValidationStatusBar } from "@/components/equations/ValidationStatusBar"
 import { KatexFormula } from "@/components/equations/KatexFormula";
 import { AstVisualizer } from "@/components/equations/AstVisualizer";
 import { Card } from "@/components/ui/Card";
-import { Code2, Sparkles, Layers, Activity, Calculator } from "lucide-react";
+import { Code2, Sparkles, Layers, Calculator } from "lucide-react";
 
 // Default physical variables for demonstration: v = a * t
 const INITIAL_VARIABLES: VariableSpec[] = [
@@ -65,117 +60,117 @@ const INITIAL_AST: ExprNode = {
   right: { node_type: "variable", value: "t" },
 };
 
-// Initial physical probe values for real-time telemetry calculation
-const DEFAULT_PROBE_SCOPE: Record<string, number> = {
-  v: 39.4,
-  v_0: 10,
-  a: 9.8,
-  t: 3,
-  m: 2,
-  c: 299792458,
-  G: 6.674e-11,
-  M: 5.972e24,
-  r: 6371000,
-  x: 5,
-  y: 10,
-  k: 1,
-};
-
 export default function EquationEditorPage({
   params: _params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const params = useParams();
-  const slug = (params?.slug as string) || "default-model";
+  const slug = (params?.slug as string) || "";
 
-  const [variables, setVariables] = useState<VariableSpec[]>(INITIAL_VARIABLES);
-  const [nodes, setNodes] = useState<MathCanvasNode[]>([]);
-  const [edges, setEdges] = useState<MathCanvasEdge[]>([]);
-  const [currentAst, setCurrentAst] = useState<ExprNode | null>(INITIAL_AST);
-  const [currentLatex, setCurrentLatex] = useState<string>("a \\cdot t");
-  const [probeScope] = useState<Record<string, number>>(DEFAULT_PROBE_SCOPE);
-  const [computedResult, setComputedResult] = useState<EvaluationResult>({
-    value: 29.4,
-    error: null,
-  });
-  const [validationResult, setValidationResult] = useState<FindingResult | null>(null);
-  const [isValidating, setIsValidating] = useState<boolean>(false);
-  const [translationError, setTranslationError] = useState<string | null>(null);
-  const [nodeIdCounter, setNodeIdCounter] = useState<number>(100);
+  const {
+    nodes, edges, variables, currentAst, currentLatex, computedResult,
+    validationResult, isValidating, translationError, replaceCanvas, cancelPendingValidation,
+    handleVariablesChange, handleNodeDataChange, onNodesChange, onEdgesChange, onConnect,
+    handleAddNode, handleAutoLayout, handleClear, handleValidate,
+  } = useEquationCanvas();
+  const [project, setProject] = useState<ResearchProjectModel | null>(null);
+  const [projectLoading, setProjectLoading] = useState(true);
+  const [projectError, setProjectError] = useState<string | null>(null);
+  const activeVersion = project?.versions?.[0] ?? null;
 
-  // Quick-Load Preset Handler
-  const handleSelectPreset = useCallback(async (preset: ScientificPreset) => {
-    setTranslationError(null);
+  // Presets populate only the local canvas; validation remains an explicit action.
+  const handleSelectPreset = useCallback((preset: ScientificPreset) => {
+    replaceCanvas(preset.ast, preset.variables);
+  }, [replaceCanvas]);
 
-    // 1. Update variables state
-    setVariables(preset.variables);
-
-    // 2. Build graph from preset AST and variables
-    const { nodes: newNodes, edges: newEdges } = astToGraph(preset.ast, preset.variables);
-    const pulseEdges = newEdges.map((e) => ({ ...e, type: "pulseFlow" }));
-
-    // 3. Compute live numerical evaluation
-    const evalRes = evaluateAstNumeric(preset.ast, probeScope);
-    setComputedResult(evalRes);
-
-    const latex = preset.formulaLatex || exprNodeToLatex(preset.ast);
-    setCurrentAst(preset.ast);
-    setCurrentLatex(latex);
-
-    // Enrich equation root node with computed preview
-    const enrichedNodes = newNodes.map((n) =>
-      n.type === "equationRootNode"
-        ? { ...n, data: { ...n.data, latex, computedValue: evalRes.value } }
-        : n
-    );
-    setNodes(enrichedNodes);
-    setEdges(pulseEdges);
-
-    // 4. Auto-trigger 6-layer scientific validation
-    setIsValidating(true);
-    try {
-      const finding = await validateEquationAst({
-        expression_ast: preset.ast,
-        variables: preset.variables,
-      });
-      setValidationResult(finding);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Validation failed";
-      setTranslationError(msg);
-    } finally {
-      setIsValidating(false);
-    }
-  }, [probeScope]);
-
-  // Initialize canvas with initial AST layout or query parameter preset
+  // Load the actual project/version records before describing the canvas context.
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const presetParam = urlParams.get("preset");
-      if (presetParam) {
-        const found = CANONICAL_PRESETS.find(
-          (p) => p.id === presetParam || p.id.toLowerCase().includes(presetParam.toLowerCase())
-        );
-        if (found) {
-          handleSelectPreset(found);
+    let active = true;
+
+    async function loadEditorContext() {
+      let loadedProject: ResearchProjectModel | null = null;
+      replaceCanvas(null, []);
+      setProjectLoading(true);
+      setProjectError(null);
+      setProject(null);
+      try {
+        loadedProject = slug ? await fetchProjectBySlug(slug) : null;
+        if (!active) return;
+        setProject(loadedProject);
+
+        const version = loadedProject?.versions?.[0];
+        if (version) {
+          let equations: EquationModel[];
+          let apiVariables: VariableModel[];
+          try {
+            [equations, apiVariables] = await Promise.all([
+              fetchVersionEquations(version.id),
+              fetchVersionVariables(version.id),
+            ]);
+          } catch (cause) {
+            if (!active) return;
+            setProjectError(cause instanceof Error ? cause.message : "Version records could not be loaded.");
+            replaceCanvas(null, []);
+            return;
+          }
+          if (!active) return;
+
+          const declaredVariables: VariableSpec[] = apiVariables.map((variable) => ({
+            symbol: variable.symbol,
+            name: variable.name,
+            unit: variable.unit,
+            domain: variable.domain as VariableSpec["domain"],
+            latex_presentation: variable.latex_presentation,
+          }));
+          const equation = equations[0];
+          if (equation?.canonical_ast_json) {
+            assertCanonicalAst(equation.canonical_ast_json);
+            const ast = equation.canonical_ast_json;
+            replaceCanvas(ast, declaredVariables);
+            return;
+          }
+
+          replaceCanvas(null, declaredVariables);
           return;
         }
+
+        if (loadedProject) {
+          replaceCanvas(null, []);
+          return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const presetParam = urlParams.get("preset");
+        const preset = presetParam
+          ? CANONICAL_PRESETS.find((item) => item.id === presetParam || item.id.toLowerCase().includes(presetParam.toLowerCase()))
+          : null;
+        const initialAst = preset?.ast ?? INITIAL_AST;
+        const initialVariables = preset?.variables ?? INITIAL_VARIABLES;
+        replaceCanvas(initialAst, initialVariables);
+      } catch (cause) {
+        if (!active) return;
+        if (loadedProject) {
+          setProject(loadedProject);
+          setProjectError(cause instanceof Error ? cause.message : "Project records could not be loaded.");
+          replaceCanvas(null, []);
+          return;
+        }
+
+        setProject(null);
+        setProjectError(cause instanceof Error ? cause.message : "Project context could not be loaded.");
+        replaceCanvas(INITIAL_AST, INITIAL_VARIABLES);
+      } finally {
+        if (active) setProjectLoading(false);
       }
     }
 
-    const { nodes: initialNodes, edges: initialEdges } = astToGraph(INITIAL_AST, INITIAL_VARIABLES);
-    const initialEval = evaluateAstNumeric(INITIAL_AST, DEFAULT_PROBE_SCOPE);
-    setComputedResult(initialEval);
-
-    const enriched = initialNodes.map((n) =>
-      n.type === "equationRootNode"
-        ? { ...n, data: { ...n.data, computedValue: initialEval.value } }
-        : n
-    );
-    setNodes(enriched);
-    setEdges(initialEdges.map((e) => ({ ...e, type: "pulseFlow" })));
-  }, [handleSelectPreset]);
+    loadEditorContext();
+    return () => {
+      active = false;
+      cancelPendingValidation();
+    };
+  }, [slug, replaceCanvas, cancelPendingValidation]);
 
   // Compute set of symbols currently used on canvas
   const usedSymbols = useMemo(() => {
@@ -188,246 +183,34 @@ export default function EquationEditorPage({
     return syms;
   }, [nodes]);
 
-  // Synchronize AST, live LaTeX, and formula evaluator when nodes or edges change
-  const syncAst = useCallback(
-    (currentNodes: MathCanvasNode[], currentEdges: MathCanvasEdge[]) => {
-      try {
-        const ast = graphToAst(currentNodes, currentEdges, variables);
-        const latex = exprNodeToLatex(ast);
-        setCurrentAst(ast);
-        setCurrentLatex(latex);
-        setTranslationError(null);
-
-        // Live real-time numerical formula evaluation
-        const evalRes = evaluateAstNumeric(ast, probeScope);
-        setComputedResult(evalRes);
-
-        // Update EquationRootNode with live LaTeX and computed value if present
-        setNodes((prevNodes) =>
-          prevNodes.map((n) =>
-            n.type === "equationRootNode"
-              ? { ...n, data: { ...n.data, latex, computedValue: evalRes.value } }
-              : n
-          )
-        );
-      } catch (err) {
-        if (err instanceof TranslationError) {
-          setTranslationError(err.message);
-        }
-      }
-    },
-    [variables, probeScope]
-  );
-
-  const onNodesChange: OnNodesChange<MathCanvasNode> = useCallback(
-    (changes) => {
-      setNodes((nds) => {
-        const nextNodes = applyNodeChanges(changes, nds) as MathCanvasNode[];
-        syncAst(nextNodes, edges);
-        return nextNodes;
-      });
-    },
-    [edges, syncAst]
-  );
-
-  const onEdgesChange: OnEdgesChange = useCallback(
-    (changes) => {
-      setEdges((eds) => {
-        const nextEdges = applyEdgeChanges(changes, eds) as MathCanvasEdge[];
-        syncAst(nodes, nextEdges);
-        return nextEdges;
-      });
-    },
-    [nodes, syncAst]
-  );
-
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      setEdges((eds) => {
-        const nextEdges = addEdge(
-          {
-            ...connection,
-            type: "pulseFlow",
-            animated: true,
-            style: { stroke: "#0ea5e9", strokeWidth: 2 },
-          },
-          eds
-        ) as MathCanvasEdge[];
-        syncAst(nodes, nextEdges);
-        return nextEdges;
-      });
-    },
-    [nodes, syncAst]
-  );
-
-  const handleNodeDataChange = useCallback(
-    (nodeId: string, updatedData: Record<string, unknown>) => {
-      setNodes((prevNodes) => {
-        const nextNodes = prevNodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...updatedData } } : n
-        ) as MathCanvasNode[];
-        syncAst(nextNodes, edges);
-        return nextNodes;
-      });
-    },
-    [edges, syncAst]
-  );
-
-  const handleAddNode = useCallback(
-    (type: NodeTypeToAdd) => {
-      const newId = `node_${nodeIdCounter + 1}`;
-      setNodeIdCounter((c) => c + 1);
-
-      // Position in viewport center or slightly staggered
-      const x = 120 + (nodes.length % 5) * 40;
-      const y = 140 + (nodes.length % 5) * 40;
-
-      let newNode: MathCanvasNode;
-
-      switch (type) {
-        case "constant":
-          newNode = {
-            id: newId,
-            type: "constantNode",
-            position: { x, y },
-            data: { value: 1 },
-          };
-          break;
-        case "variable":
-          newNode = {
-            id: newId,
-            type: "variableNode",
-            position: { x, y },
-            data: {
-              symbol: variables[0]?.symbol || "v",
-              name: variables[0]?.name,
-              unit: variables[0]?.unit,
-            },
-          };
-          break;
-        case "binary_op":
-          newNode = {
-            id: newId,
-            type: "binaryOpNode",
-            position: { x, y },
-            data: { op: "+" },
-          };
-          break;
-        case "unary_op":
-          newNode = {
-            id: newId,
-            type: "unaryOpNode",
-            position: { x, y },
-            data: { op: "neg" },
-          };
-          break;
-        case "function_call":
-          newNode = {
-            id: newId,
-            type: "functionCallNode",
-            position: { x, y },
-            data: { func: "sqrt" },
-          };
-          break;
-        case "equation_root":
-          newNode = {
-            id: newId,
-            type: "equationRootNode",
-            position: { x, y },
-            data: { name: "R", latex: currentLatex, computedValue: computedResult.value },
-          };
-          break;
-      }
-
-      setNodes((nds) => [...nds, newNode]);
-    },
-    [nodeIdCounter, nodes.length, variables, currentLatex, computedResult.value]
-  );
-
-  const handleAutoLayout = useCallback(() => {
-    try {
-      const ast = graphToAst(nodes, edges, variables);
-      const { nodes: layoutNodes, edges: layoutEdges } = astToGraph(ast, variables);
-      setNodes(layoutNodes);
-      setEdges(layoutEdges.map((e) => ({ ...e, type: "pulseFlow" })));
-      setTranslationError(null);
-    } catch (err) {
-      if (err instanceof TranslationError) {
-        setTranslationError(`Cannot auto-layout: ${err.message}`);
-      }
-    }
-  }, [nodes, edges, variables]);
-
-  const handleClear = useCallback(() => {
-    if (window.confirm("Are you sure you want to clear the entire canvas?")) {
-      setNodes([]);
-      setEdges([]);
-      setCurrentAst(null);
-      setCurrentLatex("");
-      setComputedResult({ value: null, error: null });
-      setValidationResult(null);
-      setTranslationError(null);
-    }
-  }, []);
-
-  const handleValidate = useCallback(async () => {
-    setIsValidating(true);
-    setTranslationError(null);
-
-    try {
-      // 1. Convert canvas to canonical AST
-      const ast = graphToAst(nodes, edges, variables);
-      setCurrentAst(ast);
-      setCurrentLatex(exprNodeToLatex(ast));
-
-      // 2. Dispatch to backend compute sandbox (or pre-flight fallback)
-      const finding = await validateEquationAst({
-        expression_ast: ast,
-        variables,
-      });
-
-      setValidationResult(finding);
-    } catch (err) {
-      if (err instanceof TranslationError) {
-        setTranslationError(err.message);
-        setValidationResult({
-          job_id: `err-${Date.now()}`,
-          state: "FAIL",
-          diagnostic_code: "AST_CONSTRUCTION_ERROR",
-          message: err.message,
-          dimensions_verified: false,
-          diagnostics: [
-            `Node '${err.nodeId || "canvas"}' triggered validation failure: ${err.message}`,
-            "Inspect canvas port connections and declared symbols.",
-          ],
-        });
-      } else {
-        const errorMsg = (err as Error)?.message || "Unknown validation error";
-        setTranslationError(errorMsg);
-      }
-    } finally {
-      setIsValidating(false);
-    }
-  }, [nodes, edges, variables]);
+  if (projectLoading) {
+    return (
+      <div role="status" className="container mx-auto max-w-7xl p-6 text-sm text-slate-300">
+        Loading project records…
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
             <Layers className="h-4 w-4" />
-            <span>Interactive Symbolic Canvas Studio</span>
-            <span className="flex items-center gap-1 text-[10px] bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 px-2 py-0.5 rounded-full font-mono shadow-sm">
-              <Activity className="w-3 h-3 text-cyan-400 animate-pulse" />
-              PulseFlow Active
-            </span>
+            <span>Research equation workspace</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 mt-1">
-            Mathematical Model Editor — {slug}
+          <h1 className="mt-1 text-2xl font-semibold text-slate-100 sm:text-3xl">
+            {project?.title || "Local equation draft"}
           </h1>
-          <p className="text-sm text-slate-400">
-            Structured symbol-first authoring with live Pint dimensional verification and SymPy simplification.
+          <p className="text-sm text-slate-400" aria-live="polite">
+            {projectLoading
+              ? "Loading project records…"
+              : activeVersion
+              ? `Project ${project?.slug} · Version ${activeVersion.version_number}: ${activeVersion.title}. Canvas edits are not saved automatically.`
+              : project
+              ? "No version is recorded for this project. Canvas edits remain local and are not persisted."
+              : "Illustrative local draft. Canvas edits are not persisted to a project."}
           </p>
         </div>
 
@@ -449,7 +232,7 @@ export default function EquationEditorPage({
           {computedResult?.value !== null && computedResult?.value !== undefined && (
             <div className="flex items-center gap-1.5 pl-3 border-l border-white/10 text-xs font-mono text-cyan-300">
               <Calculator className="h-3.5 w-3.5 text-cyan-400" />
-              <span className="text-slate-400">Preview:</span>
+              <span className="text-slate-400">Local calculation:</span>
               <span className="font-bold text-white bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-500/40 shadow-inner">
                 R ≈ {formatEvaluatedValue(computedResult.value)}
               </span>
@@ -458,9 +241,21 @@ export default function EquationEditorPage({
         </div>
       </div>
 
+      {projectError && (
+        <div role="alert" className="border border-amber-700/70 bg-amber-950/30 p-3 text-sm text-amber-100">
+          {project
+            ? `Stored project records could not be loaded: ${projectError}. The canvas was cleared and no example data was substituted.`
+            : `Project lookup failed: ${projectError}. This illustrative local draft is not associated with the requested project.`}
+        </div>
+      )}
+
+      <p role="status" className="border border-slate-700 bg-slate-900/70 p-3 text-xs text-slate-300">
+        Interactive checks are ad hoc API responses; they do not create persisted validation history. Recorded versions can be validated from their project page.
+      </p>
+
       {/* Translation Error Alert */}
       {translationError && (
-        <div className="rounded-xl border border-rose-800/80 bg-rose-950/60 p-4 text-xs text-rose-300 shadow-tactile-card flex items-center justify-between">
+        <div role="alert" className="rounded-xl border border-rose-800/80 bg-rose-950/60 p-4 text-xs text-rose-300 shadow-tactile-card flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-bold font-mono uppercase tracking-wider text-rose-400">Canvas Notice:</span>
             <span>{translationError}</span>
@@ -476,7 +271,7 @@ export default function EquationEditorPage({
         {/* Symbol-First Declaration Panel */}
         <VariableDeclarationPanel
           variables={variables}
-          onVariablesChange={setVariables}
+          onVariablesChange={handleVariablesChange}
           usedSymbols={usedSymbols}
         />
 
@@ -523,8 +318,8 @@ export default function EquationEditorPage({
                 <Code2 className="h-4 w-4 text-cyan-400" />
                 AST Tree Inspection &amp; Serialization
               </h3>
-              <span className="text-xs font-mono text-cyan-400">
-                Layer 1 Syntax Guard: PASS
+              <span className="text-xs font-mono text-slate-400">
+                AST preview · not a validation result
               </span>
             </div>
             <AstVisualizer ast={currentAst} />

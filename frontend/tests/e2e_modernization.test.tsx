@@ -4,8 +4,8 @@
  * Covers 4 Tiers of verification:
  * - Tier 1: Feature Coverage (Landing hero, Preset demo, Navbar, Presets bar, PulseFlowEdge, Dark glass nodes)
  * - Tier 2: Boundary & Corner Cases (Dimensional mismatch, Singularities, Missing operands, Cycle & depth limits)
- * - Tier 3: Cross-Feature Combinations (Preset -> AST -> 6-Layer verification, Dark tokens, Variable live-sync)
- * - Tier 4: Real-World Application Scenarios (Full researcher workflow, Network resilience & local preflight)
+ * - Tier 3: Cross-Feature Combinations (Preset -> AST translation, Dark tokens, Variable live-sync)
+ * - Tier 4: Real-World Application Scenarios (Local draft workflow, backend-only results)
  */
 
 import React from "react";
@@ -30,7 +30,6 @@ import { VariableDeclarationPanel } from "@/components/equations/VariableDeclara
 import { ValidationStatusBar } from "@/components/equations/ValidationStatusBar";
 import { LayerPipelineMatrix } from "@/components/equations/LayerPipelineMatrix";
 import { KatexFormula } from "@/components/equations/KatexFormula";
-import { ScientificPresetDemo } from "@/components/home/ScientificPresetDemo";
 import { ScientificPresetsBar } from "@/components/equations/canvas/ScientificPresetsBar";
 import { PulseFlowEdge } from "@/components/equations/canvas/edges/PulseFlowEdge";
 
@@ -109,14 +108,14 @@ describe("E2E Modernization Test Suite", () => {
         render(<HomePage />);
         const heading = screen.getByRole("heading", { level: 1 });
         expect(heading).toHaveTextContent(/REALITY SCIENCE/i);
-        expect(
-          screen.getByText(/Evidence-Driven Scientific Hypothesis & Mathematical Verification Engine/i)
-        ).toBeInTheDocument();
+        expect(screen.getByText(/keep the evidence that supports a result in view/i)).toBeInTheDocument();
+        expect(screen.getByText("Illustrative example", { exact: true })).toBeInTheDocument();
+        expect(screen.getByText(/not run/i)).toBeInTheDocument();
       });
 
       it("provides direct navigation into projects and studio without raw API docs confusion", () => {
         render(<HomePage />);
-        const exploreLink = screen.getByRole("link", { name: /Explore Projects|Studio Canvas|Launch Studio/i });
+        const exploreLink = screen.getByRole("link", { name: /Explore research projects/i });
         expect(exploreLink).toHaveAttribute("href", expect.stringMatching(/\/projects/));
       });
 
@@ -129,8 +128,8 @@ describe("E2E Modernization Test Suite", () => {
       });
     });
 
-    describe("1.2 Hero 1-Click Verification Demo widget (ScientificPresetDemo)", () => {
-      it("validates the 4 canonical physical laws configured for instant hero verification", async () => {
+    describe("1.2 Illustrative equation presets", () => {
+      it("keeps example ASTs available without asserting verification outcomes", () => {
         const heroLaws = CANONICAL_PRESETS.slice(0, 4);
         expect(heroLaws.length).toBe(4);
 
@@ -139,53 +138,13 @@ describe("E2E Modernization Test Suite", () => {
           expect(preset.variables.length).toBeGreaterThan(0);
           expect(preset.ast.node_type).toBe("binary_op");
 
-          const res = await validateEquationAst({
-            expression_ast: preset.ast,
-            variables: preset.variables,
-          });
-
-          expect(res.state).toBe("PASS");
-          expect(res.dimensions_verified).toBe(true);
-          expect(res.layer_findings?.[1]?.state).toBe("PASS");
+          const graph = astToGraph(preset.ast, preset.variables);
+          expect(graphToAst(graph.nodes, graph.edges, preset.variables)).toEqual(preset.ast);
         }
-      });
-
-      it("mounts ScientificPresetDemo and allows interactive preset switching", async () => {
-        render(<ScientificPresetDemo />);
-
-        // Verify container and title
-        expect(screen.getByTestId("scientific-preset-demo")).toBeInTheDocument();
-        expect(screen.getByText(/1-Click Scientific Presets Verification/i)).toBeInTheDocument();
-
-        // Default preset: Kinematics
-        expect(screen.getByText(/Kinematics Velocity/i)).toBeInTheDocument();
-
-        // Click Einstein preset tab
-        const einsteinBtn = screen.getByRole("tab", { name: /Einstein/i });
-        expect(einsteinBtn).toBeInTheDocument();
-        fireEvent.click(einsteinBtn);
-
-        // Verify telemetry badge and formula update
-        await waitFor(() => {
-          expect(
-            screen.getByText(/Lorentz-Poincaré Mass-Energy Equivalence Verified/i)
-          ).toBeInTheDocument();
-        });
-
-        // Click Negative Control preset tab
-        const negativeControlBtn = screen.getByRole("tab", { name: /Dimensional Invariant Violation/i });
-        fireEvent.click(negativeControlBtn);
-
-        await waitFor(() => {
-          expect(screen.getByTestId("preset-verdict-badge")).toHaveTextContent("FAIL");
-          expect(
-            screen.getByText(/FAIL at Layer 3: Dimensional Homogeneity Violation/i)
-          ).toBeInTheDocument();
-        });
       });
     });
 
-    describe("1.3 Persistent glassmorphic Navbar with live engine status", () => {
+    describe("1.3 Research workspace navbar", () => {
       it("renders glassmorphic container with high-tech border and backdrop blur", () => {
         const { container } = render(<Navbar />);
         const header = container.querySelector("header");
@@ -195,19 +154,13 @@ describe("E2E Modernization Test Suite", () => {
         expect(header?.className).toContain("border-b");
       });
 
-      it("displays live 6-Layer RCE Engine Online telemetry pill with animated ping", () => {
+      it("does not display unobserved engine status", () => {
         render(<Navbar />);
-        const statusPill = screen.getByRole("status");
-        expect(statusPill).toHaveTextContent(/6-Layer RCE Engine Online/i);
-        const pingIndicator = statusPill.querySelector(".animate-ping");
-        expect(pingIndicator).toBeInTheDocument();
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
       });
 
-      it("includes direct links to Studio Canvas, Projects, and GitHub repository", () => {
+      it("includes project and source repository links", () => {
         render(<Navbar />);
-        const studioLink = screen.getByRole("link", { name: /Studio Canvas/i });
-        expect(studioLink).toHaveAttribute("href", "/projects/default-model/editor");
-
         const projectsLink = screen.getByRole("link", { name: /Projects/i });
         expect(projectsLink).toHaveAttribute("href", "/projects");
 
@@ -445,17 +398,17 @@ describe("E2E Modernization Test Suite", () => {
   // =========================================================================
   describe("Tier 2: Boundary & Corner Cases", () => {
     describe("2.1 Dimensional violation detection (meter + second)", () => {
-      it("processes backend HTTP 422 dimensional error via validateEquationAst and updates UI", async () => {
+      it("renders a dimensional finding returned by the validation API", async () => {
         const originalFetch = (global as any).fetch;
         (global as any).fetch = jest.fn().mockResolvedValue({
-          ok: false,
-          status: 422,
-          statusText: "Unprocessable Entity",
+          ok: true,
           json: async () => ({
+            job_id: "verify-test-mismatch",
             state: "FAIL",
             diagnostic_code: "DIMENSIONAL_MISMATCH",
             message: "Cannot add quantities with dimensions [length] and [time].",
             dimensions_verified: false,
+            diagnostics: ["Incompatible dimension addition"],
             layer_findings: {
               3: {
                 layer: 3,
@@ -502,7 +455,7 @@ describe("E2E Modernization Test Suite", () => {
         (global as any).fetch = originalFetch;
       });
 
-      it("rejects incompatible dimensions in offline preflight without calling backend", async () => {
+      it("does not return a scientific result when the backend is unavailable", async () => {
         const originalFetch = (global as any).fetch;
         (global as any).fetch = jest.fn().mockRejectedValue(new Error("Network connection refused"));
 
@@ -518,15 +471,11 @@ describe("E2E Modernization Test Suite", () => {
           { symbol: "t", name: "Time", unit: "second" },
         ];
 
-        const result = await validateEquationAst({
+        await expect(validateEquationAst({
           expression_ast: meterPlusSecondAst,
           variables,
-        });
-
-        expect(result.state).toBe("FAIL");
-        expect(result.diagnostic_code).toBe("DIMENSIONAL_MISMATCH");
-        expect(result.dimensions_verified).toBe(false);
-        expect(result.layer_findings?.[3]?.state).toBe("FAIL");
+        })).rejects.toThrow(/Network connection refused/);
+        expect((global as any).fetch).toHaveBeenCalledTimes(1);
 
         (global as any).fetch = originalFetch;
       });
@@ -784,8 +733,8 @@ describe("E2E Modernization Test Suite", () => {
   // TIER 3: CROSS-FEATURE COMBINATIONS
   // =========================================================================
   describe("Tier 3: Cross-Feature Combinations", () => {
-    describe("3.1 Preset selection -> AST translation -> live 6-layer verification pipeline", () => {
-      it("round-trips Einstein E = mc^2 preset and executes 6-layer verification", async () => {
+    describe("3.1 Preset selection and AST translation", () => {
+      it("round-trips Einstein E = mc^2 without fabricating a verification result", () => {
         const einstein = CANONICAL_PRESETS.find((p) => p.id === "einstein-energy")!;
         expect(einstein).toBeDefined();
 
@@ -803,33 +752,16 @@ describe("E2E Modernization Test Suite", () => {
         expect(latex).toContain("m");
         expect(latex).toContain("c");
 
-        // 4. Verify live 6-layer pipeline
-        const finding = await validateEquationAst({
-          expression_ast: roundTripAst,
-          variables: einstein.variables,
-        });
-
-        expect(finding.state).toBe("PASS");
-        expect(finding.diagnostic_code).toBe("PREFLIGHT_OK");
-        expect(finding.dimensions_verified).toBe(true);
-        expect(finding.layer_findings?.[1]?.state).toBe("PASS");
-        expect(finding.layer_findings?.[2]?.state).toBe("PASS");
-        expect(finding.layer_findings?.[3]?.state).toBe("PASS");
+        expect(roundTripAst).toEqual(einstein.ast);
       });
 
-      it("verifies Newton's Gravity round-trip and multi-variable dimensional binding", async () => {
+      it("round-trips Newton's Gravity AST and declared variables", () => {
         const gravity = CANONICAL_PRESETS.find((p) => p.id === "newton-gravity")!;
         const { nodes, edges } = astToGraph(gravity.ast, gravity.variables);
         const roundTripAst = graphToAst(nodes, edges, gravity.variables);
 
         expect(roundTripAst).toEqual(gravity.ast);
-        const finding = await validateEquationAst({
-          expression_ast: roundTripAst,
-          variables: gravity.variables,
-        });
-
-        expect(finding.state).toBe("PASS");
-        expect(finding.layer_findings?.[3]?.name).toContain("Dimensional");
+        expect(gravity.variables.map((variable) => variable.symbol)).toContain("G");
       });
     });
 
@@ -934,8 +866,8 @@ describe("E2E Modernization Test Suite", () => {
   // TIER 4: REAL-WORLD APPLICATION SCENARIOS
   // =========================================================================
   describe("Tier 4: Real-World Application Scenarios", () => {
-    describe("4.1 Full researcher workflow (Landing -> Studio Canvas -> Verification)", () => {
-      it("executes complete model inspection and verification flow on Studio Canvas", async () => {
+    describe("4.1 Local equation draft workflow", () => {
+      it("does not treat an unknown route slug as a project record", async () => {
         // Mount EquationEditorPage
         render(
           <EquationEditorPage
@@ -943,9 +875,8 @@ describe("E2E Modernization Test Suite", () => {
           />
         );
 
-        // 1. Verify editor header with slug
-        expect(screen.getByText(/Mathematical Model Editor — general-relativity/i)).toBeInTheDocument();
-        expect(screen.getByText(/Interactive Symbolic Canvas/i)).toBeInTheDocument();
+        await screen.findByText("Local equation draft");
+        expect(screen.getByText(/not persisted to a project/i)).toBeInTheDocument();
 
         // 2. Verify canvas is populated with mock nodes and initial formula
         const canvas = screen.getByTestId("xyflow-mock-canvas");
@@ -957,19 +888,15 @@ describe("E2E Modernization Test Suite", () => {
         expect(validateBtn).toBeInTheDocument();
         fireEvent.click(validateBtn);
 
-        // 4. Await verification status completion
         await waitFor(() => {
-          expect(screen.getByTestId("finding-state-badge")).toHaveTextContent("PASS");
-          expect(screen.getByText("VERIFIED")).toBeInTheDocument();
+          expect(screen.getByTestId("finding-state-badge")).toHaveTextContent("NOT YET TESTED");
         });
-
-        // 5. Verify telemetry and job ID display
-        expect(screen.getByText(/Job:\s*local-/i)).toBeInTheDocument();
+        expect(screen.queryByText("PASS")).not.toBeInTheDocument();
       });
     });
 
-    describe("4.2 Network resilience & graceful client pre-flight fallback", () => {
-      it("falls back gracefully to local preflight when backend is unavailable", async () => {
+    describe("4.2 Network resilience and backend-only results", () => {
+  it("surfaces backend unavailability instead of manufacturing a validation result", async () => {
         // Mock global fetch network error
         const originalFetch = (global as any).fetch;
         (global as any).fetch = jest.fn().mockRejectedValue(new Error("Network connection refused"));
@@ -979,17 +906,7 @@ describe("E2E Modernization Test Suite", () => {
           variables: CANONICAL_PRESETS[1].variables,
         };
 
-        const result = await validateEquationAst(payload);
-
-        // Check fallback attributes
-        expect(result).toBeDefined();
-        expect(result.job_id).toMatch(/^local-\d+$/);
-        expect(result.state).toBe("PASS");
-        expect(result.diagnostic_code).toBe("PREFLIGHT_OK");
-        expect(result.dimensions_verified).toBe(true);
-        expect(result.layer_findings?.[1]?.state).toBe("PASS");
-        expect(result.layer_findings?.[2]?.state).toBe("PASS");
-        expect(result.layer_findings?.[3]?.state).toBe("PASS");
+        await expect(validateEquationAst(payload)).rejects.toThrow(/Network connection refused/);
 
         if (originalFetch) {
           (global as any).fetch = originalFetch;
@@ -998,32 +915,10 @@ describe("E2E Modernization Test Suite", () => {
         }
       });
 
-      it("displays offline preflight verification badge in status bar without crashing", () => {
-        const offlineResult: FindingResult = {
-          job_id: "local-1700000000000",
-          state: "PASS",
-          diagnostic_code: "PREFLIGHT_OK",
-          message: "Pre-flight AST validation passed. Ready for compute sandbox dispatch.",
-          dimensions_verified: true,
-          diagnostics: ["Pre-flight syntax checks passed across 2 declared symbols."],
-          layer_findings: {
-            1: { layer: 1, name: "Syntax", state: "PASS", diagnostic_code: "OK", message: "Pass", diagnostics: [] },
-          },
-        };
-
-        render(
-          <ValidationStatusBar
-            result={offlineResult}
-            isValidating={false}
-            onValidate={jest.fn()}
-          />
-        );
-
-        const badge = screen.getByTestId("finding-state-badge");
-        expect(badge).toHaveTextContent("PASS");
-        expect(screen.getByText("VERIFIED")).toBeInTheDocument();
-        expect(screen.getByText("PREFLIGHT_OK")).toBeInTheDocument();
-        expect(screen.getByText("Job: local-17")).toBeInTheDocument();
+      it("keeps state untested when no backend result exists", () => {
+        render(<ValidationStatusBar result={null} isValidating={false} onValidate={jest.fn()} />);
+        expect(screen.getByTestId("finding-state-badge")).toHaveTextContent("NOT YET TESTED");
+        expect(screen.queryByText("PREFLIGHT_OK")).not.toBeInTheDocument();
       });
     });
   });

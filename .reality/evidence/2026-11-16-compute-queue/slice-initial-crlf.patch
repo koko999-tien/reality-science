@@ -1,0 +1,1202 @@
+--- a/backend/app/core/redis.py
++++ b/backend/app/core/redis.py
+@@ -8,7 +8,8 @@
+ async def get_redis_client() -> Redis:
+     global redis_client
+     if redis_client is None:
+-        redis_client = from_url(settings.redis_url, encoding="utf-8", decode_responses=True)
++        redis_client = from_url(settings.redis_url, encoding="utf-8", decode_responses=True,
++                                socket_connect_timeout=2, socket_timeout=2)
+     return redis_client
+ 
+ 
+@@ -16,7 +17,8 @@
+     global redis_result_client
+     if redis_result_client is None:
+         redis_result_client = from_url(
+-            settings.celery_result_backend_url, encoding="utf-8", decode_responses=True
++            settings.celery_result_backend_url, encoding="utf-8", decode_responses=True,
++            socket_connect_timeout=2, socket_timeout=2
+         )
+     return redis_result_client
+ 
+@@ -24,8 +26,8 @@
+ async def close_redis_client() -> None:
+     global redis_client, redis_result_client
+     if redis_client is not None:
+-        await redis_client.close()
++        await redis_client.aclose()
+         redis_client = None
+     if redis_result_client is not None:
+-        await redis_result_client.close()
++        await redis_result_client.aclose()
+         redis_result_client = None
+--- /dev/null
++++ b/backend/app/modules/compute_orchestrator/errors.py
+@@ -0,0 +1,13 @@
++"""Transport failures are distinct from scientific FindingState values."""
++
++
++class ComputeUnavailable(RuntimeError):
++    pass
++
++
++class ComputeTimeout(ComputeUnavailable):
++    pass
++
++
++class InvalidComputeResult(ComputeUnavailable):
++    pass
+--- a/backend/app/modules/compute_orchestrator/dispatcher.py
++++ b/backend/app/modules/compute_orchestrator/dispatcher.py
+@@ -1,7 +1,9 @@
+ import base64
+ import json
+ import uuid
++from datetime import datetime, timedelta, timezone
+ from app.core.redis import get_redis_client
++from app.modules.compute_orchestrator.errors import ComputeUnavailable
+ from shared.schemas.job_bundle import JobBundle
+ 
+ 
+@@ -11,10 +13,13 @@
+     """
+     redis = await get_redis_client()
+     task_id = bundle.job_id
+-    args = [bundle.model_dump()]
++    args = [bundle.model_dump(mode="json")]
+     kwargs = {}
+     body = [args, kwargs, {"callbacks": None, "errbacks": None, "chain": None, "chord": None}]
+-    body_b64 = base64.b64encode(json.dumps(body).encode("utf-8")).decode("utf-8")
++    encoded_body = json.dumps(body, allow_nan=False).encode("utf-8")
++    if len(encoded_body) > 10 * 1024 * 1024:
++        raise ComputeUnavailable("Compute payload exceeds the queue limit")
++    body_b64 = base64.b64encode(encoded_body).decode("utf-8")
+ 
+     envelope = {
+         "body": body_b64,
+@@ -29,6 +34,9 @@
+             "kwargsrepr": "{}",
+             "origin": "backend@reality_science",
+             "retries": 0,
++            "expires": (datetime.now(timezone.utc) + timedelta(seconds=bundle.timeout_seconds + 5)).isoformat(),
++            # Celery v2 consumer expects (hard, soft), as emitted by as_task_v2.
++            "timelimit": [bundle.timeout_seconds + 5, bundle.timeout_seconds],
+         },
+         "content-type": "application/json",
+         "properties": {
+@@ -45,5 +53,10 @@
+         },
+         "content-encoding": "utf-8",
+     }
++    # A server-generated job ID is single-use, even after timeout/failed publish.
++    # Retain the tombstone longer than both Celery result and visibility TTLs.
++    claimed = await redis.set(f"compute-dispatched:{task_id}", bundle.fingerprint(), nx=True, ex=86400)
++    if not claimed:
++        raise ComputeUnavailable("Compute job ID has already been dispatched")
+     await redis.lpush("compute_tasks", json.dumps(envelope))
+     return task_id
+--- a/backend/app/modules/compute_orchestrator/ingestion.py
++++ b/backend/app/modules/compute_orchestrator/ingestion.py
+@@ -1,5 +1,7 @@
+ import json
++from pydantic import ValidationError
+ from app.core.redis import get_redis_result_client
++from app.modules.compute_orchestrator.errors import ComputeUnavailable, InvalidComputeResult
+ from shared.schemas.finding_result import FindingResult
+ 
+ 
+@@ -10,6 +12,24 @@
+     raw = await redis.get(key)
+     if not raw:
+         return None
+-    data = json.loads(raw)
+-    result_dict = data.get("result", {})
+-    return FindingResult.model_validate(result_dict)
++    try:
++        data = json.loads(raw)
++        if not isinstance(data, dict) or data.get("task_id") != job_id:
++            raise InvalidComputeResult("Celery result task identity mismatch")
++        if data.get("status") in {"PENDING", "RECEIVED", "STARTED", "RETRY"}:
++            return None
++        if data.get("status") in {"FAILURE", "REVOKED"}:
++            raise ComputeUnavailable("Compute task failed or expired")
++        if data.get("status") != "SUCCESS":
++            raise InvalidComputeResult("Unknown Celery result status")
++        finding = FindingResult.model_validate(data.get("result"))
++        if finding.job_id != job_id:
++            raise InvalidComputeResult("Finding job identity mismatch")
++        return finding
++    except (ValueError, TypeError, ValidationError) as exc:
++        raise InvalidComputeResult("Malformed compute result") from exc
++
++
++async def discard_finding_result(job_id: str) -> None:
++    redis = await get_redis_result_client()
++    await redis.delete(f"celery-task-meta-{job_id}")
+--- /dev/null
++++ b/backend/app/modules/compute_orchestrator/service.py
+@@ -0,0 +1,64 @@
++"""API-owned bounded queue orchestration. No worker imports or database writes."""
++import asyncio
++from contextlib import asynccontextmanager
++import logging
++
++from redis.exceptions import RedisError
++
++from app.modules.compute_orchestrator.dispatcher import dispatch_compute_job
++from app.modules.compute_orchestrator.errors import ComputeTimeout, ComputeUnavailable, InvalidComputeResult
++from app.modules.compute_orchestrator.ingestion import discard_finding_result, fetch_finding_result
++from shared.schemas.finding_result import FindingResult
++from shared.schemas.job_bundle import JobBundle
++
++logger = logging.getLogger(__name__)
++
++
++def validate_result(bundle: JobBundle, finding: FindingResult) -> FindingResult:
++    if (finding.job_id != bundle.job_id or finding.version_id != bundle.version_id
++            or finding.target_entity_type != bundle.target_entity_type
++            or finding.target_entity_id != bundle.target_entity_id
++            or finding.bundle_sha256 != bundle.fingerprint()):
++        raise InvalidComputeResult("Result does not match the staged input")
++    if finding.diagnostic_code == "COMPUTE_TIMEOUT_EXCEEDED":
++        raise ComputeTimeout("Compute execution timed out")
++    layers = finding.layer_findings
++    if (not layers or set(layers) != set(range(1, 7))
++            or any(key != item.layer for key, item in layers.items())):
++        raise InvalidComputeResult("Incomplete or mismatched pipeline layers")
++    return finding
++
++
++@asynccontextmanager
++async def compute_job(bundle: JobBundle):
++    """Yield one correlated result; caller commits before result disposal.
++
++    Duplicate IDs fail closed. No background ingestion occurs after timeout or
++    cancellation. Late worker results expire in Redis and cannot attach to a new
++    UUID. A failed DB commit never becomes a successful HTTP response.
++    """
++    dispatched = False
++    try:
++        try:
++            async with asyncio.timeout(bundle.timeout_seconds + 5):
++                await dispatch_compute_job(bundle)
++                dispatched = True
++                while True:
++                    finding = await fetch_finding_result(bundle.job_id)
++                    if finding is not None:
++                        finding = validate_result(bundle, finding)
++                        break
++                    await asyncio.sleep(0.05)
++        except TimeoutError as exc:
++            raise ComputeTimeout("Compute queue deadline exceeded") from exc
++        except RedisError as exc:
++            raise ComputeUnavailable("Compute queue is unavailable") from exc
++        yield finding
++    finally:
++        if dispatched:
++            try:
++                async with asyncio.timeout(2):
++                    await discard_finding_result(bundle.job_id)
++            except (RedisError, TimeoutError):
++                # Result TTL is the cleanup backstop; never mask a DB outcome.
++                logger.warning("Compute result cleanup unavailable; expiration will remove it")
+--- a/backend/app/modules/cluster_orchestrator/dispatcher.py
++++ b/backend/app/modules/cluster_orchestrator/dispatcher.py
+@@ -16,6 +16,7 @@
+ 
+ from app.modules.cluster_orchestrator.registry import ClusterNodeRegistry
+ from app.modules.cluster_orchestrator.transport import ClusterTransport
++from app.modules.compute_orchestrator.service import validate_result
+ from shared.schemas.cluster import (
+     ClusterNode,
+     ClusterNodeRole,
+@@ -132,23 +133,13 @@
+                     finding = FindingResult.model_validate(resp_dict["finding_result"])
+                 else:
+                     finding = FindingResult.model_validate(resp_dict)
++                validate_result(bundle, finding)
+             elif self.mock_executor is not None:
+                 finding = self.mock_executor(bundle)
+             else:
+-                # Direct worker pipeline execution
+-                try:
+-                    from worker.tasks.compute_tasks import verify_equation_ast
+-                    raw_res = verify_equation_ast.run(bundle.model_dump())
+-                    finding = FindingResult.model_validate(raw_res)
+-                except Exception:
+-                    finding = FindingResult(
+-                        job_id=bundle.job_id,
+-                        state=FindingState.PASS,
+-                        diagnostic_code="VALIDATION_PASSED",
+-                        message="Cluster task successfully executed on worker node",
+-                        dimensions_verified=True,
+-                        diagnostics=["Sequential L1-L5 execution completed via cluster dispatcher"],
+-                    )
++                # A shared queue cannot prove execution on a selected node.
++                # Explicit cluster targeting requires its configured transport.
++                raise RuntimeError("Cluster node transport is not configured")
+ 
+             elapsed_ms = (time.perf_counter() - start_time) * 1000.0
+ 
+--- a/backend/app/modules/reality_constraint_engine/router.py
++++ b/backend/app/modules/reality_constraint_engine/router.py
+@@ -8,6 +8,8 @@
+ from sqlalchemy.ext.asyncio import AsyncSession
+ 
+ from app.db.session import get_db
++from app.modules.compute_orchestrator.errors import ComputeUnavailable
++from app.modules.compute_orchestrator.service import compute_job, validate_result
+ from app.modules.reality_constraint_engine.models import (
+     Claim,
+     ClaimRelation,
+@@ -202,10 +204,9 @@
+         claim_graph=payload.claim_graph,
+     )
+     try:
+-        from worker.tasks.compute_tasks import verify_equation_ast
+-        result_dict = verify_equation_ast.run(bundle.model_dump())
+-        return FindingResult.model_validate(result_dict)
+-    except Exception as exc:
++        async with compute_job(bundle) as finding:
++            return finding
++    except ComputeUnavailable as exc:
+         raise HTTPException(
+             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+             detail="Scientific verification is unavailable because the compute worker failed.",
+@@ -310,7 +311,8 @@
+             dependencies=deps,
+         )
+ 
+-    job_id = f"pipeline-val-{uuid.uuid4()}"
++    # The durable run ID and queue job ID share one server-generated identity.
++    job_id = str(uuid.uuid4())
+     bundle = JobBundle(
+         job_id=job_id,
+         version_id=version_id,
+@@ -324,65 +326,55 @@
+         claim_graph=claim_graph,
+     )
+ 
++    started_at = datetime.now(timezone.utc)
+     try:
+-        from worker.tasks.compute_tasks import verify_equation_ast
+-        raw_res = verify_equation_ast.run(bundle.model_dump())
+-        finding_res = FindingResult.model_validate(raw_res)
+-    except Exception as exc:
++        async with compute_job(bundle) as finding_res:
++            return await _persist_validation(db, bundle, finding_res, started_at)
++    except ComputeUnavailable as exc:
+         raise HTTPException(
+             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+             detail="Scientific validation is unavailable because the compute worker failed.",
+         ) from exc
+ 
++
++
++async def _persist_validation(db: AsyncSession, bundle: JobBundle,
++                               finding_res: FindingResult, started_at: datetime):
++    """Only correlated, complete queue results reach this transaction."""
++    validate_result(bundle, finding_res)
++    version_id, job_id = bundle.version_id, bundle.job_id
+     now_utc = datetime.now(timezone.utc)
+     run = ValidationRun(
+-        id=str(uuid.uuid4()),
++        id=job_id,
+         version_id=version_id,
+         status="completed",
+         overall_state=finding_res.state.value,
+-        started_at=now_utc,
++        started_at=started_at,
+         completed_at=now_utc,
+     )
+     db.add(run)
+     await db.flush()
+ 
+     persisted_findings: List[ValidationFinding] = []
+-    if finding_res.layer_findings:
+-        for layer_num, l_finding in sorted(finding_res.layer_findings.items()):
+-            vf = ValidationFinding(
+-                id=str(uuid.uuid4()),
+-                run_id=run.id,
+-                layer=layer_num,
+-                target_entity_type=bundle.target_entity_type.value,
+-                target_entity_id=bundle.target_entity_id,
+-                job_id=job_id,
+-                state=l_finding.state.value,
+-                diagnostic_code=l_finding.diagnostic_code,
+-                message=l_finding.message,
+-                symbolic_simplification=finding_res.symbolic_simplification if layer_num == 2 else None,
+-                dimensions_verified=finding_res.dimensions_verified if layer_num == 3 else False,
+-                diagnostics={"diagnostics": l_finding.diagnostics, "details": l_finding.details or {}},
+-            )
+-            db.add(vf)
+-            persisted_findings.append(vf)
+-    else:
+-        for l_num in range(1, 7):
+-            vf = ValidationFinding(
+-                id=str(uuid.uuid4()),
+-                run_id=run.id,
+-                layer=l_num,
+-                target_entity_type=bundle.target_entity_type.value,
+-                target_entity_id=bundle.target_entity_id,
+-                job_id=job_id,
+-                state=finding_res.state.value if l_num == (finding_res.layer or 1) else "NOT_APPLICABLE",
+-                diagnostic_code=finding_res.diagnostic_code,
+-                message=finding_res.message,
+-                symbolic_simplification=finding_res.symbolic_simplification,
+-                dimensions_verified=finding_res.dimensions_verified,
+-                diagnostics={"diagnostics": finding_res.diagnostics},
+-            )
+-            db.add(vf)
+-            persisted_findings.append(vf)
++    for layer_num, l_finding in sorted(finding_res.layer_findings.items()):
++        vf = ValidationFinding(
++            id=str(uuid.uuid4()),
++            run_id=run.id,
++            layer=layer_num,
++            target_entity_type=bundle.target_entity_type.value,
++            target_entity_id=bundle.target_entity_id,
++            job_id=job_id,
++            state=l_finding.state.value,
++            diagnostic_code=l_finding.diagnostic_code,
++            message=l_finding.message,
++            symbolic_simplification=finding_res.symbolic_simplification if layer_num == 2 else None,
++            dimensions_verified=finding_res.dimensions_verified if layer_num == 3 else False,
++            diagnostics={"diagnostics": l_finding.diagnostics, "details": l_finding.details or {},
++                         "provenance": {"bundle_sha256": finding_res.bundle_sha256,
++                                        "job_id": job_id, "version_id": version_id}},
++        )
++        db.add(vf)
++        persisted_findings.append(vf)
+ 
+     await db.commit()
+     return _serialize_run(run, persisted_findings)
+--- a/shared/shared/schemas/finding_result.py
++++ b/shared/shared/schemas/finding_result.py
+@@ -36,6 +36,11 @@
+ class FindingResult(BaseModel):
+     model_config = ConfigDict(extra="forbid")
+     job_id: str
++    # Optional for legacy/non-queue producers; mandatory at queue ingestion.
++    version_id: Optional[str] = None
++    target_entity_type: Optional[TargetEntityType] = None
++    target_entity_id: Optional[str] = None
++    bundle_sha256: Optional[str] = None
+     state: FindingState
+     diagnostic_code: str
+     message: str
+--- a/shared/shared/schemas/job_bundle.py
++++ b/shared/shared/schemas/job_bundle.py
+@@ -1,4 +1,6 @@
+ from __future__ import annotations
++import hashlib
++import json
+ from typing import List, Optional
+ from pydantic import BaseModel, Field, ConfigDict
+ from shared.schemas.math_ast import ExprNode, VariableSpec, UnitSpec
+@@ -23,5 +25,10 @@
+     empirical_tolerance_sigma: float = Field(default=3.0, ge=0.1, le=10.0)
+     claim_graph: Optional[ClaimGraph] = None
+ 
++    def fingerprint(self) -> str:
++        """Stable identity for the entire staged input, including target and job."""
++        canonical = json.dumps(self.model_dump(mode="json"), sort_keys=True, separators=(",", ":"), allow_nan=False)
++        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
++
+ 
+ __all__ = ["JobBundle", "TargetEntityType"]
+--- a/worker/worker/celery_app.py
++++ b/worker/worker/celery_app.py
+@@ -14,6 +14,7 @@
+     task_serializer="json",
+     accept_content=["json"],
+     result_serializer="json",
++    result_expires=3600,
+     timezone="UTC",
+     enable_utc=True,
+     task_default_queue="compute_tasks",
+--- a/worker/worker/tasks/compute_tasks.py
++++ b/worker/worker/tasks/compute_tasks.py
+@@ -24,6 +24,19 @@
+ 
+ @celery_app.task(name="worker.tasks.verify_equation_ast", bind=True)
+ def verify_equation_ast(self, bundle_data: dict) -> dict:
++    """Celery transport boundary: correlate task, staged input and output."""
++    bundle = JobBundle.model_validate(bundle_data)
++    if not self.request.is_eager and self.request.id is not None and self.request.id != bundle.job_id:
++        raise ValueError("Celery task ID does not match staged job ID")
++    result = _verify_equation_ast(bundle_data)
++    result.update(version_id=bundle.version_id,
++                  target_entity_type=bundle.target_entity_type.value,
++                  target_entity_id=bundle.target_entity_id,
++                  bundle_sha256=bundle.fingerprint())
++    return result
++
++
++def _verify_equation_ast(bundle_data: dict) -> dict:
+     """Executes the full 6-layer Reality Constraint Engine (RCE) validation pipeline:
+     - Layer 1: Syntax & Semantics
+     - Layer 2: Boundary & Singularities
+@@ -518,13 +531,5 @@
+         )
+         return finding.model_dump()
+     except Exception as e:
+-        finding = FindingResult(
+-            job_id=bundle.job_id,
+-            state=FindingState.FAIL,
+-            diagnostic_code=DiagnosticCode.INVALID_AST.value,
+-            message=f"Computation encountered unexpected error: {str(e)}",
+-            dimensions_verified=False,
+-            diagnostics=[str(e)],
+-            layer_findings=layer_findings or None,
+-        )
+-        return finding.model_dump()
++        # Operational failures are Celery failures, never scientific verdicts.
++        raise RuntimeError("Scientific compute execution failed") from e
+--- a/backend/tests/unit/test_compute_orchestrator.py
++++ b/backend/tests/unit/test_compute_orchestrator.py
+@@ -51,6 +51,7 @@
+ async def test_fetch_finding_result_reads_from_db1():
+     mock_redis_result = AsyncMock()
+     mock_result_data = {
++        "task_id": "test-job-uuid-1234",
+         "status": "SUCCESS",
+         "result": {
+             "job_id": "test-job-uuid-1234",
+--- /dev/null
++++ b/backend/tests/unit/test_compute_queue_boundary.py
+@@ -0,0 +1,158 @@
++"""Protocol/negative tests use Redis mocks; real queue evidence is separate."""
++import asyncio
++import json
++from pathlib import Path
++from unittest.mock import AsyncMock, Mock
++
++import pytest
++from redis.exceptions import ConnectionError as RedisConnectionError
++
++from app.modules.compute_orchestrator import dispatcher, ingestion, service
++from app.modules.compute_orchestrator.errors import ComputeUnavailable, ComputeTimeout, InvalidComputeResult
++from shared.schemas.finding_result import FindingResult, LayerFinding
++from shared.schemas.job_bundle import JobBundle
++
++
++@pytest.fixture
++def bundle():
++    return JobBundle(job_id="test-job", version_id="version-a", target_entity_type="EQUATION",
++                     target_entity_id="eq-a", expression_ast={"node_type":"constant","value":2})
++
++
++def result_for(bundle):
++    return FindingResult(job_id=bundle.job_id, version_id=bundle.version_id,
++        target_entity_type=bundle.target_entity_type, target_entity_id=bundle.target_entity_id,
++        bundle_sha256=bundle.fingerprint(), state="PASS", diagnostic_code="VALIDATION_PASSED",
++        message="Test protocol fixture only", dimensions_verified=True,
++        layer_findings={i:LayerFinding(layer=i,name=str(i),state="PASS",diagnostic_code="OK",message="fixture")
++                        for i in range(1,7)})
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("mutation", ["bad-json","array","task","job","state","missing","failure","revoked"])
++async def test_ingestion_rejects_invalid_or_failed_results(bundle, monkeypatch, mutation):
++    data = {"task_id":bundle.job_id,"status":"SUCCESS","result":result_for(bundle).model_dump(mode="json")}
++    if mutation == "task": data["task_id"]="other"
++    if mutation == "job": data["result"]["job_id"]="other"
++    if mutation == "state": data["result"]["state"]="VERIFIED"
++    if mutation == "missing": del data["result"]
++    if mutation in {"failure","revoked"}: data["status"]=mutation.upper()
++    raw = "{" if mutation == "bad-json" else "[]" if mutation == "array" else json.dumps(data)
++    redis = AsyncMock(); redis.get.return_value=raw
++    monkeypatch.setattr(ingestion,"get_redis_result_client",AsyncMock(return_value=redis))
++    with pytest.raises(ComputeUnavailable): await ingestion.fetch_finding_result(bundle.job_id)
++
++
++@pytest.mark.parametrize("field", ["job_id","version_id","target_entity_id","target_entity_type","bundle_sha256"])
++def test_result_correlation_rejects_other_input(bundle, field):
++    result=result_for(bundle)
++    setattr(result,field,"CLAIM" if field=="target_entity_type" else "other")
++    with pytest.raises(InvalidComputeResult): service.validate_result(bundle,result)
++
++
++@pytest.mark.parametrize("bad_layers", ["missing","wrong-key","wrong-number"])
++def test_reject_incomplete_pipeline(bundle,bad_layers):
++    result=result_for(bundle)
++    if bad_layers=="missing": del result.layer_findings[6]
++    elif bad_layers=="wrong-key": result.layer_findings[7]=result.layer_findings.pop(6)
++    else: result.layer_findings[2].layer=3
++    with pytest.raises(InvalidComputeResult): service.validate_result(bundle,result)
++
++
++@pytest.mark.asyncio
++async def test_single_use_job_rejects_replay_before_publish(bundle,monkeypatch):
++    redis=AsyncMock(); redis.set.return_value=False
++    monkeypatch.setattr(dispatcher,"get_redis_client",AsyncMock(return_value=redis))
++    with pytest.raises(ComputeUnavailable,match="already"): await dispatcher.dispatch_compute_job(bundle)
++    redis.lpush.assert_not_called()
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("failure", ["redis","timeout","malformed","worker-timeout","cancelled"])
++async def test_failure_never_yields_a_finding(bundle,monkeypatch,failure):
++    dispatch=AsyncMock(return_value=bundle.job_id)
++    fetch=AsyncMock(return_value=result_for(bundle))
++    discard=AsyncMock()
++    if failure=="redis": fetch.side_effect=RedisConnectionError("synthetic failure")
++    if failure=="timeout": fetch.side_effect=TimeoutError()
++    if failure=="malformed": fetch.return_value.job_id="replay"
++    if failure=="worker-timeout": fetch.return_value.diagnostic_code="COMPUTE_TIMEOUT_EXCEEDED"
++    if failure=="cancelled": fetch.side_effect=asyncio.CancelledError()
++    monkeypatch.setattr(service,"dispatch_compute_job",dispatch)
++    monkeypatch.setattr(service,"fetch_finding_result",fetch)
++    monkeypatch.setattr(service,"discard_finding_result",discard)
++    with pytest.raises(asyncio.CancelledError if failure=="cancelled" else ComputeUnavailable):
++        async with service.compute_job(bundle): pytest.fail("must not reach DB persistence")
++    discard.assert_awaited_once_with(bundle.job_id)
++
++
++@pytest.mark.asyncio
++async def test_result_is_retained_until_commit_and_cleaned_on_db_failure(bundle,monkeypatch):
++    discard=AsyncMock()
++    monkeypatch.setattr(service,"dispatch_compute_job",AsyncMock())
++    monkeypatch.setattr(service,"fetch_finding_result",AsyncMock(return_value=result_for(bundle)))
++    monkeypatch.setattr(service,"discard_finding_result",discard)
++    with pytest.raises(RuntimeError,match="DB commit failed"):
++        async with service.compute_job(bundle) as result:
++            assert result.job_id==bundle.job_id
++            discard.assert_not_awaited()
++            raise RuntimeError("DB commit failed")
++    discard.assert_awaited_once()
++
++
++def test_backend_product_source_never_imports_worker():
++    import ast
++    root=Path(__file__).resolve().parents[2]/"app"
++    for file in root.rglob("*.py"):
++        for node in ast.walk(ast.parse(file.read_text(encoding="utf-8"))):
++            if isinstance(node,ast.ImportFrom): assert not (node.module or "").startswith("worker")
++            if isinstance(node,ast.Import): assert all(not item.name.startswith("worker") for item in node.names)
++
++
++@pytest.mark.asyncio
++async def test_cluster_without_node_transport_fails_instead_of_manufacturing_pass():
++    from app.modules.cluster_orchestrator.dispatcher import ClusterTaskDispatcher
++    from app.modules.cluster_orchestrator.registry import ClusterNodeRegistry
++    from app.modules.cluster_orchestrator.wireguard import generate_wireguard_keypair
++    from shared.schemas.cluster import NodeJoinRequest
++    registry=ClusterNodeRegistry(cluster_secret="fixture")
++    _,key=generate_wireguard_keypair()
++    registry.register_node(NodeJoinRequest(hostname="fixture",wireguard_public_key=key,join_token="fixture"))
++    dispatcher=ClusterTaskDispatcher(registry)
++    bundle=JobBundle(job_id="fixture",version_id="v",target_entity_type="EQUATION",target_entity_id="e")
++    with pytest.raises(RuntimeError,match="transport is not configured"):
++        await dispatcher.dispatch_bundle(bundle)
++    assert all(node.active_tasks==0 for node in registry.get_healthy_workers())
++
++
++@pytest.mark.asyncio
++async def test_persistence_refuses_to_synthesize_missing_layers(bundle):
++    from datetime import datetime, timezone
++    from app.modules.reality_constraint_engine.router import _persist_validation
++    finding=result_for(bundle)
++    finding.layer_findings=None
++    db=Mock()
++    with pytest.raises(InvalidComputeResult):
++        await _persist_validation(db,bundle,finding,datetime.now(timezone.utc))
++    db.add.assert_not_called()
++
++
++@pytest.mark.asyncio
++async def test_cluster_transport_result_checked_even_with_unused_mock_executor(bundle):
++    from app.modules.cluster_orchestrator.dispatcher import ClusterTaskDispatcher
++    from app.modules.cluster_orchestrator.registry import ClusterNodeRegistry
++    from app.modules.cluster_orchestrator.wireguard import generate_wireguard_keypair
++    from shared.schemas.cluster import NodeJoinRequest
++    registry=ClusterNodeRegistry(cluster_secret='fixture')
++    _,key=generate_wireguard_keypair()
++    registry.register_node(NodeJoinRequest(hostname='fixture',wireguard_public_key=key,join_token='fixture'))
++    invalid=result_for(bundle)
++    invalid.version_id='other-version'
++    transport=AsyncMock()
++    transport.send_to_node.return_value=invalid.model_dump_json().encode()
++    unused=Mock()
++    dispatcher=ClusterTaskDispatcher(registry,transport=transport,mock_executor=unused)
++    with pytest.raises(InvalidComputeResult):
++        await dispatcher.dispatch_bundle(bundle)
++    unused.assert_not_called()
++    assert all(node.active_tasks==0 for node in registry.get_healthy_workers())
+--- a/backend/tests/integration/test_stage4_final_e2e_integration.py
++++ b/backend/tests/integration/test_stage4_final_e2e_integration.py
+@@ -22,6 +22,7 @@
+ import tempfile
+ import uuid
+ import zipfile
++from contextlib import asynccontextmanager
+ from datetime import UTC, datetime
+ from pathlib import Path
+ from typing import Any, List, Optional
+@@ -72,6 +73,23 @@
+ )
+ 
+ 
++@pytest.fixture(autouse=True)
++def isolated_test_transport(monkeypatch):
++    """Default ASGI suite: real math, mocked queue transport and DB/access.
++
++    Live PostgreSQL/HTTP suite has no such override and uses actual Redis/Celery.
++    """
++    from worker.tasks.compute_tasks import verify_equation_ast
++    from app.modules.compute_orchestrator.service import validate_result
++
++    @asynccontextmanager
++    async def local_test_compute(bundle):
++        result = FindingResult.model_validate(verify_equation_ast.run(bundle.model_dump(mode="json")))
++        yield validate_result(bundle, result)
++
++    monkeypatch.setattr("app.modules.reality_constraint_engine.router.compute_job", local_test_compute)
++
++
+ class MockResult:
+     def __init__(self, items: List[Any]):
+         self._items = items
+@@ -243,12 +261,14 @@
+     monkeypatch,
+ ):
+     """Interactive verification must not manufacture a PASS when compute fails."""
+-    import worker.tasks.compute_tasks as compute_tasks
+-
+-    def fail_worker_run(*args, **kwargs):
+-        raise RuntimeError("worker execution failed")
+-
+-    monkeypatch.setattr(compute_tasks.verify_equation_ast, "run", fail_worker_run)
++    from app.modules.compute_orchestrator.errors import ComputeUnavailable
++
++    @asynccontextmanager
++    async def fail_queue(*args, **kwargs):
++        raise ComputeUnavailable("worker execution failed")
++        yield
++
++    monkeypatch.setattr("app.modules.reality_constraint_engine.router.compute_job", fail_queue)
+     transport = ASGITransport(app=app)
+     async with AsyncClient(transport=transport, base_url="http://test") as ac:
+         response = await ac.post(
+@@ -438,7 +458,7 @@
+ 
+ 
+ @pytest.mark.asyncio
+-async def test_version_validate_worker_import_failure_returns_unavailable_without_persisting(
++async def test_version_validate_queue_failure_returns_unavailable_without_persisting(
+     stage4_test_entities, monkeypatch
+ ):
+     """Worker failure must not be converted into persisted scientific findings."""
+@@ -446,14 +466,14 @@
+     mock_db = MockDbSession(list(stage4_test_entities.values()))
+     app.dependency_overrides[get_db] = lambda: mock_db
+     override_version_access(version)
+-    original_import = __import__
+-
+-    def fail_worker_import(name, *args, **kwargs):
+-        if name == "worker.tasks.compute_tasks":
+-            raise ImportError("worker unavailable")
+-        return original_import(name, *args, **kwargs)
+-
+-    monkeypatch.setattr("builtins.__import__", fail_worker_import)
++    from app.modules.compute_orchestrator.errors import ComputeUnavailable
++
++    @asynccontextmanager
++    async def fail_queue(*args, **kwargs):
++        raise ComputeUnavailable("worker unavailable")
++        yield
++
++    monkeypatch.setattr("app.modules.reality_constraint_engine.router.compute_job", fail_queue)
+ 
+     transport = ASGITransport(app=app)
+     async with AsyncClient(transport=transport, base_url="http://test") as ac:
+--- a/backend/tests/integration/test_decision3_postgres_rls.py
++++ b/backend/tests/integration/test_decision3_postgres_rls.py
+@@ -290,8 +290,8 @@
+ async def live_api(pg, tmp_path):
+     """Actual Uvicorn HTTP server + actual app pool, JWT, password hashing and DB.
+ 
+-    No dependency overrides or compute mocks. Current in-process worker import
+-    rejects the API's DB environment; successful queued compute is not covered.
++    No dependency overrides or compute mocks. The external lifecycle provides
++    a task-owned Redis broker and a separate worker for queued-compute tests.
+     """
+     target = disposable_target(os.environ)
+     with socket.socket() as sock:
+--- /dev/null
++++ b/backend/tests/integration/test_compute_queue_live.py
+@@ -0,0 +1,255 @@
++"""Opt-in actual HTTP + Redis/Celery + PostgreSQL. No math/DB/auth overrides.
++
++Version creation has no API contract: only fixture project/version rows are SQL seeded.
++"""
++import asyncio
++import base64
++import json
++import os
++import uuid
++
++import pytest
++from redis.asyncio import Redis
++from sqlalchemy import text
++
++from tests.integration.test_decision3_postgres_rls import pg, live_api, register_login, context
++from tests.postgres_target import disposable_target
++from shared.schemas.job_bundle import JobBundle
++
++
++@pytest.fixture(autouse=True)
++def require_owned_queue():
++    if not disposable_target(os.environ) or not os.environ.get("REALITY_TEST_QUEUE_INSTANCE"):
++        pytest.skip("Explicit disposable database and task-owned queue required")
++
++
++async def assert_queue_identity():
++    broker=Redis.from_url(os.environ['REDIS_URL'],decode_responses=True)
++    try:
++        assert await broker.get('reality-test-instance')==os.environ['REALITY_TEST_QUEUE_INSTANCE']
++    finally: await broker.aclose()
++
++
++async def seed_version(pg,client,visibility="private_draft",publication="preprint"):
++    headers,user=await register_login(client)
++    version,project=(str(uuid.uuid4()) for _ in range(2))
++    async with pg.begin() as conn:
++        actor=(await conn.execute(text("SELECT id FROM research_actors WHERE user_account_id=:id"),{"id":user})).scalar_one()
++        await context(conn,actor)
++        await conn.execute(text("INSERT INTO research_projects(id,slug,title,owner_actor_id,visibility) "
++            "VALUES (:id,:id,'Queue fixture',:actor,:visibility)"),{"id":project,"actor":actor,"visibility":visibility})
++        await conn.execute(text("INSERT INTO research_versions(id,project_id,title,publication_status) "
++            "VALUES (:id,:project,'Queue fixture',:publication)"),{"id":version,"project":project,"publication":publication})
++    return headers,actor,version
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("kind,expected", [("valid","PASS"),("undeclared","FAIL"),("dimensions","FAIL"),("zero","FAIL")])
++async def test_interactive_uses_real_queue(live_api,kind,expected):
++    await assert_queue_identity()
++    variables=[{"symbol":"x","name":"position","unit":"m"}]
++    ast={"node_type":"variable","value":"x"}
++    if kind=="undeclared": variables=[]
++    if kind=="dimensions":
++        variables.append({"symbol":"t","name":"time","unit":"s"})
++        ast={"node_type":"binary_op","op":"+","left":ast,"right":{"node_type":"variable","value":"t"}}
++    if kind=="zero":
++        ast={"node_type":"binary_op","op":"/","left":ast,"right":{"node_type":"constant","value":0}}
++    response=await live_api.post('/api/v1/validation/verify',json={'expression_ast':ast,'variables':variables})
++    assert response.status_code==200,response.text
++    result=response.json()
++    assert result['state']==expected
++    assert result['version_id']==result['target_entity_id']=='interactive'
++    assert len(result['bundle_sha256'])==64 and len(result['layer_findings'])==6
++    redis=Redis.from_url(os.environ['CELERY_RESULT_BACKEND_URL'])
++    try: assert await redis.get('celery-task-meta-'+result['job_id']) is None
++    finally: await redis.aclose()
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize("visibility",["private_draft","public_preprint"])
++@pytest.mark.parametrize("valid",[True,False])
++async def test_queued_findings_read_after_new_request_and_connection(live_api,pg,visibility,valid,tmp_path):
++    await assert_queue_identity()
++    headers,actor,version=await seed_version(pg,live_api,visibility)
++    outsiders,_=await register_login(live_api)
++    route=f'/api/v1/versions/{version}'
++    eq=await live_api.post(route+'/equations',headers=headers,json={'label':'Position','latex_raw':'x',
++        'canonical_ast_json':{'node_type':'variable','value':'x'}})
++    assert eq.status_code==201
++    if valid:
++        assert (await live_api.post(route+'/variables',headers=headers,json={
++            'symbol':'x','name':'position','unit':'m'})).status_code==201
++    expected='PASS' if valid else 'FAIL'
++    result=await live_api.post(route+'/validate',headers=headers)
++    assert result.status_code==200,result.text
++    run=result.json()
++    assert run['overall_state']==expected and len(run['findings'])==6
++    assert all(f['run_id']==f['job_id']==run['id'] and f['target_entity_id']==eq.json()['id'] for f in run['findings'])
++    assert all(f['diagnostics']['provenance']['version_id']==version for f in run['findings'])
++    history=await live_api.get(route+'/validation-runs',headers=headers)
++    assert history.status_code==200 and history.json()[0]==run
++    for reader in ({},outsiders):
++        assert (await live_api.get(route+'/validation-runs',headers=reader)).status_code==(200 if visibility=='public_preprint' else 404)
++    assert (await live_api.post(route+'/validate',headers=outsiders)).status_code==404
++    async with pg.begin() as fresh:
++        await context(fresh,actor)
++        assert (await fresh.execute(text('SELECT overall_state FROM validation_runs WHERE id=:id'),{'id':run['id']})).scalar_one()==expected
++        assert (await fresh.execute(text('SELECT count(*) FROM validation_findings WHERE run_id=:id'),{'id':run['id']})).scalar_one()==6
++        assert (await fresh.execute(text('SELECT publication_status FROM research_versions WHERE id=:id'),{'id':version})).scalar_one()=='preprint'
++    (tmp_path/'run-evidence.json').write_text(json.dumps(run,indent=2))
++
++
++@pytest.mark.asyncio
++async def test_queue_without_worker_times_out_without_persistence(live_api,pg):
++    if os.environ.get('REALITY_TEST_NO_WORKER')!='1':
++        pytest.skip('Separate deliberate no-worker lifecycle required')
++    await assert_queue_identity()
++    headers,actor,version=await seed_version(pg,live_api)
++    response=await live_api.post(f'/api/v1/versions/{version}/validate',headers=headers)
++    assert response.status_code==503,response.text
++    history=await live_api.get(f'/api/v1/versions/{version}/validation-runs',headers=headers)
++    assert history.status_code==200 and history.json()==[]
++    async with pg.begin() as fresh:
++        await context(fresh,actor)
++        assert (await fresh.execute(text('SELECT count(*) FROM validation_runs WHERE version_id=:id'),{'id':version})).scalar_one()==0
++        assert (await fresh.execute(text('SELECT publication_status FROM research_versions WHERE id=:id'),{'id':version})).scalar_one()=='preprint'
++
++
++def require_no_worker():
++    if os.environ.get('REALITY_TEST_NO_WORKER')!='1':
++        pytest.skip('Fault injection requires an isolated lifecycle without a worker')
++
++
++async def receive_staged_bundle(broker):
++    queued=await broker.brpop('compute_tasks',timeout=5)
++    assert queued is not None,'HTTP API did not dispatch a job'
++    message=json.loads(queued[1])
++    args,kwargs,_=json.loads(base64.b64decode(message['body']))
++    bundle=JobBundle.model_validate(args[0])
++    assert message['headers']['id']==message['properties']['correlation_id']==bundle.job_id
++    assert kwargs=={}
++    return bundle
++
++
++def protocol_fixture(bundle):
++    """Deliberately synthetic envelope for rejection tests; never compute evidence."""
++    return {'task_id':bundle.job_id,'status':'SUCCESS','result':{
++        'job_id':bundle.job_id,'version_id':bundle.version_id,
++        'target_entity_type':bundle.target_entity_type.value,'target_entity_id':bundle.target_entity_id,
++        'bundle_sha256':bundle.fingerprint(),'state':'PASS','diagnostic_code':'PROTOCOL_FIXTURE',
++        'message':'Synthetic protocol rejection fixture','dimensions_verified':False,
++        'layer_findings':{str(i):{'layer':i,'name':str(i),'state':'PASS',
++            'diagnostic_code':'PROTOCOL_FIXTURE','message':'Synthetic fixture'} for i in range(1,7)}}}
++
++
++async def assert_no_persisted_run(live_api,pg,headers,actor,version):
++    history=await live_api.get(f'/api/v1/versions/{version}/validation-runs',headers=headers)
++    assert history.status_code==200 and history.json()==[]
++    async with pg.begin() as fresh:
++        await context(fresh,actor)
++        assert (await fresh.execute(text('SELECT count(*) FROM validation_runs WHERE version_id=:id'),
++                                    {'id':version})).scalar_one()==0
++        assert (await fresh.execute(text('SELECT publication_status FROM research_versions WHERE id=:id'),
++                                    {'id':version})).scalar_one()=='preprint'
++
++
++@pytest.mark.asyncio
++@pytest.mark.parametrize('fault',['bad-json','task','job','version','target','hash','layers','failure','revoked'])
++async def test_fault_result_is_rejected_without_persistence(live_api,pg,fault,tmp_path):
++    require_no_worker()
++    await assert_queue_identity()
++    headers,actor,version=await seed_version(pg,live_api)
++    broker=Redis.from_url(os.environ['REDIS_URL'])
++    results=Redis.from_url(os.environ['CELERY_RESULT_BACKEND_URL'])
++    request=asyncio.create_task(live_api.post(f'/api/v1/versions/{version}/validate',headers=headers))
++    try:
++        bundle=await receive_staged_bundle(broker)
++        envelope=protocol_fixture(bundle)
++        if fault=='task': envelope['task_id']=str(uuid.uuid4())
++        if fault=='job': envelope['result']['job_id']=str(uuid.uuid4())
++        if fault=='version': envelope['result']['version_id']=str(uuid.uuid4())
++        if fault=='target': envelope['result']['target_entity_id']=str(uuid.uuid4())
++        if fault=='hash': envelope['result']['bundle_sha256']='0'*64
++        if fault=='layers': del envelope['result']['layer_findings']['6']
++        if fault in {'failure','revoked'}: envelope['status']=fault.upper()
++        raw='{' if fault=='bad-json' else json.dumps(envelope)
++        key='celery-task-meta-'+bundle.job_id
++        await results.set(key,raw,ex=60)
++        response=await request
++        assert response.status_code==503,response.text
++        assert await results.get(key) is None
++        await assert_no_persisted_run(live_api,pg,headers,actor,version)
++        (tmp_path/'fault-evidence.json').write_text(json.dumps({
++            'kind':fault,'injected':True,'job_id':bundle.job_id,'version_id':version,
++            'response_status':response.status_code,'persisted_runs':0,'result_key_removed':True},indent=2))
++    finally:
++        if not request.done(): request.cancel()
++        await asyncio.gather(request,return_exceptions=True)
++        await broker.aclose()
++        await results.aclose()
++
++
++@pytest.mark.asyncio
++async def test_fault_late_result_cannot_attach_to_a_new_job(live_api,pg,tmp_path):
++    require_no_worker()
++    await assert_queue_identity()
++    headers,actor,version=await seed_version(pg,live_api)
++    broker=Redis.from_url(os.environ['REDIS_URL'])
++    results=Redis.from_url(os.environ['CELERY_RESULT_BACKEND_URL'])
++    request=asyncio.create_task(live_api.post(f'/api/v1/versions/{version}/validate',headers=headers))
++    old_key=None
++    try:
++        old=await receive_staged_bundle(broker)
++        assert (await request).status_code==503
++        old_key='celery-task-meta-'+old.job_id
++        await results.set(old_key,json.dumps(protocol_fixture(old)),ex=60)
++        await assert_no_persisted_run(live_api,pg,headers,actor,version)
++        request=asyncio.create_task(live_api.post(f'/api/v1/versions/{version}/validate',headers=headers))
++        new=await receive_staged_bundle(broker)
++        assert new.job_id!=old.job_id
++        assert await results.get(old_key) is not None
++        # Even moving the old result into the new key cannot bypass correlation.
++        new_key='celery-task-meta-'+new.job_id
++        await results.set(new_key,json.dumps(protocol_fixture(old)),ex=60)
++        assert (await request).status_code==503
++        assert await results.get(new_key) is None
++        await assert_no_persisted_run(live_api,pg,headers,actor,version)
++        (tmp_path/'late-evidence.json').write_text(json.dumps({
++            'injected':True,'expired_job':old.job_id,'new_job':new.job_id,
++            'persisted_runs':0,'both_responses':503,'late_result_ttl':await results.ttl(old_key)},indent=2))
++    finally:
++        if not request.done(): request.cancel()
++        await asyncio.gather(request,return_exceptions=True)
++        if old_key: await results.delete(old_key)
++        await broker.aclose()
++        await results.aclose()
++
++
++@pytest.mark.asyncio
++async def test_fault_duplicate_dispatch_is_claimed_once(tmp_path):
++    require_no_worker()
++    await assert_queue_identity()
++    from app.core.redis import close_redis_client
++    from app.modules.compute_orchestrator.dispatcher import dispatch_compute_job
++    from app.modules.compute_orchestrator.errors import ComputeUnavailable
++    bundle=JobBundle(job_id=str(uuid.uuid4()),version_id='fixture',target_entity_type='EQUATION',target_entity_id='fixture')
++    broker=Redis.from_url(os.environ['REDIS_URL'])
++    try:
++        assert await broker.llen('compute_tasks')==0
++        await dispatch_compute_job(bundle)
++        with pytest.raises(ComputeUnavailable,match='already'):
++            await dispatch_compute_job(bundle)
++        assert await broker.llen('compute_tasks')==1
++        staged=await receive_staged_bundle(broker)
++        assert staged.job_id==bundle.job_id
++        assert await broker.llen('compute_tasks')==0
++        claim='compute-dispatched:'+bundle.job_id
++        assert (await broker.get(claim)).decode()==bundle.fingerprint()
++        ttl=await broker.ttl(claim)
++        assert 86000<ttl<=86400
++        (tmp_path/'replay-evidence.json').write_text(json.dumps({
++            'job_id':bundle.job_id,'published_count':1,'duplicate_rejected':True,'claim_ttl':ttl},indent=2))
++    finally:
++        await broker.aclose()
++        await close_redis_client()
+--- /dev/null
++++ b/worker/tests/test_queue_contract.py
+@@ -0,0 +1,36 @@
++import pytest
++from worker.tasks import compute_tasks
++from shared.schemas.job_bundle import JobBundle
++
++
++def bundle():
++    return JobBundle(job_id="job-test",version_id="v1",target_entity_type="EQUATION",target_entity_id="e1",
++                     expression_ast={"node_type":"constant","value":2})
++
++
++def test_worker_returns_exact_input_provenance():
++    job=bundle()
++    result=compute_tasks.verify_equation_ast.run(job.model_dump(mode="json"))
++    assert result["job_id"]==job.job_id
++    assert result["version_id"]==job.version_id
++    assert result["target_entity_id"]==job.target_entity_id
++    assert result["bundle_sha256"]==job.fingerprint()
++    assert result["state"]=="PASS"
++
++
++def test_worker_rejects_task_id_mismatch_before_math(monkeypatch):
++    job=bundle()
++    def forbidden(*args): pytest.fail("must reject before math")
++    monkeypatch.setattr(compute_tasks,"_verify_equation_ast",forbidden)
++    task=compute_tasks.verify_equation_ast
++    task.push_request(id="other",is_eager=False)
++    try:
++        with pytest.raises(ValueError,match="task ID"): task.run(job.model_dump())
++    finally: task.pop_request()
++
++
++def test_unexpected_engine_failure_is_not_a_scientific_finding(monkeypatch):
++    def fail(*args): raise RuntimeError("synthetic engine error")
++    monkeypatch.setattr(compute_tasks,"validate_ast_semantics",fail)
++    with pytest.raises(RuntimeError,match="compute execution failed"):
++        compute_tasks.verify_equation_ast.run(bundle().model_dump())
+--- /dev/null
++++ b/.reality/evidence/2026-11-16-compute-queue/run_live.py
+@@ -0,0 +1,141 @@
++"""Bounded local lifecycle: checked PostgreSQL + fresh broker + separate real worker."""
++import asyncio
++import json
++import os
++from pathlib import Path
++import re
++import shutil
++import socket
++import subprocess
++import sys
++import time
++
++ROOT=Path('D:/Reality_Science'); BACKEND=ROOT/'backend'; E=Path(__file__).resolve().parent
++RUNTIME=Path('C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-compute-queue-20261116')
++WORKER=Path('C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-worker-verification-20261116/Scripts/python.exe')
++sys.path.insert(0,str(BACKEND))
++from scripts.disposable_postgres import start_cluster, admin_connection, stop_cluster, environment, control_data
++from redis import Redis
++
++
++def stop_owned_process(process):
++    if process is not None and process.poll() is None:
++        subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],check=True,capture_output=True)
++        process.wait(timeout=20)
++
++
++def run(command,name,env):
++    with (E/(name+'.log')).open('w',encoding='utf-8') as log:
++        code=subprocess.run(command,cwd=BACKEND,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=600).returncode
++    print((E/(name+'.log')).read_text(encoding='utf-8'))
++    return {'command':command,'exit':code}
++
++
++async def identity(manifest):
++    conn,actual=await admin_connection(manifest)
++    try:
++        actual['revision']=await conn.fetchval('SELECT version_num FROM alembic_version')
++        actual['roles']=[dict(row) for row in await conn.fetch(
++            "SELECT rolname,rolsuper,rolbypassrls,rolcreatedb,rolcreaterole FROM pg_roles WHERE rolname='rs_test_app'")]
++        assert actual['revision']=='004_owner_only_dml'
++        return actual
++    finally: await conn.close()
++
++
++def main():
++    name=sys.argv[1] if len(sys.argv)>1 else 'live-original'
++    if not re.fullmatch(r'[a-z0-9-]+',name): raise ValueError('Invalid evidence run name')
++    tests=sys.argv[2:] or ['tests/integration/test_decision3_postgres_rls.py']
++    if (E/(name+'.log')).exists(): raise RuntimeError('Refusing to overwrite prior run')
++    manifest_path=E/'instance.json'; manifest=json.loads(manifest_path.read_text())
++    broker=worker=None; client=None; broker_id=None; port=None; codes={}
++    no_worker=os.environ.get('REALITY_TEST_NO_WORKER')=='1'
++    logs=[]
++    try:
++        restart_evidence=E/(name+'-restart')
++        restart_evidence.mkdir()
++        start_cluster(manifest,manifest_path,restart_evidence)
++        (E/(name+'-db-identity.json')).write_text(json.dumps(asyncio.run(identity(manifest)),indent=2))
++        with socket.socket() as sock:
++            sock.bind(('127.0.0.1',0)); port=sock.getsockname()[1]
++        config=RUNTIME/(name+'-redis.conf')
++        config.write_text(f'bind 127.0.0.1\nport {port}\nprotected-mode yes\nsave ""\nappendonly no\n'
++                          'maxmemory 128mb\nmaxmemory-policy noeviction\n',encoding='utf-8')
++        executable=next((RUNTIME/'broker').rglob('redis-server.exe'))
++        cygpath='/cygdrive/'+config.drive[0].lower()+config.as_posix()[2:]
++        log=(E/(name+'-broker.log')).open('w',encoding='utf-8'); logs.append(log)
++        broker=subprocess.Popen([str(executable),cygpath],cwd=RUNTIME,stdout=log,stderr=subprocess.STDOUT)
++        client=Redis(host='127.0.0.1',port=port,decode_responses=True,socket_timeout=2)
++        deadline=time.monotonic()+15
++        while True:
++            if broker.poll() is not None: raise RuntimeError('Broker exited; inspect log')
++            try:
++                info=client.info('server')
++                if info: break
++            except Exception:
++                if time.monotonic()>deadline: raise
++                time.sleep(.1)
++        broker_id=info['run_id']
++        marker=name+'-'+broker_id
++        client.set('reality-test-instance',marker)
++        broker_identity={'pid_handle':broker.pid,'server':info,'config':client.config_get('bind','port','dir'),
++                         'marker':marker,'executable':str(executable)}
++        (E/(name+'-broker-identity.json')).write_text(json.dumps(broker_identity,indent=2))
++        assert broker_identity['config']['bind']=='127.0.0.1' and int(info['tcp_port'])==port
++        # Construct the worker environment independently. API retains its DB env.
++        allow={'SYSTEMROOT','WINDIR','COMSPEC','TEMP','TMP','USERPROFILE','APPDATA','LOCALAPPDATA','PATH',
++               'NUMBER_OF_PROCESSORS','PROCESSOR_ARCHITECTURE','SYSTEMDRIVE'}
++        worker_env={k:v for k,v in os.environ.items() if k.upper() in allow}
++        worker_env.update(CELERY_BROKER_URL=f'redis://127.0.0.1:{port}/0',
++                          CELERY_RESULT_BACKEND=f'redis://127.0.0.1:{port}/1',PYTHONIOENCODING='utf-8',
++                          REALITY_TEST_RUN=name,
++                          PYTHONPATH=os.pathsep.join([str(ROOT/'worker'),str(ROOT/'shared')]))
++        if not no_worker:
++            log=(E/(name+'-worker.log')).open('w',encoding='utf-8'); logs.append(log)
++            worker=subprocess.Popen([str(WORKER),str(E/'worker_bootstrap.py')],cwd=RUNTIME,env=worker_env,
++                                    stdout=log,stderr=subprocess.STDOUT)
++        env=environment(manifest)
++        env.update(REDIS_URL=f'redis://127.0.0.1:{port}/0',CELERY_RESULT_BACKEND_URL=f'redis://127.0.0.1:{port}/1',
++                   REALITY_TEST_QUEUE_INSTANCE=marker)
++        codes['tests']=run([sys.executable,'-m','pytest','-vv','--tb=short','--basetemp',str(E/(name+'-pytest')),
++                            *tests],name,env)
++        if worker is not None:
++            assert worker.poll() is None, 'Worker exited unexpectedly'
++        (E/(name+'-queue-after.json')).write_text(json.dumps({'queue_length':client.llen('compute_tasks'),
++            'result_keys':Redis(host='127.0.0.1',port=port,db=1).keys('celery-task-meta-*').__len__(),
++            'worker_still_running':worker is not None and worker.poll() is None,
++            'worker_started':worker is not None},indent=2))
++        return codes['tests']['exit']
++    finally:
++        stop_owned_process(worker)
++        if broker is not None and broker.poll() is None:
++            if broker_id is not None:
++                assert client.info('server')['run_id']==broker_id
++                assert client.get('reality-test-instance')==name+'-'+broker_id
++                client.shutdown(nosave=True)
++                broker.wait(timeout=15)
++            else:
++                stop_owned_process(broker)
++        if client is not None: client.close()
++        if not manifest.get('stopped'):
++            asyncio.run(identity(manifest))
++            codes['stop']=stop_cluster(manifest,E/(name+'-stop.log'))
++            manifest_path.write_text(json.dumps(manifest,indent=2))
++        for log in logs: log.close()
++        ports={manifest['port']}
++        if port: ports.add(port)
++        for log in (E/(name+'-pytest')).glob('*/api.log'):
++            ports.update(int(p) for p in re.findall(r'Uvicorn running on http://127\.0\.0\.1:(\d+)',log.read_text()))
++        listening={}
++        for p in ports:
++            with socket.socket() as sock:
++                sock.settimeout(.5); listening[str(p)]=sock.connect_ex(('127.0.0.1',p))==0
++        cleanup={'codes':codes,'ports_accepting':listening,'postgres_stopped':manifest['stopped'],
++                 'worker_exit':worker.poll() if worker else None,'broker_exit':broker.poll() if broker else None,
++                 'postgres_control':control_data(manifest)}
++        (E/(name+'-cleanup.json')).write_text(json.dumps(cleanup,indent=2))
++        assert manifest['stopped'] and not any(listening.values())
++        print(json.dumps(cleanup,indent=2))
++
++
++if __name__=='__main__': raise SystemExit(main())
+--- /dev/null
++++ b/.reality/evidence/2026-11-16-compute-queue/worker_bootstrap.py
+@@ -0,0 +1,31 @@
++"""Actual Celery worker; records host isolation evidence without environment values."""
++import importlib.util
++import json
++import os
++from pathlib import Path
++import sys
++
++E=Path(__file__).resolve().parent
++run=os.environ['REALITY_TEST_RUN']
++from worker.config import assert_zero_database_credentials
++assert_zero_database_credentials()
++drivers=['asyncpg','psycopg','psycopg2','sqlalchemy','pymysql','pymongo']
++available=[name for name in drivers if importlib.util.find_spec(name) is not None]
++assert not available, available
++(E/(run+'-worker-identity.json')).write_text(json.dumps({'pid':os.getpid(),'executable':sys.executable,
++    'database_env_guard':'PASS','database_drivers_present':available,
++    'environment_keys':sorted(os.environ),'mode':'real Celery solo, local Windows only'},indent=2))
++
++
++def audit(event,args):
++    if event=='socket.connect':
++        address=args[1]
++        with (E/(run+'-worker-connections.jsonl')).open('a') as stream:
++            stream.write(json.dumps({'pid':os.getpid(),'address':address})+'\n')
++
++
++sys.addaudithook(audit)
++from worker.celery_app import celery_app
++celery_app.worker_main(['worker','--pool=solo','--concurrency=1','--loglevel=WARNING',
++                        '--without-gossip','--without-mingle','--without-heartbeat',
++                        '--hostname=reality-compute-local@%h','--queues=compute_tasks'])

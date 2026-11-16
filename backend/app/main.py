@@ -6,10 +6,15 @@ from app.core.logging import setup_logging
 from app.api.health import health_router
 from app.api.v1.router import api_router
 from app.core.redis import close_redis_client
+from app.core.security import jwt_signing_is_configured
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if settings.environment.lower() == "production" and not jwt_signing_is_configured():
+        raise RuntimeError(
+            "Production requires a supported JWT algorithm and valid JWT_SECRET_KEY configuration"
+        )
     setup_logging(settings.log_level)
     yield
     await close_redis_client()

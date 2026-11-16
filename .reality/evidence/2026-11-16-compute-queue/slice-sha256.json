@@ -1,0 +1,21 @@
+{
+  "backend/app/core/redis.py": "c335f88e1eaefa831ebf6a153f6d89e278dbfc6a8f7dc731a4fd68dbcebaec20",
+  "backend/app/modules/compute_orchestrator/errors.py": "04394fd8e3dba7426a2340cc29a86c6c06bd3cd8a3ff31aa6d5784bc2cfbc801",
+  "backend/app/modules/compute_orchestrator/dispatcher.py": "32aeda83e5fa7a27beffaf5e7a6fad6155f0e9014b2beabbc104f6a09db8e285",
+  "backend/app/modules/compute_orchestrator/ingestion.py": "5163183779568bc182d5cff0f92f1da3053cc4bd6ad42dec104b5836825b03eb",
+  "backend/app/modules/compute_orchestrator/service.py": "0d081b60696609868277a40d705f12af8218a49c0caa0948e8c847881a340a80",
+  "backend/app/modules/cluster_orchestrator/dispatcher.py": "06f133377b231b6e1e9262d2c68bacb578d58ec18d182f99fbedfc43bf9f1616",
+  "backend/app/modules/reality_constraint_engine/router.py": "3d5d0ed83005297c57df3682bf5c641b04130c070acb3e2e1d33f88e10fdff64",
+  "shared/shared/schemas/finding_result.py": "0344f0227d5208a6e2e83172e7b2d2552a17446a6d455509d85967f45c2b1b03",
+  "shared/shared/schemas/job_bundle.py": "b1d5198e66aace3204429bd71a309bbc95f4c2f3bae94276945e1a64910d0c7c",
+  "worker/worker/celery_app.py": "9909b7a528f8a6e6c157d352870cc9a53f04c87b85f9dc29308590d8d2ed6cd0",
+  "worker/worker/tasks/compute_tasks.py": "014f6c1315f7859f3a0a94f4e44677ae53bb0c4b72b556bc452ae0c42b47263f",
+  "backend/tests/unit/test_compute_orchestrator.py": "d73b66ffed9bbc58ec1ec7a4b3a5e1b79e47270f6515c751cc1e3265a1f177bd",
+  "backend/tests/unit/test_compute_queue_boundary.py": "5a7b27d11c62733724295dd0bdc002db7e749eb8a104218cf0996e9246d0cddc",
+  "backend/tests/integration/test_stage4_final_e2e_integration.py": "06c6b38a60e35075fcd48d82a6aa9617b540bf048f2d4f3169baf20f341fa37b",
+  "backend/tests/integration/test_decision3_postgres_rls.py": "f5bf157732c6fca1e360eb73a22dadd46e236606c93c093c97f0ce47f5ed0e6f",
+  "backend/tests/integration/test_compute_queue_live.py": "4969b4159dcc369b3be2a9baab02ba413a8171035bb6a1a4b1e045db1f150deb",
+  "worker/tests/test_queue_contract.py": "b52818ea01b33fff6d03f252af7f3cfa78df828f625c5ee595c47f83d7cb2ea8",
+  ".reality/evidence/2026-11-16-compute-queue/run_live.py": "f2edef664c13e64866ace463930e135e0d3481f26d80aebcb0f998056df26903",
+  ".reality/evidence/2026-11-16-compute-queue/worker_bootstrap.py": "c8c2bde4ef7e825e2ce6e4c269fb5b90c7bce619f1f01b3dc927a950254bcdb3"
+}

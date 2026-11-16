@@ -1,0 +1,16 @@
+
+> reality-science-frontend@0.1.0 lint
+> next lint
+
+npm.cmd : `next lint` is deprecated and will be removed in Next.js 16.
+At line:2 char:1
++ npm.cmd run lint *> '../.reality/evidence/2026-11-16-canvas/lint-rech ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (`next lint` is ... in Next.js 16.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+For new projects, use create-next-app to choose your preferred linter.
+For existing projects, migrate to the ESLint CLI:
+npx @next/codemod@canary next-lint-to-eslint-cli .
+
+✔ No ESLint warnings or errors

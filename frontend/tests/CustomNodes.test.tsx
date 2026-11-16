@@ -79,6 +79,40 @@ describe("Custom Canvas Nodes", () => {
       fireEvent.change(select, { target: { value: "t" } });
       expect(onChange).toHaveBeenCalledWith("t");
     });
+
+    it.each(["another declaration remains", "no declarations remain"])("keeps a removed symbol visible when %s", (scenario) => {
+      const onChange = jest.fn();
+      const x = { symbol: "x", name: "Length", unit: "meter" };
+      const y = { symbol: "y", name: "Time", unit: "second" };
+      const props = {
+        id: "v1", type: "variableNode" as const, zIndex: 1, isConnectable: true,
+        positionAbsoluteX: 0, positionAbsoluteY: 0, selected: false, dragging: false,
+        selectable: true, deletable: true, draggable: true,
+      };
+      const data = { symbol: "x", unit: "meter", onChange };
+      const { rerender } = render(<VariableNode {...props} data={{ ...data, availableSymbols: [x, y] }} />);
+      expect(screen.getByLabelText("Variable symbol for node v1")).toHaveValue("x");
+      expect(screen.getByText("[meter]")).toBeInTheDocument();
+
+      const remaining = scenario === "another declaration remains" ? [y] : [];
+      rerender(<VariableNode {...props} data={{ ...data, availableSymbols: remaining }} />);
+      const control = screen.getByLabelText("Variable symbol for node v1");
+      expect(control).toHaveValue("x");
+      expect(control).toHaveAttribute("aria-invalid", "true");
+      expect(screen.queryByText("[meter]")).not.toBeInTheDocument();
+      expect(onChange).not.toHaveBeenCalled();
+      if (remaining.length) {
+        expect(screen.getByRole("option", { name: "x (undeclared)" })).toBeDisabled();
+        fireEvent.change(control, { target: { value: "y" } });
+        expect(onChange).toHaveBeenCalledWith("y");
+      }
+
+      rerender(<VariableNode {...props} data={{ ...data, availableSymbols: [{ ...x, unit: "second" }, y] }} />);
+      expect(screen.getByLabelText("Variable symbol for node v1")).toHaveValue("x");
+      expect(screen.getByLabelText("Variable symbol for node v1")).not.toHaveAttribute("aria-invalid");
+      expect(screen.queryByRole("option", { name: "x (undeclared)" })).not.toBeInTheDocument();
+      expect(screen.getByText("[second]")).toBeInTheDocument();
+    });
   });
 
   describe("BinaryOpNode", () => {

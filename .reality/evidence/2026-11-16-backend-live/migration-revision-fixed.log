@@ -1,0 +1,5 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 001_initial_schema, Initial database schema with IAM, Research Core, and RLS metadata
+INFO  [alembic.runtime.migration] Running upgrade 001_initial_schema -> 002_stage1_validation_and_math, Stage 1 Validation and Math Schema: equations, variables, validation_runs, validation_findings with RLS
+INFO  [alembic.runtime.migration] Running upgrade 002_stage1_validation_and_math -> 003_stage3_claims_and_epistemic_logic, Stage 3 Claims and Epistemic Logic Schema: claims and claim_relations with Row-Level Security (RLS)

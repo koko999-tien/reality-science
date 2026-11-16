@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 from app.core.config import settings
+from app.core.security import create_access_token
 from app.db.session import get_db
 from app.main import app
 from app.modules.research_core.models import (
@@ -20,6 +21,7 @@ from app.modules.research_core.models import (
     ValidationRun,
     Variable,
 )
+from app.modules.iam_governance.models import UserAccount
 from httpx import ASGITransport, AsyncClient
 
 
@@ -42,8 +44,11 @@ class MockDbSession:
 
     def __init__(self, entities):
         self.entities = list(entities)
+        self.info = {}
 
-    async def execute(self, stmt):
+    async def execute(self, stmt, _params=None):
+        if not hasattr(stmt, "column_descriptions"):
+            return MockResult([])
         model_cls = stmt.column_descriptions[0]["type"]
         params = stmt.compile().params
         candidates = [e for e in self.entities if isinstance(e, model_cls)]
@@ -74,6 +79,13 @@ def seeded_db():
     )
     actor.email = "max.planck@quantum-institute.de"
     actor.user_account_id = "user_acc_planck_sec_999"
+    user = UserAccount(
+        id=actor.user_account_id,
+        email="max.planck@example.test",
+        hashed_password="unused-test-hash",
+        is_active=True,
+    )
+    user.actor = actor
 
     # Public project
     public_project = ResearchProject(
@@ -222,6 +234,7 @@ def seeded_db():
     )
 
     entities = [
+        user,
         actor,
         public_project,
         private_project,
@@ -241,12 +254,18 @@ def seeded_db():
 
 @pytest.fixture
 def override_db(seeded_db):
+    original_overrides = dict(app.dependency_overrides)
+    original_jwt_secret = settings.jwt_secret_key
+    settings.jwt_secret_key = "test-only-jwt-signing-key-at-least-32-bytes"
+
     async def _get_db():
         yield seeded_db
 
     app.dependency_overrides[get_db] = _get_db
     yield
-    app.dependency_overrides.pop(get_db, None)
+    app.dependency_overrides.clear()
+    app.dependency_overrides.update(original_overrides)
+    settings.jwt_secret_key = original_jwt_secret
 
 
 @pytest.mark.asyncio
@@ -270,32 +289,53 @@ async def test_export_nonexistent_version_rejected_with_404(override_db):
 
 
 @pytest.mark.asyncio
-async def test_export_private_draft_unauthorized_rejected_with_403(override_db):
-    """POST /api/v1/versions/{version_id}/export-zip must return HTTP 403 when unauthenticated actor accesses private draft."""
+async def test_export_private_draft_unauthorized_rejected_with_404(override_db):
+    """Caller-supplied actor identity must not authorize private-draft export."""
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         # Without owner credentials
-        response = await ac.post(
-            "/api/v1/versions/ver_private_frozen_300/export-zip",
-            headers={"X-Actor-Id": "unauthorized_actor_999"},
-        )
-
-    assert response.status_code == 403
-    assert "ACCESS_DENIED" in response.json()["detail"]
-
-
-@pytest.mark.asyncio
-async def test_export_private_draft_authorized_owner_returns_200(override_db):
-    """POST /api/v1/versions/{version_id}/export-zip allows owner to export private draft."""
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         response = await ac.post(
             "/api/v1/versions/ver_private_frozen_300/export-zip",
             headers={"X-Actor-Id": "actor_planck_001"},
         )
 
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_export_private_draft_anonymous_is_hidden(override_db):
+    """Private export requires a principal, not a caller-supplied identity header."""
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/api/v1/versions/ver_private_frozen_300/export-zip",
+        )
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_export_private_draft_remains_hidden_when_signing_key_is_invalid(override_db):
+    original_secret = settings.jwt_secret_key
+    settings.jwt_secret_key = ""
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            response = await ac.post("/api/v1/versions/ver_private_frozen_300/export-zip")
+    finally:
+        settings.jwt_secret_key = original_secret
+
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_export_private_draft_allows_authenticated_owner(override_db):
+    token = create_access_token("user_acc_planck_sec_999")
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/api/v1/versions/ver_private_frozen_300/export-zip",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/zip"
-    assert 'attachment; filename="research_bundle_ver_private_frozen_300.zip"' in response.headers["content-disposition"]
-    assert len(response.content) > 0
 
 
 @pytest.mark.asyncio

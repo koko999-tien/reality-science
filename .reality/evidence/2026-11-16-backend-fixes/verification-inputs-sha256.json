@@ -1,0 +1,18 @@
+{
+  "backend/app/db/migrations/versions/001_initial_schema.py": "a302aa80634bb41cab4951643857077ac18edbfe3d2ec7c56e20c213e7f5d8c9",
+  "backend/app/db/migrations/versions/002_stage1_validation_and_math.py": "efbeec2856a52ff1868ca67079f848b7ecf608f69f5946ca3c2c87a0ceaea263",
+  "backend/app/db/migrations/versions/003_stage3_claims_and_epistemic_logic.py": "45f99ed57cf68644ef9cedc4d8d90e0c2716f81c302e1cdb7d499c68072b2678",
+  "backend/app/db/migrations/versions/004_owner_only_dml.py": "48b886b4f27a7fb73f05925ec825d3ff157a2cd1b1a5f2108963225ec585cbd8",
+  "backend/app/db/session.py": "38a6e743649a78dc05c98b4fb70ee67c297dddfdc5b8836d11618774de9d4c06",
+  "backend/app/modules/iam_governance/dependencies.py": "a8a6d5da0c7f1d573cef5057db76fbe00b544dc364818f8aa6a95db3cfe60461",
+  "backend/app/modules/reality_constraint_engine/router.py": "0f40762e91140cf39c8bb18d79943aa9cf8877b21ca7471f0397fa2530f294e3",
+  "backend/app/modules/research_core/service.py": "a81f3c8ec71d0c962df313bf45901278076958cf7c60e6ac0019d70726c3bdd9",
+  "backend/scripts/disposable_postgres.py": "31507e0259ba820c569f7a8b3b71a46a4b7e2b3bc1aca61d98f5820879ee926f",
+  "backend/tests/integration/test_decision3_postgres_rls.py": "643d1d4a3f869b4bcc123d937c7b1a346c427a93cd5c54391ef58c3ef9522bfd",
+  "backend/tests/integration/test_decision3_project_owner_transfer.py": "dcc9e077b49880a1c9f6c4364521d2964dab326d6421feb642c7e1622f820392",
+  "backend/tests/integration/test_stage4_final_e2e_integration.py": "b9e592b55c724ac2651c4851a39296fe79223ae1ae38e5c92a6c3a75bd5d58a3",
+  "backend/tests/postgres_target.py": "280c23b8341b9d19b82a49f2ad30ad07d99474739e79eaec7dc8973a57cdc9c0",
+  "backend/tests/unit/test_disposable_postgres_runner.py": "527fffa50e86766311aff38161e73d99114721b95961c96f5e8aad677b2f86ff",
+  "backend/tests/unit/test_postgres_target_guard.py": "cb9726bb83e5fd68175be2828f7192bfaed7268824a4a1ee91a678f2f7581e4b",
+  "backend/tests/unit/test_research_project_auth.py": "0bd126bc127ea0414b625728af21017e0bebc8a96330b958b0ed96d55f51698c"
+}

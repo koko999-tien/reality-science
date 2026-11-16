@@ -42,8 +42,11 @@ class MockDbSession:
 
     def __init__(self, entities):
         self.entities = list(entities)
+        self.info = {}
 
     async def execute(self, stmt):
+        if not hasattr(stmt, "column_descriptions"):
+            return MockResult([])
         model_cls = stmt.column_descriptions[0]["type"]
         params = stmt.compile().params
         candidates = [e for e in self.entities if isinstance(e, model_cls)]
@@ -646,4 +649,3 @@ async def test_verify_bundle_detects_untracked_files(mock_research_entities):
         assert "Untracked / undeclared file(s) listed in checksums.sha256" in proc_zip_poison.stdout
         assert "malicious_in_zip_poison.sh" in proc_zip_poison.stdout
         assert "Untracked / undeclared file(s) detected in bundle" in proc_zip_poison.stdout
-

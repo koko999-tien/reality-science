@@ -1,0 +1,16 @@
+ 
+ -------------- reality-compute-local@koko v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Windows-10-10.0.26300-SP0 2026-11-16 22:45:35
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         reality_science_worker:0x190ec3f6810
+- ** ---------- .> transport:   redis://127.0.0.1:57168/0
+- ** ---------- .> results:     redis://127.0.0.1:57168/1
+- *** --- * --- .> concurrency: 1 (solo)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> compute_tasks    exchange=compute_tasks(direct) key=compute_tasks
+                
+

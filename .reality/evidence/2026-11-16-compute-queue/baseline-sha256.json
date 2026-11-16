@@ -1,0 +1,15 @@
+{
+  "backend/app/core/redis.py": "8958042a23de4cd91a0caa87e951ff9420f0dcdf19e4049c8c6df0cc0975c989",
+  "backend/app/modules/compute_orchestrator/dispatcher.py": "086dc79d04f73e6768ca2ad843e998667fc0535b96a178e9343181a94f5be86c",
+  "backend/app/modules/compute_orchestrator/ingestion.py": "545a1fb05c0110b5088e697e3feb1c0314f61fbcf7e2dbf673dbf47417ddd4bb",
+  "backend/app/modules/cluster_orchestrator/dispatcher.py": "663ec3222a7e1ef309b9e1148184235e9236e6bab0c8407204b006a98e09bb5f",
+  "backend/app/modules/reality_constraint_engine/router.py": "0f40762e91140cf39c8bb18d79943aa9cf8877b21ca7471f0397fa2530f294e3",
+  "shared/shared/schemas/job_bundle.py": "c66481624c9e3a56edc997d66468007f30f074317eb27580b5b004a7f0aede79",
+  "shared/shared/schemas/finding_result.py": "512ff92cb68bf1012251cc5cbba4944d273a87d85ce0b5399b05d85eaacf2690",
+  "worker/worker/tasks/compute_tasks.py": "8659de549d1724f106ac521af5c7af700afeb8a50983cabba8dfbd89c7ed8749",
+  "worker/worker/celery_app.py": "a3cf880fbe2a73ab36f40afd06a49b1377d6b8f15c8bc148694de296ed15f9e3",
+  "backend/tests/unit/test_compute_orchestrator.py": "02d305610b62aaeba2798528182d5ea32df0d964cb1ad8db9123896b322d6c08",
+  "backend/tests/integration/test_stage1_e2e_integration.py": "9d3538b621fb16b7f173238084a9abfc30fcb7655328f966bbd39469aff78a7e",
+  "backend/tests/integration/test_stage4_final_e2e_integration.py": "b9e592b55c724ac2651c4851a39296fe79223ae1ae38e5c92a6c3a75bd5d58a3",
+  "backend/tests/integration/test_decision3_postgres_rls.py": "643d1d4a3f869b4bcc123d937c7b1a346c427a93cd5c54391ef58c3ef9522bfd"
+}

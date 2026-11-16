@@ -1,0 +1,13 @@
+1765:C 16 Nov 2026 22:37:52.679 * oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+1765:C 16 Nov 2026 22:37:52.682 * Redis version=8.10.3, bits=64, commit=c38b716e, modified=0, pid=1765, just started
+1765:C 16 Nov 2026 22:37:52.682 * Configuration loaded
+1765:M 16 Nov 2026 22:37:52.685 # You requested maxclients of 10000 requiring at least 10032 max file descriptors.
+1765:M 16 Nov 2026 22:37:52.685 # Server can't set maximum open files to 10032 because of OS error: Operation not permitted.
+1765:M 16 Nov 2026 22:37:52.685 # Current maximum open files is 3200. maxclients has been reduced to 3168 to compensate for low ulimit. If you need higher maxclients increase 'ulimit -n'.
+1765:M 16 Nov 2026 22:37:52.685 * monotonic clock: POSIX clock_gettime
+1765:M 16 Nov 2026 22:37:52.689 * Running mode=standalone, port=62389.
+1765:M 16 Nov 2026 22:37:52.697 * Server initialized
+1765:M 16 Nov 2026 22:37:52.697 * Ready to accept connections tcp
+1765:M 16 Nov 2026 22:37:52.697 # WARNING: Redis does not require authentication. Redis will accept connections from any local client.
+1765:M 16 Nov 2026 22:38:14.691 * User requested shutdown...
+1765:M 16 Nov 2026 22:38:14.691 # Redis is now ready to exit, bye bye...

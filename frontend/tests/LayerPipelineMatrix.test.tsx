@@ -12,7 +12,7 @@ describe("LayerPipelineMatrix Component", () => {
     expect(screen.getByText("Layer 3: Dimensional Analysis")).toBeInTheDocument();
     expect(screen.getByText("Layer 4: Physical Laws & Invariants")).toBeInTheDocument();
     expect(screen.getByText("Layer 5: Empirical Correlation")).toBeInTheDocument();
-    expect(screen.getByText("Layer 6: Epistemic Logic")).toBeInTheDocument();
+    expect(screen.getByText("Layer 6: Definition Pending")).toBeInTheDocument();
     const pendingBadges = screen.getAllByText("PENDING");
     expect(pendingBadges.length).toBe(6);
   });
@@ -62,11 +62,11 @@ describe("LayerPipelineMatrix Component", () => {
       },
       6: {
         layer: 6,
-        name: "Layer 6: Epistemic Logic",
+        name: "Layer 6: Backend-provided finding",
         state: "WARNING",
-        diagnostic_code: "EPISTEMIC_ANTECEDENT_WARNING",
-        message: "Epistemic graph verified with antecedent warning(s).",
-        diagnostics: ["Antecedent claim C-01 has status WARNING"],
+        diagnostic_code: "BACKEND_WARNING",
+        message: "A backend warning was returned for this layer.",
+        diagnostics: ["Review the backend response for details."],
       },
     };
 

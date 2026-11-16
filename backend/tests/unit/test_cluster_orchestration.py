@@ -25,6 +25,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
+from app.core.config import settings
 from app.modules.cluster_orchestrator.dispatcher import ClusterTaskDispatcher
 from app.modules.cluster_orchestrator.mtls import (
     ClusterCertificateAuthority,
@@ -618,7 +619,11 @@ async def test_dispatcher_fails_when_no_healthy_workers():
 @pytest.fixture(autouse=True)
 def reset_global_cluster():
     """Reset global cluster registry and dispatcher state before each test."""
-    reg = ClusterNodeRegistry(cluster_secret="test-cluster-token")
+    reg = ClusterNodeRegistry(cluster_secret="test-cluster-join-token-32-bytes-long")
+    original_join_token = settings.cluster_join_token
+    original_admin_token = settings.cluster_admin_token
+    settings.cluster_join_token = "test-cluster-join-token-32-bytes-long"
+    settings.cluster_admin_token = "test-cluster-admin-token-32-bytes-long"
     disp = ClusterTaskDispatcher(
         registry=reg,
         mock_executor=lambda b: FindingResult(
@@ -632,6 +637,8 @@ def reset_global_cluster():
     reset_cluster_state(registry=reg, dispatcher=disp)
     yield
     reset_cluster_state(None, None)
+    settings.cluster_join_token = original_join_token
+    settings.cluster_admin_token = original_admin_token
 
 
 @pytest.mark.asyncio
@@ -645,7 +652,7 @@ async def test_api_cluster_join_and_get_config():
             "hostname": "api-worker-01",
             "wireguard_public_key": pub,
             "role": "WORKER",
-            "join_token": "test-cluster-token",
+            "join_token": "test-cluster-join-token-32-bytes-long",
             "endpoint": "198.51.100.22:51820",
         }
         res_join = await ac.post("/api/v1/cluster/nodes/join", json=join_payload)
@@ -657,7 +664,10 @@ async def test_api_cluster_join_and_get_config():
         assert "-----BEGIN CERTIFICATE-----" in data["issued_cert_pem"]
 
         # 2. Get WireGuard wg0.conf
-        res_cfg = await ac.get(f"/api/v1/cluster/nodes/{node_id}/config")
+        cluster_headers = {"X-Cluster-Admin-Token": "test-cluster-admin-token-32-bytes-long"}
+        unauthenticated_nodes = await ac.get("/api/v1/cluster/nodes")
+        assert unauthenticated_nodes.status_code == 401
+        res_cfg = await ac.get(f"/api/v1/cluster/nodes/{node_id}/config", headers=cluster_headers)
         assert res_cfg.status_code == 200
         cfg_data = res_cfg.json()
         assert cfg_data["node_id"] == node_id
@@ -665,10 +675,64 @@ async def test_api_cluster_join_and_get_config():
         assert "[Peer]" in cfg_data["interface_config"]
 
         # 3. List nodes
-        res_list = await ac.get("/api/v1/cluster/nodes")
+        res_list = await ac.get("/api/v1/cluster/nodes", headers=cluster_headers)
         assert res_list.status_code == 200
         nodes_list = res_list.json()
         assert any(n["node_id"] == node_id for n in nodes_list)
+        assert all("wireguard_private_key" not in node for node in nodes_list)
+        assert all("certificate_pem" not in node for node in nodes_list)
+
+        controller_cfg = await ac.get(
+            "/api/v1/cluster/nodes/controller-node/config",
+            headers=cluster_headers,
+        )
+        assert controller_cfg.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_cluster_join_fails_closed_without_configured_token():
+    _, pub = generate_wireguard_keypair()
+    settings.cluster_join_token = None
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/api/v1/cluster/nodes/join",
+            json={
+                "hostname": "unconfigured-worker",
+                "wireguard_public_key": pub,
+                "join_token": "reality-cluster-dev-token-secret-2026",
+            },
+        )
+
+    assert response.status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_cluster_join_rejects_non_worker_role():
+    _, pub = generate_wireguard_keypair()
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/api/v1/cluster/nodes/join",
+            json={
+                "hostname": "untrusted-controller",
+                "wireguard_public_key": pub,
+                "role": "CONTROLLER",
+                "join_token": "test-cluster-join-token-32-bytes-long",
+            },
+        )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_cluster_control_plane_requires_configured_admin_token():
+    settings.cluster_admin_token = None
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.get("/api/v1/cluster/nodes")
+
+    assert response.status_code == 503
 
 
 @pytest.mark.asyncio
@@ -683,15 +747,17 @@ async def test_api_cluster_heartbeat_and_security_blocking():
                 "hostname": "api-worker-heartbeat",
                 "wireguard_public_key": pub,
                 "role": "WORKER",
-                "join_token": "test-cluster-token",
+                "join_token": "test-cluster-join-token-32-bytes-long",
             },
         )
         node_id = res_join.json()["node_id"]
 
         # Valid heartbeat
+        cluster_headers = {"X-Cluster-Admin-Token": "test-cluster-admin-token-32-bytes-long"}
         res_hb = await ac.post(
             "/api/v1/cluster/nodes/heartbeat",
             json={"node_id": node_id, "load_average": 0.25, "active_tasks": 1},
+            headers=cluster_headers,
         )
         assert res_hb.status_code == 200
         assert res_hb.json()["acknowledged"] is True
@@ -700,7 +766,10 @@ async def test_api_cluster_heartbeat_and_security_blocking():
         res_rogue = await ac.post(
             "/api/v1/cluster/nodes/heartbeat",
             json={"node_id": node_id, "load_average": 0.25, "active_tasks": 1},
-            headers={"X-Cert-Fingerprint": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"},
+            headers={
+                **cluster_headers,
+                "X-Cert-Fingerprint": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+            },
         )
         assert res_rogue.status_code == 403
 
@@ -718,12 +787,16 @@ async def test_api_cluster_dispatch_task():
                 "hostname": "api-worker-dispatch",
                 "wireguard_public_key": pub,
                 "role": "WORKER",
-                "join_token": "test-cluster-token",
+                "join_token": "test-cluster-join-token-32-bytes-long",
             },
         )
 
         bundle = create_sample_job_bundle("api-dispatch-001")
-        res_dispatch = await ac.post("/api/v1/cluster/dispatch", json=bundle.model_dump())
+        res_dispatch = await ac.post(
+            "/api/v1/cluster/dispatch",
+            json=bundle.model_dump(),
+            headers={"X-Cluster-Admin-Token": "test-cluster-admin-token-32-bytes-long"},
+        )
         assert res_dispatch.status_code == 200
         disp_data = res_dispatch.json()
         assert disp_data["dispatched"] is True
@@ -743,22 +816,23 @@ async def test_api_block_drain_unblock():
                 "hostname": "api-worker-ops",
                 "wireguard_public_key": pub,
                 "role": "WORKER",
-                "join_token": "test-cluster-token",
+                "join_token": "test-cluster-join-token-32-bytes-long",
             },
         )
         node_id = res_join.json()["node_id"]
 
         # Drain
-        res_drain = await ac.post(f"/api/v1/cluster/nodes/{node_id}/drain")
+        cluster_headers = {"X-Cluster-Admin-Token": "test-cluster-admin-token-32-bytes-long"}
+        res_drain = await ac.post(f"/api/v1/cluster/nodes/{node_id}/drain", headers=cluster_headers)
         assert res_drain.status_code == 200
         assert res_drain.json()["status"] == "DRAINED"
 
         # Block
-        res_block = await ac.post(f"/api/v1/cluster/nodes/{node_id}/block")
+        res_block = await ac.post(f"/api/v1/cluster/nodes/{node_id}/block", headers=cluster_headers)
         assert res_block.status_code == 200
         assert res_block.json()["status"] == "BLOCKED"
 
         # Unblock
-        res_unblock = await ac.post(f"/api/v1/cluster/nodes/{node_id}/unblock")
+        res_unblock = await ac.post(f"/api/v1/cluster/nodes/{node_id}/unblock", headers=cluster_headers)
         assert res_unblock.status_code == 200
         assert res_unblock.json()["status"] == "ACTIVE"

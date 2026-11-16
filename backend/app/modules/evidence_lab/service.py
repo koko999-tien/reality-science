@@ -7,6 +7,7 @@ import hashlib
 import io
 import json
 import math
+import threading
 import uuid
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,6 +31,7 @@ from shared.schemas.empirical_data import (
 
 # In-memory repository for uploaded datasets (fast, thread-safe, isolated)
 _DATASET_STORE: Dict[str, Tuple[EmpiricalDatasetSpec, str]] = {}
+_DATASET_STORE_LOCK = threading.Lock()
 
 
 async def register_evidence_artifact(
@@ -121,9 +123,8 @@ def parse_and_validate_dataset_json(
         if metadata.dependent_variable_symbol and "dependent_variable_symbol" not in data:
             data["dependent_variable_symbol"] = metadata.dependent_variable_symbol
 
-    # Ensure dataset_id exists
-    if "dataset_id" not in data or not data["dataset_id"]:
-        data["dataset_id"] = f"dataset-{uuid.uuid4().hex[:12]}"
+    # Dataset IDs are server-owned so an upload cannot replace another record.
+    data["dataset_id"] = f"dataset-{uuid.uuid4().hex}"
     if "dataset_name" not in data and "name" not in data:
         data["dataset_name"] = "Imported Empirical Dataset"
     if "dataset_type" not in data and "source_type" not in data:
@@ -243,7 +244,10 @@ def parse_and_validate_dataset_csv(
 
 def register_empirical_dataset(dataset: EmpiricalDatasetSpec, sha256_hash: str) -> str:
     """Stores a validated dataset in the runtime store."""
-    _DATASET_STORE[dataset.dataset_id] = (dataset, sha256_hash)
+    with _DATASET_STORE_LOCK:
+        if dataset.dataset_id in _DATASET_STORE:
+            raise ValueError("Dataset ID already exists")
+        _DATASET_STORE[dataset.dataset_id] = (dataset, sha256_hash)
     return dataset.dataset_id
 
 

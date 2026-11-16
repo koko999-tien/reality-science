@@ -1,0 +1,155 @@
+{
+  "id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+  "version_id": "f9d99fc1-d983-4e44-a98b-14cd814d65c3",
+  "status": "completed",
+  "overall_state": "FAIL",
+  "started_at": "2026-11-16T15:20:06.609821+00:00",
+  "completed_at": "2026-11-16T15:20:06.677311+00:00",
+  "created_at": "2026-11-16T15:20:06.679349+00:00",
+  "findings": [
+    {
+      "id": "8eac7cd8-5a03-4bda-98b8-cb2bee38fa6c",
+      "run_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "layer": 1,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "50a30c24-10bc-4d62-9d89-e831c8eaf9db",
+      "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "state": "FAIL",
+      "diagnostic_code": "UNDECLARED_SYMBOL",
+      "message": "AST references undeclared symbol(s): ['x']",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [
+          "AST references undeclared symbol(s): ['x']"
+        ],
+        "details": {
+          "referenced_symbols": [
+            "x"
+          ]
+        },
+        "provenance": {
+          "bundle_sha256": "880cc30ba3ebcdcdf280f2f9ca659a89e8b229d31535609310d4f01190037b4c",
+          "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+          "version_id": "f9d99fc1-d983-4e44-a98b-14cd814d65c3"
+        }
+      },
+      "created_at": "2026-11-16T15:20:06.684366+00:00"
+    },
+    {
+      "id": "cd2394fc-b4c2-4dd0-be23-b381cea2dd0a",
+      "run_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "layer": 2,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "50a30c24-10bc-4d62-9d89-e831c8eaf9db",
+      "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "state": "NOT_APPLICABLE",
+      "diagnostic_code": "SKIPPED_GATE",
+      "message": "Layer 2 skipped due to Layer 1 failure.",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [],
+        "details": {},
+        "provenance": {
+          "bundle_sha256": "880cc30ba3ebcdcdf280f2f9ca659a89e8b229d31535609310d4f01190037b4c",
+          "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+          "version_id": "f9d99fc1-d983-4e44-a98b-14cd814d65c3"
+        }
+      },
+      "created_at": "2026-11-16T15:20:06.684366+00:00"
+    },
+    {
+      "id": "0abe4c4d-cb51-4d5e-ac56-1b68fefdca13",
+      "run_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "layer": 3,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "50a30c24-10bc-4d62-9d89-e831c8eaf9db",
+      "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "state": "NOT_APPLICABLE",
+      "diagnostic_code": "SKIPPED_GATE",
+      "message": "Layer 3 skipped due to Layer 1 failure.",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [],
+        "details": {},
+        "provenance": {
+          "bundle_sha256": "880cc30ba3ebcdcdf280f2f9ca659a89e8b229d31535609310d4f01190037b4c",
+          "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+          "version_id": "f9d99fc1-d983-4e44-a98b-14cd814d65c3"
+        }
+      },
+      "created_at": "2026-11-16T15:20:06.684366+00:00"
+    },
+    {
+      "id": "cc46536f-7e20-4279-8b73-8b979239e924",
+      "run_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "layer": 4,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "50a30c24-10bc-4d62-9d89-e831c8eaf9db",
+      "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "state": "NOT_APPLICABLE",
+      "diagnostic_code": "SKIPPED_GATE",
+      "message": "Layer 4 skipped due to Layer 1 failure.",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [],
+        "details": {},
+        "provenance": {
+          "bundle_sha256": "880cc30ba3ebcdcdf280f2f9ca659a89e8b229d31535609310d4f01190037b4c",
+          "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+          "version_id": "f9d99fc1-d983-4e44-a98b-14cd814d65c3"
+        }
+      },
+      "created_at": "2026-11-16T15:20:06.684366+00:00"
+    },
+    {
+      "id": "2a6c554a-df62-47e5-b1fb-3fb2381969f1",
+      "run_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "layer": 5,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "50a30c24-10bc-4d62-9d89-e831c8eaf9db",
+      "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "state": "NOT_APPLICABLE",
+      "diagnostic_code": "SKIPPED_GATE",
+      "message": "Layer 5 skipped due to Layer 1 failure.",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [],
+        "details": {},
+        "provenance": {
+          "bundle_sha256": "880cc30ba3ebcdcdf280f2f9ca659a89e8b229d31535609310d4f01190037b4c",
+          "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+          "version_id": "f9d99fc1-d983-4e44-a98b-14cd814d65c3"
+        }
+      },
+      "created_at": "2026-11-16T15:20:06.684366+00:00"
+    },
+    {
+      "id": "073768de-efc9-4234-a2e5-73280b9a9d99",
+      "run_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "layer": 6,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "50a30c24-10bc-4d62-9d89-e831c8eaf9db",
+      "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+      "state": "NOT_APPLICABLE",
+      "diagnostic_code": "SKIPPED_GATE",
+      "message": "Layer 6 skipped due to Layer 1 failure.",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [],
+        "details": {},
+        "provenance": {
+          "bundle_sha256": "880cc30ba3ebcdcdf280f2f9ca659a89e8b229d31535609310d4f01190037b4c",
+          "job_id": "62a5d27f-d1b1-4def-8008-802cfde1199a",
+          "version_id": "f9d99fc1-d983-4e44-a98b-14cd814d65c3"
+        }
+      },
+      "created_at": "2026-11-16T15:20:06.684366+00:00"
+    }
+  ]
+}

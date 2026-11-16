@@ -13,3 +13,14 @@ class UserResponse(BaseModel):
     id: str
     email: str
     display_name: str
+
+
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    email: EmailStr
+    password: str
+
+
+class AccessTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

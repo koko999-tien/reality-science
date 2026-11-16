@@ -1,0 +1,8 @@
+{
+  "injected": true,
+  "expired_job": "33a70f34-19cd-4a53-873d-77d7e08c6528",
+  "new_job": "85d103d5-0c78-4ad8-9834-dde6935b02b8",
+  "persisted_runs": 0,
+  "both_responses": 503,
+  "late_result_ttl": 60
+}

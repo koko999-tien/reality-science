@@ -1,4 +1,6 @@
 from __future__ import annotations
+import hashlib
+import json
 from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 from shared.schemas.math_ast import ExprNode, VariableSpec, UnitSpec
@@ -22,6 +24,11 @@ class JobBundle(BaseModel):
     empirical_dataset: Optional[EmpiricalDatasetSpec] = None
     empirical_tolerance_sigma: float = Field(default=3.0, ge=0.1, le=10.0)
     claim_graph: Optional[ClaimGraph] = None
+
+    def fingerprint(self) -> str:
+        """Stable identity for the entire staged input, including target and job."""
+        canonical = json.dumps(self.model_dump(mode="json"), sort_keys=True, separators=(",", ":"), allow_nan=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 __all__ = ["JobBundle", "TargetEntityType"]

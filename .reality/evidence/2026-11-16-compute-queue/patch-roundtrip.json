@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-11-16T16:42:02.286211+00:00",
+  "scratch_directory": "C:\\Users\\TIEN PC\\AppData\\Local\\Temp\\opencode\\reality-queue-patch-check-lf-0ru81ik6",
+  "commands": [
+    {
+      "command": [
+        "git",
+        "apply",
+        "--check",
+        "--whitespace=error-all",
+        "D:\\Reality_Science\\.reality\\evidence\\2026-11-16-compute-queue\\slice.patch"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "apply",
+        "--whitespace=error-all",
+        "D:\\Reality_Science\\.reality\\evidence\\2026-11-16-compute-queue\\slice.patch"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "reconstructed_files": 19,
+  "text_mismatches": [],
+  "comparison": "Text comparison normalizes CRLF/LF. Scratch baseline only was normalized to LF; original source and baseline bytes are unchanged and retain their recorded hashes.",
+  "scope": "Patch applied only to a new task-owned temporary baseline copy; repository unchanged."
+}

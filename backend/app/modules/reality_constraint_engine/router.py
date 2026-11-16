@@ -8,6 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
+from app.modules.compute_orchestrator.errors import ComputeUnavailable
+from app.modules.compute_orchestrator.service import compute_job, validate_result
 from app.modules.reality_constraint_engine.models import (
     Claim,
     ClaimRelation,
@@ -22,6 +24,7 @@ from app.modules.reality_constraint_engine.schemas import (
     VariableCreateRequest,
 )
 from app.modules.research_core.models import ResearchVersion
+from app.modules.iam_governance.dependencies import get_accessible_version, get_owned_version
 from shared.models.enums import DiagnosticCode
 from shared.schemas.epistemic_logic import (
     ClaimDependency,
@@ -201,32 +204,19 @@ async def verify_equation_interactive(payload: EquationVerificationRequest):
         claim_graph=payload.claim_graph,
     )
     try:
-        from worker.tasks.compute_tasks import verify_equation_ast
-        result_dict = verify_equation_ast.run(bundle.model_dump())
-        return FindingResult.model_validate(result_dict)
-    except (ImportError, ModuleNotFoundError):
-        from shared.schemas.finding_result import FindingResult, FindingState, LayerFinding
-        layers = {
-            1: LayerFinding(layer=1, name="Syntax & Semantics", state=FindingState.PASS, diagnostic_code="SYNTAX_VALID", message="AST syntax verified"),
-            2: LayerFinding(layer=2, name="Boundary & Singularities", state=FindingState.PASS, diagnostic_code="BOUNDARY_NORMAL", message="Boundary normal"),
-            3: LayerFinding(layer=3, name="Dimensional Analysis", state=FindingState.PASS, diagnostic_code="DIMENSIONS_HOMOGENEOUS", message="Dimensions homogeneous"),
-            4: LayerFinding(layer=4, name="Physical Laws", state=FindingState.PASS if bundle.system_context else FindingState.NOT_APPLICABLE, diagnostic_code="PHYSICAL_LAWS_SATISFIED" if bundle.system_context else "NOT_APPLICABLE", message="Physical laws satisfied" if bundle.system_context else "No system context"),
-            5: LayerFinding(layer=5, name="Empirical Data", state=FindingState.PASS if bundle.empirical_dataset else FindingState.NOT_APPLICABLE, diagnostic_code="EMPIRICAL_FIT_PASS" if bundle.empirical_dataset else "NOT_APPLICABLE", message="Empirical fit normal" if bundle.empirical_dataset else "No empirical dataset"),
-            6: LayerFinding(layer=6, name="Epistemic Logic", state=FindingState.PASS if bundle.claim_graph else FindingState.NOT_APPLICABLE, diagnostic_code="EPISTEMIC_VALIDATED" if bundle.claim_graph else "NOT_APPLICABLE", message="Epistemic graph verified" if bundle.claim_graph else "No claim graph"),
-        }
-        return FindingResult(
-            job_id=job_id,
-            state=FindingState.PASS,
-            diagnostic_code="AST_VERIFIED",
-            message="Interactive 6-layer verification complete",
-            dimensions_verified=True,
-            layer_findings=layers,
-        )
+        async with compute_job(bundle) as finding:
+            return finding
+    except ComputeUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Scientific verification is unavailable because the compute worker failed.",
+        ) from exc
 
 
 @router.post("/versions/{version_id}/validate", status_code=status.HTTP_200_OK)
 async def validate_version(
     version_id: str,
+    _: ResearchVersion = Depends(get_owned_version),
     db: AsyncSession = Depends(get_db),
 ):
     """Executes full 6-layer RCE validation pipeline for a research version.
@@ -321,7 +311,8 @@ async def validate_version(
             dependencies=deps,
         )
 
-    job_id = f"pipeline-val-{uuid.uuid4()}"
+    # The durable run ID and queue job ID share one server-generated identity.
+    job_id = str(uuid.uuid4())
     bundle = JobBundle(
         job_id=job_id,
         version_id=version_id,
@@ -335,81 +326,55 @@ async def validate_version(
         claim_graph=claim_graph,
     )
 
+    started_at = datetime.now(timezone.utc)
     try:
-        from worker.tasks.compute_tasks import verify_equation_ast
-        raw_res = verify_equation_ast.run(bundle.model_dump())
-        finding_res = FindingResult.model_validate(raw_res)
-    except (ImportError, ModuleNotFoundError):
-        from shared.schemas.finding_result import FindingResult, FindingState, LayerFinding
-        layers = {
-            1: LayerFinding(layer=1, name="Syntax & Semantics", state=FindingState.PASS, diagnostic_code="SYNTAX_VALID", message="AST syntax verified"),
-            2: LayerFinding(layer=2, name="Boundary & Singularities", state=FindingState.PASS, diagnostic_code="BOUNDARY_NORMAL", message="Boundary normal"),
-            3: LayerFinding(layer=3, name="Dimensional Analysis", state=FindingState.PASS, diagnostic_code="DIMENSIONS_HOMOGENEOUS", message="Dimensions homogeneous"),
-            4: LayerFinding(layer=4, name="Physical Laws", state=FindingState.PASS if bundle.system_context else FindingState.NOT_APPLICABLE, diagnostic_code="PHYSICAL_LAWS_SATISFIED" if bundle.system_context else "NOT_APPLICABLE", message="Physical laws satisfied" if bundle.system_context else "No system context"),
-            5: LayerFinding(layer=5, name="Empirical Data", state=FindingState.PASS if bundle.empirical_dataset else FindingState.NOT_APPLICABLE, diagnostic_code="EMPIRICAL_FIT_PASS" if bundle.empirical_dataset else "NOT_APPLICABLE", message="Empirical fit normal" if bundle.empirical_dataset else "No empirical dataset"),
-            6: LayerFinding(layer=6, name="Epistemic Logic", state=FindingState.PASS if bundle.claim_graph else FindingState.NOT_APPLICABLE, diagnostic_code="EPISTEMIC_VALIDATED" if bundle.claim_graph else "NOT_APPLICABLE", message="Epistemic graph verified" if bundle.claim_graph else "No claim graph"),
-        }
-        finding_res = FindingResult(
-            job_id=job_id,
-            state=FindingState.PASS,
-            diagnostic_code="STAGE4_E2E_VERIFIED",
-            message="6-layer validation pipeline executed successfully",
-            dimensions_verified=True,
-            layer_findings=layers,
-        )
+        async with compute_job(bundle) as finding_res:
+            return await _persist_validation(db, bundle, finding_res, started_at)
+    except ComputeUnavailable as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Scientific validation is unavailable because the compute worker failed.",
+        ) from exc
 
+
+
+async def _persist_validation(db: AsyncSession, bundle: JobBundle,
+                               finding_res: FindingResult, started_at: datetime):
+    """Only correlated, complete queue results reach this transaction."""
+    validate_result(bundle, finding_res)
+    version_id, job_id = bundle.version_id, bundle.job_id
     now_utc = datetime.now(timezone.utc)
     run = ValidationRun(
-        id=str(uuid.uuid4()),
+        id=job_id,
         version_id=version_id,
         status="completed",
         overall_state=finding_res.state.value,
-        started_at=now_utc,
+        started_at=started_at,
         completed_at=now_utc,
     )
     db.add(run)
     await db.flush()
 
     persisted_findings: List[ValidationFinding] = []
-    if finding_res.layer_findings:
-        for layer_num, l_finding in sorted(finding_res.layer_findings.items()):
-            vf = ValidationFinding(
-                id=str(uuid.uuid4()),
-                run_id=run.id,
-                layer=layer_num,
-                target_entity_type=bundle.target_entity_type.value,
-                target_entity_id=bundle.target_entity_id,
-                job_id=job_id,
-                state=l_finding.state.value,
-                diagnostic_code=l_finding.diagnostic_code,
-                message=l_finding.message,
-                symbolic_simplification=finding_res.symbolic_simplification if layer_num == 2 else None,
-                dimensions_verified=finding_res.dimensions_verified if layer_num == 3 else False,
-                diagnostics={"diagnostics": l_finding.diagnostics, "details": l_finding.details or {}},
-            )
-            db.add(vf)
-            persisted_findings.append(vf)
-    else:
-        for l_num in range(1, 7):
-            vf = ValidationFinding(
-                id=str(uuid.uuid4()),
-                run_id=run.id,
-                layer=l_num,
-                target_entity_type=bundle.target_entity_type.value,
-                target_entity_id=bundle.target_entity_id,
-                job_id=job_id,
-                state=finding_res.state.value if l_num == (finding_res.layer or 1) else "NOT_APPLICABLE",
-                diagnostic_code=finding_res.diagnostic_code,
-                message=finding_res.message,
-                symbolic_simplification=finding_res.symbolic_simplification,
-                dimensions_verified=finding_res.dimensions_verified,
-                diagnostics={"diagnostics": finding_res.diagnostics},
-            )
-            db.add(vf)
-            persisted_findings.append(vf)
-
-    if finding_res.state == FindingState.PASS and version.publication_status == "draft":
-        version.publication_status = "verified"
+    for layer_num, l_finding in sorted(finding_res.layer_findings.items()):
+        vf = ValidationFinding(
+            id=str(uuid.uuid4()),
+            run_id=run.id,
+            layer=layer_num,
+            target_entity_type=bundle.target_entity_type.value,
+            target_entity_id=bundle.target_entity_id,
+            job_id=job_id,
+            state=l_finding.state.value,
+            diagnostic_code=l_finding.diagnostic_code,
+            message=l_finding.message,
+            symbolic_simplification=finding_res.symbolic_simplification if layer_num == 2 else None,
+            dimensions_verified=finding_res.dimensions_verified if layer_num == 3 else False,
+            diagnostics={"diagnostics": l_finding.diagnostics, "details": l_finding.details or {},
+                         "provenance": {"bundle_sha256": finding_res.bundle_sha256,
+                                        "job_id": job_id, "version_id": version_id}},
+        )
+        db.add(vf)
+        persisted_findings.append(vf)
 
     await db.commit()
     return _serialize_run(run, persisted_findings)
@@ -418,6 +383,7 @@ async def validate_version(
 @router.get("/versions/{version_id}/validation-runs")
 async def list_validation_runs(
     version_id: str,
+    _: ResearchVersion = Depends(get_accessible_version),
     db: AsyncSession = Depends(get_db),
 ):
     """Retrieves all historical validation runs with nested layer findings."""
@@ -449,6 +415,7 @@ async def list_validation_runs(
 async def create_equation(
     version_id: str,
     payload: EquationCreateRequest,
+    _: ResearchVersion = Depends(get_owned_version),
     db: AsyncSession = Depends(get_db),
 ):
     """Creates a new mathematical equation for a research version."""
@@ -486,6 +453,7 @@ async def create_equation(
 @router.get("/versions/{version_id}/equations")
 async def list_equations(
     version_id: str,
+    _: ResearchVersion = Depends(get_accessible_version),
     db: AsyncSession = Depends(get_db),
 ):
     """Lists all equations associated with a research version."""
@@ -509,6 +477,7 @@ async def list_equations(
 async def create_variable(
     version_id: str,
     payload: VariableCreateRequest,
+    _: ResearchVersion = Depends(get_owned_version),
     db: AsyncSession = Depends(get_db),
 ):
     """Declares a new physical/mathematical variable for a research version."""
@@ -541,6 +510,7 @@ async def create_variable(
 @router.get("/versions/{version_id}/variables")
 async def list_variables(
     version_id: str,
+    _: ResearchVersion = Depends(get_accessible_version),
     db: AsyncSession = Depends(get_db),
 ):
     """Lists all declared variables for a research version."""
@@ -564,6 +534,7 @@ async def list_variables(
 async def create_claim(
     version_id: str,
     payload: ClaimCreateRequest,
+    _: ResearchVersion = Depends(get_owned_version),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(ResearchVersion).where(ResearchVersion.id == version_id)
@@ -608,6 +579,7 @@ async def create_claim(
 @router.get("/versions/{version_id}/claims")
 async def list_claims(
     version_id: str,
+    _: ResearchVersion = Depends(get_accessible_version),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(ResearchVersion).where(ResearchVersion.id == version_id)
@@ -626,6 +598,7 @@ async def list_claims(
 async def create_claim_relation(
     version_id: str,
     payload: ClaimRelationCreateRequest,
+    _: ResearchVersion = Depends(get_owned_version),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(ResearchVersion).where(ResearchVersion.id == version_id)
@@ -668,6 +641,7 @@ async def create_claim_relation(
 @router.get("/versions/{version_id}/claims/graph")
 async def get_claim_graph(
     version_id: str,
+    _: ResearchVersion = Depends(get_accessible_version),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(ResearchVersion).where(ResearchVersion.id == version_id)
@@ -694,6 +668,7 @@ async def get_claim_graph(
 @router.post("/versions/{version_id}/claims/verify-epistemic")
 async def verify_claims_epistemic(
     version_id: str,
+    _: ResearchVersion = Depends(get_owned_version),
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(ResearchVersion).where(ResearchVersion.id == version_id)

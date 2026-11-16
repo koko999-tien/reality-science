@@ -1,0 +1,135 @@
+{
+  "cluster_identity": {
+    "data": "C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-postgres-83c0e945/data",
+    "cluster": "rs_test_74caee9603bb4ea986e62cb223864982",
+    "system_id": "7708747722773675460"
+  },
+  "app_identity": {
+    "database": "rs_test_74caee9603bb4ea986e62cb223864982",
+    "role": "rs_test_app",
+    "host": "127.0.0.1",
+    "port": 60655,
+    "cluster": "rs_test_74caee9603bb4ea986e62cb223864982",
+    "version": "17.12",
+    "rolsuper": false,
+    "rolbypassrls": false,
+    "rolcreatedb": false,
+    "rolcreaterole": false,
+    "database_owner": "rs_test_admin",
+    "has_memberships": false,
+    "owns_tables": false
+  },
+  "tables": [
+    {
+      "relname": "alembic_version",
+      "owner": "rs_test_admin",
+      "relrowsecurity": false,
+      "relforcerowsecurity": false
+    },
+    {
+      "relname": "claim_relations",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "claims",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "equations",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "research_actors",
+      "owner": "rs_test_admin",
+      "relrowsecurity": false,
+      "relforcerowsecurity": false
+    },
+    {
+      "relname": "research_projects",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "research_versions",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "user_accounts",
+      "owner": "rs_test_admin",
+      "relrowsecurity": false,
+      "relforcerowsecurity": false
+    },
+    {
+      "relname": "validation_findings",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "validation_runs",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    },
+    {
+      "relname": "variables",
+      "owner": "rs_test_admin",
+      "relrowsecurity": true,
+      "relforcerowsecurity": true
+    }
+  ],
+  "policies": [
+    {
+      "tablename": "claim_relations",
+      "policyname": "rls_claim_relations",
+      "cmd": "ALL"
+    },
+    {
+      "tablename": "claims",
+      "policyname": "rls_claims",
+      "cmd": "ALL"
+    },
+    {
+      "tablename": "equations",
+      "policyname": "rls_equations",
+      "cmd": "ALL"
+    },
+    {
+      "tablename": "research_projects",
+      "policyname": "rls_research_projects",
+      "cmd": "ALL"
+    },
+    {
+      "tablename": "research_versions",
+      "policyname": "rls_research_versions",
+      "cmd": "ALL"
+    },
+    {
+      "tablename": "validation_findings",
+      "policyname": "rls_validation_findings",
+      "cmd": "ALL"
+    },
+    {
+      "tablename": "validation_runs",
+      "policyname": "rls_validation_runs",
+      "cmd": "ALL"
+    },
+    {
+      "tablename": "variables",
+      "policyname": "rls_variables",
+      "cmd": "ALL"
+    }
+  ],
+  "revision": "003_stage3_claims_and_epistemic_logic",
+  "revision_column_size": 64,
+  "marker_writable": false
+}

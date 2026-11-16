@@ -1,0 +1,9 @@
+{
+  "kind": "revoked",
+  "injected": true,
+  "job_id": "fef238b7-2e70-4713-9683-1d40e0c3935d",
+  "version_id": "48f3d5cd-185b-4b7b-a346-488f01f51ebd",
+  "response_status": 503,
+  "persisted_runs": 0,
+  "result_key_removed": true
+}

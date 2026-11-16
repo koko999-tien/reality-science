@@ -35,7 +35,11 @@ class ResearchProject(Base):
         DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
 
-    versions: Mapped[list["ResearchVersion"]] = relationship("ResearchVersion", back_populates="project")
+    versions: Mapped[list["ResearchVersion"]] = relationship(
+        "ResearchVersion",
+        back_populates="project",
+        order_by=lambda: ResearchVersion.version_number.desc(),
+    )
     owner: Mapped[ResearchActor] = relationship("ResearchActor", foreign_keys=[owner_actor_id], lazy="selectin")
 
     def __init__(self, **kwargs):
@@ -86,6 +90,5 @@ __all__ = [
     "ValidationRun",
     "Variable",
 ]
-
 
 

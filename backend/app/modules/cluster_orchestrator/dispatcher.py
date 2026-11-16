@@ -16,6 +16,7 @@ from typing import Any, Callable, Dict, Optional
 
 from app.modules.cluster_orchestrator.registry import ClusterNodeRegistry
 from app.modules.cluster_orchestrator.transport import ClusterTransport
+from app.modules.compute_orchestrator.service import validate_result
 from shared.schemas.cluster import (
     ClusterNode,
     ClusterNodeRole,
@@ -132,23 +133,13 @@ class ClusterTaskDispatcher:
                     finding = FindingResult.model_validate(resp_dict["finding_result"])
                 else:
                     finding = FindingResult.model_validate(resp_dict)
+                validate_result(bundle, finding)
             elif self.mock_executor is not None:
                 finding = self.mock_executor(bundle)
             else:
-                # Direct worker pipeline execution
-                try:
-                    from worker.tasks.compute_tasks import verify_equation_ast
-                    raw_res = verify_equation_ast.run(bundle.model_dump())
-                    finding = FindingResult.model_validate(raw_res)
-                except Exception:
-                    finding = FindingResult(
-                        job_id=bundle.job_id,
-                        state=FindingState.PASS,
-                        diagnostic_code="VALIDATION_PASSED",
-                        message="Cluster task successfully executed on worker node",
-                        dimensions_verified=True,
-                        diagnostics=["Sequential L1-L5 execution completed via cluster dispatcher"],
-                    )
+                # A shared queue cannot prove execution on a selected node.
+                # Explicit cluster targeting requires its configured transport.
+                raise RuntimeError("Cluster node transport is not configured")
 
             elapsed_ms = (time.perf_counter() - start_time) * 1000.0
 

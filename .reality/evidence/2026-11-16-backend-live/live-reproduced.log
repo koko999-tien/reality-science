@@ -1,0 +1,109 @@
+D:\Reality_Science\backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+...................................................FFFFFFFFF..FEFE       [100%]
+=================================== ERRORS ====================================
+__ ERROR at teardown of test_live_login_project_create_and_read_after_commit __
+tests\integration\test_decision3_postgres_rls.py:230: in live_api
+    assert sock.connect_ex(("127.0.0.1", port)) != 0
+E   AssertionError: assert 0 != 0
+E    +  where 0 = <built-in method connect_ex of socket object at 0x000001942E6132E0>(('127.0.0.1', 65193))
+E    +    where <built-in method connect_ex of socket object at 0x000001942E6132E0> = <socket.socket fd=1036, family=2, type=1, proto=0, laddr=('127.0.0.1', 57306), raddr=('127.0.0.1', 65193)>.connect_ex
+______ ERROR at teardown of test_live_version_writes_history_and_access _______
+tests\integration\test_decision3_postgres_rls.py:230: in live_api
+    assert sock.connect_ex(("127.0.0.1", port)) != 0
+E   AssertionError: assert 0 != 0
+E    +  where 0 = <built-in method connect_ex of socket object at 0x000001942E6B76A0>(('127.0.0.1', 57310))
+E    +    where <built-in method connect_ex of socket object at 0x000001942E6B76A0> = <socket.socket fd=1428, family=2, type=1, proto=0, laddr=('127.0.0.1', 57351), raddr=('127.0.0.1', 57310)>.connect_ex
+================================== FAILURES ===================================
+_ test_nonowner_cannot_delete_any_project_record[public_preprint-research_projects] _
+tests\integration\test_decision3_postgres_rls.py:124: in test_nonowner_cannot_delete_any_project_record
+    assert deleted == []
+E   AssertionError: assert ['72f72600-a5...11cb95f74d60'] == []
+E     
+E     Left contains one more item: '72f72600-a589-4c73-ad90-11cb95f74d60'
+E     Use -v to get more diff
+_ test_nonowner_cannot_delete_any_project_record[public_preprint-research_versions] _
+tests\integration\test_decision3_postgres_rls.py:124: in test_nonowner_cannot_delete_any_project_record
+    assert deleted == []
+E   AssertionError: assert ['a6c9f744-b3...bcc0637d7ac1'] == []
+E     
+E     Left contains one more item: 'a6c9f744-b35f-44fd-a035-bcc0637d7ac1'
+E     Use -v to get more diff
+__ test_nonowner_cannot_delete_any_project_record[public_preprint-equations] __
+tests\integration\test_decision3_postgres_rls.py:124: in test_nonowner_cannot_delete_any_project_record
+    assert deleted == []
+E   AssertionError: assert ['7c2d7665-ba...c95d0261c223'] == []
+E     
+E     Left contains one more item: '7c2d7665-bab4-403f-9a3b-c95d0261c223'
+E     Use -v to get more diff
+__ test_nonowner_cannot_delete_any_project_record[public_preprint-variables] __
+tests\integration\test_decision3_postgres_rls.py:124: in test_nonowner_cannot_delete_any_project_record
+    assert deleted == []
+E   AssertionError: assert ['f35a6407-bf...92fce9762e99'] == []
+E     
+E     Left contains one more item: 'f35a6407-bf17-4e49-bd82-92fce9762e99'
+E     Use -v to get more diff
+___ test_nonowner_cannot_delete_any_project_record[public_preprint-claims] ____
+tests\integration\test_decision3_postgres_rls.py:124: in test_nonowner_cannot_delete_any_project_record
+    assert deleted == []
+E   AssertionError: assert ['91520984-20...e45fa8337319'] == []
+E     
+E     Left contains one more item: '91520984-205e-4133-988b-e45fa8337319'
+E     Use -v to get more diff
+_ test_nonowner_cannot_delete_any_project_record[public_preprint-claim_relations] _
+tests\integration\test_decision3_postgres_rls.py:124: in test_nonowner_cannot_delete_any_project_record
+    assert deleted == []
+E   AssertionError: assert ['8b8e6c72-d4...e1798d2e6b0c'] == []
+E     
+E     Left contains one more item: '8b8e6c72-d41a-4c62-937e-e1798d2e6b0c'
+E     Use -v to get more diff
+_ test_nonowner_cannot_delete_any_project_record[public_preprint-validation_runs] _
+tests\integration\test_decision3_postgres_rls.py:124: in test_nonowner_cannot_delete_any_project_record
+    assert deleted == []
+E   AssertionError: assert ['e88ca012-de...351c8a9e686a'] == []
+E     
+E     Left contains one more item: 'e88ca012-de28-4b1c-801d-351c8a9e686a'
+E     Use -v to get more diff
+_ test_nonowner_cannot_delete_any_project_record[public_preprint-validation_findings] _
+tests\integration\test_decision3_postgres_rls.py:124: in test_nonowner_cannot_delete_any_project_record
+    assert deleted == []
+E   AssertionError: assert ['98baa548-34...1007d1987087'] == []
+E     
+E     Left contains one more item: '98baa548-3494-4357-99fe-1007d1987087'
+E     Use -v to get more diff
+__________________ test_public_project_cannot_be_taken_over ___________________
+tests\integration\test_decision3_postgres_rls.py:136: in test_public_project_cannot_be_taken_over
+    assert changed == []
+E   AssertionError: assert ['58c99f6f-24...761e6d21ea2d'] == []
+E     
+E     Left contains one more item: '58c99f6f-2437-4e52-ba74-761e6d21ea2d'
+E     Use -v to get more diff
+____________ test_live_login_project_create_and_read_after_commit _____________
+tests\integration\test_decision3_postgres_rls.py:255: in test_live_login_project_create_and_read_after_commit
+    assert created.status_code == 201, created.text
+E   AssertionError: Internal Server Error
+E   assert 500 == 201
+E    +  where 500 = <Response [500 Internal Server Error]>.status_code
+_________________ test_live_version_writes_history_and_access _________________
+tests\integration\test_decision3_postgres_rls.py:316: in test_live_version_writes_history_and_access
+    assert result.status_code == 200, result.text
+E   AssertionError: {"detail":"Scientific validation is unavailable because the compute worker failed."}
+E   assert 503 == 200
+E    +  where 503 = <Response [503 Service Unavailable]>.status_code
+=========================== short test summary info ===========================
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-research_projects]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-research_versions]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-equations]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-variables]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-claims]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-claim_relations]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-validation_runs]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_delete_any_project_record[public_preprint-validation_findings]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_public_project_cannot_be_taken_over
+FAILED tests/integration/test_decision3_postgres_rls.py::test_live_login_project_create_and_read_after_commit
+FAILED tests/integration/test_decision3_postgres_rls.py::test_live_version_writes_history_and_access
+ERROR tests/integration/test_decision3_postgres_rls.py::test_live_login_project_create_and_read_after_commit
+ERROR tests/integration/test_decision3_postgres_rls.py::test_live_version_writes_history_and_access
+11 failed, 53 passed, 2 errors in 20.89s

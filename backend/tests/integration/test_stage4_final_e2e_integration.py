@@ -22,6 +22,7 @@ import sys
 import tempfile
 import uuid
 import zipfile
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, List, Optional
@@ -30,6 +31,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.db.session import get_db
+from app.modules.iam_governance.dependencies import get_accessible_version, get_owned_version
 from app.main import app
 from app.modules.reality_constraint_engine.models import (
     Claim,
@@ -71,6 +73,23 @@ from shared.schemas.physical_invariants import (
 )
 
 
+@pytest.fixture(autouse=True)
+def isolated_test_transport(monkeypatch):
+    """Default ASGI suite: real math, mocked queue transport and DB/access.
+
+    Live PostgreSQL/HTTP suite has no such override and uses actual Redis/Celery.
+    """
+    from worker.tasks.compute_tasks import verify_equation_ast
+    from app.modules.compute_orchestrator.service import validate_result
+
+    @asynccontextmanager
+    async def local_test_compute(bundle):
+        result = FindingResult.model_validate(verify_equation_ast.run(bundle.model_dump(mode="json")))
+        yield validate_result(bundle, result)
+
+    monkeypatch.setattr("app.modules.reality_constraint_engine.router.compute_job", local_test_compute)
+
+
 class MockResult:
     def __init__(self, items: List[Any]):
         self._items = items
@@ -90,6 +109,7 @@ class MockDbSession:
 
     def __init__(self, entities: List[Any]):
         self.entities = list(entities)
+        self.info: dict[str, Any] = {}
 
     def add(self, entity: Any) -> None:
         self.entities.append(entity)
@@ -104,6 +124,8 @@ class MockDbSession:
         pass
 
     async def execute(self, stmt: Any) -> MockResult:
+        if not hasattr(stmt, "column_descriptions"):
+            return MockResult([])
         model_cls = stmt.column_descriptions[0]["type"]
         params = stmt.compile().params
         candidates = [e for e in self.entities if isinstance(e, model_cls)]
@@ -171,6 +193,24 @@ def stage4_test_entities():
     }
 
 
+@pytest.fixture(autouse=True)
+def restore_app_dependency_overrides():
+    original_overrides = dict(app.dependency_overrides)
+    yield
+    app.dependency_overrides.clear()
+    app.dependency_overrides.update(original_overrides)
+
+
+def override_version_access(version: ResearchVersion):
+    async def _get_version(version_id: str):
+        if version_id != version.id:
+            raise AssertionError(f"Unexpected test version {version_id}")
+        return version
+
+    app.dependency_overrides[get_owned_version] = _get_version
+    app.dependency_overrides[get_accessible_version] = _get_version
+
+
 # =========================================================================
 # Tier 1: Canonical Valid Scientific Formulation (L1-L6 All-Pass)
 # =========================================================================
@@ -178,6 +218,7 @@ def stage4_test_entities():
 @pytest.mark.asyncio
 async def test_tier1_canonical_valid_formulation_all_layers_pass(stage4_test_entities):
     """Tier 1: Verifies interactive verification endpoint for a valid formulation."""
+    override_version_access(stage4_test_entities["version_draft"])
     mock_db = MockDbSession(list(stage4_test_entities.values()))
     app.dependency_overrides[get_db] = lambda: mock_db
 
@@ -213,6 +254,33 @@ async def test_tier1_canonical_valid_formulation_all_layers_pass(stage4_test_ent
         assert data["dimensions_verified"] is True
         assert "job_id" in data
         assert "layer_findings" in data or "layers" in data
+
+
+@pytest.mark.asyncio
+async def test_interactive_verify_worker_execution_failure_returns_unavailable(
+    monkeypatch,
+):
+    """Interactive verification must not manufacture a PASS when compute fails."""
+    from app.modules.compute_orchestrator.errors import ComputeUnavailable
+
+    @asynccontextmanager
+    async def fail_queue(*args, **kwargs):
+        raise ComputeUnavailable("worker execution failed")
+        yield
+
+    monkeypatch.setattr("app.modules.reality_constraint_engine.router.compute_job", fail_queue)
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.post(
+            "/api/v1/validation/verify",
+            json={
+                "expression_ast": {"node_type": "variable", "value": "x"},
+                "variables": [],
+            },
+        )
+
+    assert response.status_code == 503
+    assert "compute worker failed" in response.json()["detail"]
 
 
 # =========================================================================
@@ -307,6 +375,7 @@ async def test_tier2e_layer6_epistemic_cycle_detection(stage4_test_entities):
     entities = list(e.values()) + [c1, c2, r1, r2]
     mock_db = MockDbSession(entities)
     app.dependency_overrides[get_db] = lambda: mock_db
+    override_version_access(e["version_draft"])
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -322,9 +391,14 @@ async def test_tier2e_layer6_epistemic_cycle_detection(stage4_test_entities):
 # =========================================================================
 
 @pytest.mark.asyncio
-async def test_tier3_full_version_validate_and_persistence(stage4_test_entities):
-    """Tier 3: Full 6-layer version validation persists run and findings."""
+@pytest.mark.parametrize("declare_acceleration", [True, False])
+@pytest.mark.parametrize("publication_status", ["draft", "preprint", "published", "retracted"])
+async def test_tier3_full_version_validate_and_persistence(
+    stage4_test_entities, declare_acceleration, publication_status
+):
+    """Persist real worker findings for complete and undeclared-symbol formulations."""
     v_draft = stage4_test_entities["version_draft"]
+    v_draft.publication_status = publication_status
     eq1 = Equation(
         id="eq_stage4_01",
         version_id=v_draft.id,
@@ -346,8 +420,18 @@ async def test_tier3_full_version_validate_and_persistence(stage4_test_entities)
         domain="real",
     )
     entities = list(stage4_test_entities.values()) + [eq1, var1]
+    if declare_acceleration:
+        entities.append(Variable(
+            id="var_a_01",
+            version_id=v_draft.id,
+            symbol="a",
+            name="acceleration",
+            unit="m/s^2",
+            domain="real",
+        ))
     mock_db = MockDbSession(entities)
     app.dependency_overrides[get_db] = lambda: mock_db
+    override_version_access(v_draft)
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -355,15 +439,50 @@ async def test_tier3_full_version_validate_and_persistence(stage4_test_entities)
         res_val = await ac.post(f"/api/v1/versions/{v_draft.id}/validate")
         assert res_val.status_code == 200, res_val.text
         data_val = res_val.json()
-        assert data_val["overall_state"] in ("PASS", "VERIFIED")
+        expected_state = "PASS" if declare_acceleration else "FAIL"
+        assert data_val["overall_state"] == expected_state
         assert len(data_val["findings"]) == 6
+        assert v_draft.publication_status == publication_status
+        if not declare_acceleration:
+            assert data_val["findings"][0]["diagnostic_code"] == DiagnosticCode.UNDECLARED_SYMBOL.value
 
         # Query historical runs
         res_runs = await ac.get(f"/api/v1/versions/{v_draft.id}/validation-runs")
         assert res_runs.status_code == 200
         runs_list = res_runs.json()
         assert len(runs_list) >= 1
+        assert runs_list[0]["id"] == data_val["id"]
+        assert runs_list[0]["overall_state"] == expected_state
         assert len(runs_list[0]["findings"]) == 6
+        assert v_draft.publication_status == publication_status
+
+
+@pytest.mark.asyncio
+async def test_version_validate_queue_failure_returns_unavailable_without_persisting(
+    stage4_test_entities, monkeypatch
+):
+    """Worker failure must not be converted into persisted scientific findings."""
+    version = stage4_test_entities["version_draft"]
+    mock_db = MockDbSession(list(stage4_test_entities.values()))
+    app.dependency_overrides[get_db] = lambda: mock_db
+    override_version_access(version)
+    from app.modules.compute_orchestrator.errors import ComputeUnavailable
+
+    @asynccontextmanager
+    async def fail_queue(*args, **kwargs):
+        raise ComputeUnavailable("worker unavailable")
+        yield
+
+    monkeypatch.setattr("app.modules.reality_constraint_engine.router.compute_job", fail_queue)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.post(f"/api/v1/versions/{version.id}/validate")
+
+    assert response.status_code == 503
+    assert "compute worker failed" in response.json()["detail"]
+    assert not any(isinstance(entity, ValidationRun) for entity in mock_db.entities)
+    assert not any(isinstance(entity, ValidationFinding) for entity in mock_db.entities)
 
 
 @pytest.mark.asyncio
@@ -371,6 +490,7 @@ async def test_tier3_frozen_version_immutability(stage4_test_entities):
     """Tier 3: Frozen research versions strictly block new equation authoring."""
     mock_db = MockDbSession(list(stage4_test_entities.values()))
     app.dependency_overrides[get_db] = lambda: mock_db
+    override_version_access(stage4_test_entities["version_frozen"])
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:

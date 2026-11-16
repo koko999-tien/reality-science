@@ -1,0 +1,31 @@
+﻿
+> reality-science-frontend@0.1.0 test
+> jest --runInBand
+
+npm.cmd : PASS tests/ast_graph_converter.test.ts
+At line:4 char:1
++ npm.cmd test -- --runInBand 2>&1 | Out-File -LiteralPath $logPath -En ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PASS tests/ast_graph_converter.test.ts:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+PASS tests/editor_validation_integrity.test.tsx (5.587 s)
+PASS tests/ScientificPresetDemo.test.tsx
+PASS tests/api_auth.test.ts
+PASS tests/e2e_modernization.test.tsx
+PASS tests/VariableDeclarationPanel.test.tsx
+PASS tests/ValidationStatusBar.test.tsx
+PASS tests/research_workspace_components.test.tsx
+PASS tests/CustomNodes.test.tsx
+PASS tests/api_offline.test.ts
+PASS tests/equation_canvas_state.test.tsx
+PASS tests/AstVisualizer.test.tsx
+PASS tests/KatexFormula.test.tsx
+PASS tests/LayerPipelineMatrix.test.tsx
+PASS tests/formula_evaluator.test.ts
+
+Test Suites: 15 passed, 15 total
+Tests:       219 passed, 219 total
+Snapshots:   0 total
+Time:        23.549 s, estimated 24 s
+Ran all test suites.

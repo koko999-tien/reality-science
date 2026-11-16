@@ -14,6 +14,7 @@ celery_app.conf.update(
     task_serializer="json",
     accept_content=["json"],
     result_serializer="json",
+    result_expires=3600,
     timezone="UTC",
     enable_utc=True,
     task_default_queue="compute_tasks",

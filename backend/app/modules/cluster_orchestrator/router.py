@@ -7,9 +7,11 @@ workload dispatch (/dispatch), and lifecycle administration (block, drain, unblo
 
 from __future__ import annotations
 
+import secrets
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 
+from app.core.config import settings
 from app.modules.cluster_orchestrator.dispatcher import ClusterTaskDispatcher
 from app.modules.cluster_orchestrator.registry import ClusterNodeRegistry
 from app.modules.cluster_orchestrator.wireguard import build_wireguard_config
@@ -38,8 +40,26 @@ def get_cluster_registry() -> ClusterNodeRegistry:
     """Dependency provider for ClusterNodeRegistry singleton."""
     global _cluster_registry
     if _cluster_registry is None:
-        _cluster_registry = ClusterNodeRegistry()
+        _cluster_registry = ClusterNodeRegistry(cluster_secret=settings.cluster_join_token)
     return _cluster_registry
+
+
+def require_cluster_admin(
+    token: Optional[str] = Header(None, alias="X-Cluster-Admin-Token"),
+) -> None:
+    """Protect cluster control-plane operations with a separately configured secret."""
+    configured_token = settings.cluster_admin_token
+    if not configured_token or len(configured_token.encode("utf-8")) < 32:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Cluster control plane is not configured",
+        )
+    if not token or not secrets.compare_digest(token, configured_token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Valid cluster admin token required",
+            headers={"WWW-Authenticate": "Cluster"},
+        )
 
 
 def get_cluster_dispatcher() -> ClusterTaskDispatcher:
@@ -72,6 +92,17 @@ async def join_cluster(
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
 ) -> NodeJoinResponse:
     """Validates cluster join token, assigns WireGuard IP, issues mTLS cert, and registers node."""
+    configured_token = settings.cluster_join_token
+    if not configured_token or len(configured_token.encode("utf-8")) < 32:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Cluster node admission is not configured",
+        )
+    if request.role != ClusterNodeRole.WORKER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only worker nodes may use the public admission endpoint",
+        )
     try:
         response = registry.register_node(request)
         return response
@@ -94,6 +125,7 @@ async def record_node_heartbeat(
     x_cert_fingerprint: Optional[str] = Header(None, alias="X-Cert-Fingerprint"),
     x_wireguard_pubkey: Optional[str] = Header(None, alias="X-WireGuard-Pubkey"),
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
+    _: None = Depends(require_cluster_admin),
 ) -> HeartbeatResponse:
     """Processes node heartbeat ping, updates load metrics, and verifies client certificates."""
     try:
@@ -113,6 +145,7 @@ async def record_node_heartbeat(
 @router.get(
     "/nodes",
     response_model=List[ClusterNode],
+    response_model_exclude={"__all__": {"wireguard_private_key", "certificate_pem"}},
     status_code=status.HTTP_200_OK,
     summary="List registered cluster nodes with optional filtering",
 )
@@ -120,6 +153,7 @@ async def list_cluster_nodes(
     role: Optional[ClusterNodeRole] = Query(None, description="Filter by node role"),
     node_status: Optional[ClusterNodeStatus] = Query(None, alias="status", description="Filter by node status"),
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
+    _: None = Depends(require_cluster_admin),
 ) -> List[ClusterNode]:
     """Returns active, pending, or drained nodes in the cluster network."""
     return registry.list_nodes(role=role, status=node_status)
@@ -134,11 +168,17 @@ async def list_cluster_nodes(
 async def get_node_wireguard_config(
     node_id: str,
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
+    _: None = Depends(require_cluster_admin),
 ) -> WireGuardConfigResponse:
     """Generates a complete wg0.conf configuration file including all registered peers."""
     node = registry.get_node(node_id)
     if not node:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Node '{node_id}' not found")
+    if node.role == ClusterNodeRole.CONTROLLER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Controller private configuration is unavailable through the API",
+        )
 
     all_nodes = registry.list_nodes()
     config_ini = build_wireguard_config(node=node, peers=all_nodes)
@@ -174,6 +214,7 @@ async def dispatch_cluster_task(
     bundle: JobBundle,
     target_node_id: Optional[str] = Query(None, description="Optional target worker node ID"),
     dispatcher: ClusterTaskDispatcher = Depends(get_cluster_dispatcher),
+    _: None = Depends(require_cluster_admin),
 ) -> ClusterTaskDispatchResponse:
     """Selects least-loaded healthy worker, signs task, and dispatches workload."""
     try:
@@ -195,6 +236,7 @@ async def dispatch_cluster_task(
 async def block_node_endpoint(
     node_id: str,
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
+    _: None = Depends(require_cluster_admin),
 ) -> Dict[str, str]:
     """Marks node status as BLOCKED and denies further communication."""
     node = registry.get_node(node_id)
@@ -213,6 +255,7 @@ async def block_node_endpoint(
 async def drain_node_endpoint(
     node_id: str,
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
+    _: None = Depends(require_cluster_admin),
 ) -> Dict[str, str]:
     """Marks node as DRAINED to stop receiving new workloads."""
     node = registry.get_node(node_id)
@@ -231,6 +274,7 @@ async def drain_node_endpoint(
 async def drain_node_query(
     node_id: str = Query(..., description="Node ID to drain"),
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
+    _: None = Depends(require_cluster_admin),
 ) -> Dict[str, str]:
     return await drain_node_endpoint(node_id=node_id, registry=registry)
 
@@ -244,6 +288,7 @@ async def drain_node_query(
 async def unblock_node_endpoint(
     node_id: str,
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
+    _: None = Depends(require_cluster_admin),
 ) -> Dict[str, str]:
     """Restores node status to ACTIVE."""
     node = registry.get_node(node_id)
@@ -262,5 +307,6 @@ async def unblock_node_endpoint(
 async def unblock_node_query(
     node_id: str = Query(..., description="Node ID to unblock"),
     registry: ClusterNodeRegistry = Depends(get_cluster_registry),
+    _: None = Depends(require_cluster_admin),
 ) -> Dict[str, str]:
     return await unblock_node_endpoint(node_id=node_id, registry=registry)

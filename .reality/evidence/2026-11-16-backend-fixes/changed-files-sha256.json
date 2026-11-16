@@ -1,0 +1,10 @@
+{
+  "backend/scripts/disposable_postgres.py": "31507e0259ba820c569f7a8b3b71a46a4b7e2b3bc1aca61d98f5820879ee926f",
+  "backend/app/modules/research_core/service.py": "a81f3c8ec71d0c962df313bf45901278076958cf7c60e6ac0019d70726c3bdd9",
+  "backend/app/modules/reality_constraint_engine/router.py": "0f40762e91140cf39c8bb18d79943aa9cf8877b21ca7471f0397fa2530f294e3",
+  "backend/tests/integration/test_stage4_final_e2e_integration.py": "b9e592b55c724ac2651c4851a39296fe79223ae1ae38e5c92a6c3a75bd5d58a3",
+  "backend/tests/unit/test_research_project_auth.py": "0bd126bc127ea0414b625728af21017e0bebc8a96330b958b0ed96d55f51698c",
+  "backend/app/db/migrations/versions/004_owner_only_dml.py": "48b886b4f27a7fb73f05925ec825d3ff157a2cd1b1a5f2108963225ec585cbd8",
+  "backend/tests/unit/test_disposable_postgres_runner.py": "527fffa50e86766311aff38161e73d99114721b95961c96f5e8aad677b2f86ff",
+  "backend/tests/integration/test_decision3_project_owner_transfer.py": "dcc9e077b49880a1c9f6c4364521d2964dab326d6421feb642c7e1622f820392"
+}

@@ -1,0 +1,10 @@
+{
+  "backend/scripts/disposable_postgres.py": "e232b940924f10eec5e271fa8c7f8536953b539e94e43dc44e93d7d704b7ce1f",
+  "backend/tests/postgres_target.py": "280c23b8341b9d19b82a49f2ad30ad07d99474739e79eaec7dc8973a57cdc9c0",
+  "backend/tests/unit/test_postgres_target_guard.py": "cb9726bb83e5fd68175be2828f7192bfaed7268824a4a1ee91a678f2f7581e4b",
+  "backend/tests/integration/test_decision3_postgres_rls.py": "643d1d4a3f869b4bcc123d937c7b1a346c427a93cd5c54391ef58c3ef9522bfd",
+  "backend/app/modules/research_core/service.py": "297174da7d550bc92a215ff6c28c439fce98ab6fcdaa50d43515cfab0e77ecf6",
+  "backend/app/modules/reality_constraint_engine/router.py": "d7cc37bf04b71c55f45ada9420aa3ce1f2fe4715e1d3004645950f06b3db541a",
+  "backend/tests/integration/test_stage4_final_e2e_integration.py": "f406391abc17472a2aeb3f47caeba0bc186a5b79bb0c0608ab38f3af0efa3209",
+  "backend/tests/unit/test_research_project_auth.py": "aafe5b14e0253812d14a8a6d15fe63a6844244df4298f0d7e7aeec96867e28eb"
+}

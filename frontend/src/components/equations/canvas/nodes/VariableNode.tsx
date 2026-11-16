@@ -16,7 +16,8 @@ export const VariableNode: React.FC<NodeProps<VariableNodeType>> = ({
   const available = data.availableSymbols ?? [];
   const selectedSym = data.symbol ?? "";
   const activeVar = available.find((v) => v.symbol === selectedSym);
-  const unit = activeVar?.unit ?? data.unit;
+  const unit = data.availableSymbols === undefined ? data.unit : activeVar?.unit;
+  const isUndeclared = data.availableSymbols !== undefined && !!selectedSym && !activeVar;
 
   return (
     <div
@@ -56,8 +57,10 @@ export const VariableNode: React.FC<NodeProps<VariableNodeType>> = ({
           onChange={handleChange}
           className="nodrag w-full rounded-lg border border-slate-700 bg-slate-950/90 px-2.5 py-1 text-sm font-mono text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors shadow-inner"
           aria-label={`Variable symbol for node ${id}`}
+          aria-invalid={isUndeclared || undefined}
         >
           {!selectedSym && <option value="">Select variable...</option>}
+          {isUndeclared && <option value={selectedSym} disabled>{selectedSym} (undeclared)</option>}
           {available.map((v) => (
             <option key={v.symbol} value={v.symbol}>
               {v.symbol} {v.name ? `(${v.name})` : ""}
@@ -72,6 +75,7 @@ export const VariableNode: React.FC<NodeProps<VariableNodeType>> = ({
           className="nodrag w-full rounded-lg border border-slate-700 bg-slate-950/90 px-2.5 py-1 text-sm font-mono text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors shadow-inner"
           placeholder="Symbol..."
           aria-label={`Variable symbol for node ${id}`}
+          aria-invalid={isUndeclared || undefined}
         />
       )}
 

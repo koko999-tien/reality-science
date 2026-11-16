@@ -1,0 +1,64 @@
+D:\Reality_Science\backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+FFFFFFF                                                                  [100%]
+================================== FAILURES ===================================
+______ test_nonowner_cannot_reparent_visible_records[research_versions] _______
+tests\integration\test_decision3_postgres_rls.py:158: in test_nonowner_cannot_reparent_visible_records
+    assert changed == []
+E   AssertionError: assert ['c388f6cf-f2...cef5b1352632'] == []
+E     
+E     Left contains one more item: 'c388f6cf-f2ef-4913-9046-cef5b1352632'
+E     Use -v to get more diff
+__________ test_nonowner_cannot_reparent_visible_records[equations] ___________
+tests\integration\test_decision3_postgres_rls.py:158: in test_nonowner_cannot_reparent_visible_records
+    assert changed == []
+E   AssertionError: assert ['7d4d6f5a-11...063237bc1150'] == []
+E     
+E     Left contains one more item: '7d4d6f5a-11ac-4180-8724-063237bc1150'
+E     Use -v to get more diff
+__________ test_nonowner_cannot_reparent_visible_records[variables] ___________
+tests\integration\test_decision3_postgres_rls.py:158: in test_nonowner_cannot_reparent_visible_records
+    assert changed == []
+E   AssertionError: assert ['b5b0efdd-2b...386c01bd4177'] == []
+E     
+E     Left contains one more item: 'b5b0efdd-2bd7-4d31-8b73-386c01bd4177'
+E     Use -v to get more diff
+____________ test_nonowner_cannot_reparent_visible_records[claims] ____________
+tests\integration\test_decision3_postgres_rls.py:158: in test_nonowner_cannot_reparent_visible_records
+    assert changed == []
+E   AssertionError: assert ['68b35338-83...a39717190d75'] == []
+E     
+E     Left contains one more item: '68b35338-831b-4ffe-972f-a39717190d75'
+E     Use -v to get more diff
+_______ test_nonowner_cannot_reparent_visible_records[claim_relations] ________
+tests\integration\test_decision3_postgres_rls.py:158: in test_nonowner_cannot_reparent_visible_records
+    assert changed == []
+E   AssertionError: assert ['6777b4cc-c0...c6c25a673c99'] == []
+E     
+E     Left contains one more item: '6777b4cc-c094-4d89-bc06-c6c25a673c99'
+E     Use -v to get more diff
+_______ test_nonowner_cannot_reparent_visible_records[validation_runs] ________
+tests\integration\test_decision3_postgres_rls.py:158: in test_nonowner_cannot_reparent_visible_records
+    assert changed == []
+E   AssertionError: assert ['6b97413d-07...a1fb950323f9'] == []
+E     
+E     Left contains one more item: '6b97413d-0792-4714-ae1d-a1fb950323f9'
+E     Use -v to get more diff
+_____ test_nonowner_cannot_reparent_visible_records[validation_findings] ______
+tests\integration\test_decision3_postgres_rls.py:158: in test_nonowner_cannot_reparent_visible_records
+    assert changed == []
+E   AssertionError: assert ['19d30a51-fa...c68453506fa8'] == []
+E     
+E     Left contains one more item: '19d30a51-facd-41dc-9c84-c68453506fa8'
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_reparent_visible_records[research_versions]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_reparent_visible_records[equations]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_reparent_visible_records[variables]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_reparent_visible_records[claims]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_reparent_visible_records[claim_relations]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_reparent_visible_records[validation_runs]
+FAILED tests/integration/test_decision3_postgres_rls.py::test_nonowner_cannot_reparent_visible_records[validation_findings]
+7 failed, 78 deselected in 4.28s

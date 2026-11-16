@@ -1,0 +1,38 @@
+﻿
+> reality-science-frontend@0.1.0 test
+> jest --runInBand tests/editor_validation_integrity.test.tsx
+
+npm.cmd : PASS tests/editor_validation_integrity.test.tsx (6.388 s)
+At line:4 char:1
++ npm.cmd test -- --runInBand tests/editor_validation_integrity.test.ts ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (PASS tests/edit...t.tsx (6.388 s):String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  editor validation result integrity
+    √ clears an earlier PASS while revalidating and after a transport failure (469 ms)
+    √ clears prior validation and numeric previews when a canvas edit cannot be computed (228 ms)
+    √ keeps a project with no versions on an empty canvas (48 ms)
+    √ does not replace a malformed stored equation with the local example (51 ms)
+    √ returns to idle after clearing during validation and ignores its late success (144 ms)
+    √ returns to idle after clearing during validation and ignores its late rejection (133 ms)
+    √ removes a previous verified response and numeric preview when the canvas is reset (121 ms)
+    √ clears prior validation when adding a node creates an invalid graph structure (193 ms)
+    √ preserves the verified result when a used declaration deletion is canceled (163 ms)
+    √ keeps a newer declaration validation pending when an obsolete success arrives after redeclaration (268 ms)
+    √ keeps a newer declaration validation pending when an obsolete rejection arrives after redeclaration (263 ms)
+    √ updates previews from the declaration panel and ignores a late result after deleting a used symbol (260 ms)
+    √ keeps route B under StrictMode after stale route A project success (184 ms)
+    √ keeps route B under StrictMode after stale route A project rejection (201 ms)
+    √ keeps route B under StrictMode after stale route A equations success (283 ms)
+    √ keeps route B under StrictMode after stale route A equations rejection (257 ms)
+    √ keeps route B under StrictMode after stale route A variables success (299 ms)
+    √ keeps route B under StrictMode after stale route A variables rejection (281 ms)
+    √ ignores a discarded StrictMode mount's late project success (129 ms)
+    √ ignores a discarded StrictMode mount's late project rejection (125 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        8.551 s
+Ran all test suites matching /tests\\editor_validation_integrity.test.tsx/i.

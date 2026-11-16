@@ -37,12 +37,12 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
     tagline: "Typed dimensional foundations for physical reality",
     icon: <Variable className="h-5 w-5 text-cyan-400" />,
     description:
-      "Every mathematical symbol begins with physical grounding. Define symbols, descriptive names, domain constraints (positive real, real, integer), and exact Pint SI dimensional units ([M], [L], [T], [Q]) before equation synthesis.",
+      "Declare symbols, descriptive names, domains, and units used by a model. Dimensional checks depend on the configured backend and supplied declarations.",
     capabilities: [
       "Symbol-first physical quantity manifest",
-      "Strict Pint SI unit dimensional typing",
-      "Mathematical domain constraints (positive real, non-zero)",
-      "Automated dimensional basis reduction",
+      "Declared units and domains",
+      "Variable manifest for model authoring",
+      "Dimensional findings when returned by the backend",
     ],
     mockupType: "variables",
   },
@@ -54,7 +54,7 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
     tagline: "Visual node-based AST DAG construction",
     icon: <Workflow className="h-5 w-5 text-violet-400" />,
     description:
-      "Construct scientific models visually without syntax errors. Connect constants, declared physical variables, binary operators (+, -, *, /, **), and function calls into an acyclic dataflow graph with live KaTeX rendering.",
+      "Compose a mathematical expression with constants, declared variables, operators, and function calls; review the generated AST and rendered equation before requesting backend validation.",
     capabilities: [
       "Visual node-based dataflow powered by @xyflow/react",
       "Bidirectional AST <-> graph synchronization",
@@ -67,16 +67,16 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
     stepNumber: "STEP 03",
     stepIndex: 3,
     id: "step-execute-verification",
-    title: "Execute 6-Layer Multi-Stage Truth Verification",
-    tagline: "Automated epistemic verification against physical laws",
+    title: "Run and Review Validation",
+    tagline: "Review validation inputs and recorded findings",
     icon: <ShieldCheck className="h-5 w-5 text-emerald-400" />,
     description:
-      "Submit the AST to the ADR-001 zero-trust compute sandbox. The Reality Constraint Engine systematically validates syntax limits, asymptotic boundaries, Pint SI homogeneity, Noether symmetries, empirical datasets, and epistemic DAG acyclicity.",
+      "A validation run depends on available compute services and supplied evidence. Review the inputs, methods, and server-recorded findings; an example workflow is not a validation result.",
     capabilities: [
-      "Sub-15ms multi-stage evaluation pipeline",
-      "Pint SI dimensional homogeneity theorem proving",
-      "SymPy asymptotic singularity and branch cut detection",
-      "Acyclic epistemic DAG validation via Tarjan SCC",
+      "Run status and provenance when available",
+      "Review backend-reported findings by layer",
+      "Inspect run state and available provenance",
+      "Keep validation results separate from publication and evidence status",
     ],
     mockupType: "verification",
   },
@@ -84,16 +84,16 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
     stepNumber: "STEP 04",
     stepIndex: 4,
     id: "step-export-bundle",
-    title: "Export Cryptographically Signed Preprint Bundle",
-    tagline: "Tamper-evident, audit-ready scientific reproducibility",
+    title: "Export a Research Bundle",
+    tagline: "Export artifacts for independent inspection",
     icon: <FileArchive className="h-5 w-5 text-amber-400" />,
     description:
-      "Generate an immutable, self-contained verification package with a single click. Packages include canonical AST JSON, full execution logs, SHA-256 digests, and preprint evidence manifests ready for publication.",
+      "Export availability and package contents depend on the configured backend. Inspect generated files and verify checksums independently before relying on an artifact.",
     capabilities: [
-      "Single-click ZIP archive export via JSZip",
-      "SHA-256 cryptographic provenance for AST and execution logs",
+      "Download a package when the export service is available",
+      "Inspect included checksums and provenance metadata",
       "Preprint-ready Markdown & JSON-LD evidence artifacts",
-      "100% reproducible independent re-verification",
+      "Independent verification is a separate step",
     ],
     mockupType: "bundle",
   },
@@ -104,8 +104,36 @@ export const WorkflowTour: React.FC = () => {
 
   const activeStep = WORKFLOW_STEPS[activeStepIndex];
 
+  function handleStepTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, index: number) {
+    let nextIndex: number | null = null;
+
+    switch (event.key) {
+      case "ArrowRight":
+        nextIndex = (index + 1) % WORKFLOW_STEPS.length;
+        break;
+      case "ArrowLeft":
+        nextIndex = (index - 1 + WORKFLOW_STEPS.length) % WORKFLOW_STEPS.length;
+        break;
+      case "Home":
+        nextIndex = 0;
+        break;
+      case "End":
+        nextIndex = WORKFLOW_STEPS.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    setActiveStepIndex(nextIndex);
+    event.currentTarget.parentElement
+      ?.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+      .item(nextIndex)
+      .focus();
+  }
+
   return (
-    <section className="relative py-12 sm:py-16">
+      <section className="relative py-12 sm:py-16">
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
         <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-950/40 px-3 py-1 shadow-sm mb-3">
@@ -115,11 +143,10 @@ export const WorkflowTour: React.FC = () => {
           </span>
         </div>
         <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-          From Intuition to Mathematically Proven Reality
+          Model, Review, and Share Research
         </h2>
         <p className="text-sm sm:text-base text-slate-400 mt-3 max-w-2xl mx-auto leading-relaxed">
-          Follow the four-step scientific research workflow designed to eliminate dimensional errors, prevent
-          mathematical singularities, and prove epistemic consistency.
+          Follow the model-authoring, validation-review, and export workflow. Findings describe the configured checks and do not establish scientific truth on their own.
         </p>
       </div>
 
@@ -138,10 +165,13 @@ export const WorkflowTour: React.FC = () => {
               <button
                 key={step.id}
                 role="tab"
+                id={`workflow-tab-${step.id}`}
                 aria-selected={isActive}
-                aria-controls={`workflow-panel-${step.id}`}
+                aria-controls="workflow-active-panel"
+                tabIndex={isActive ? 0 : -1}
                 onClick={() => setActiveStepIndex(idx)}
-                className={`flex flex-col sm:flex-row items-start sm:items-center gap-2.5 p-3 rounded-lg text-left transition-all duration-200 ${
+                onKeyDown={(event) => handleStepTabKeyDown(event, idx)}
+                className={`flex flex-col sm:flex-row items-start sm:items-center gap-2.5 p-3 rounded-lg text-left transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400 ${
                   isActive
                     ? "bg-slate-800 text-white border border-cyan-500/40 shadow-md shadow-cyan-950/50"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent"
@@ -173,8 +203,11 @@ export const WorkflowTour: React.FC = () => {
 
         {/* Active Step Content Grid */}
         <div
-          id={`workflow-panel-${activeStep.id}`}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center"
+          id="workflow-active-panel"
+          role="tabpanel"
+          aria-labelledby={`workflow-tab-${activeStep.id}`}
+          tabIndex={0}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-500"
         >
           {/* Left Column: Step Description & Capabilities */}
           <div className="lg:col-span-6 space-y-5">
@@ -211,7 +244,7 @@ export const WorkflowTour: React.FC = () => {
                 <ArrowRight className="h-3.5 w-3.5 text-slate-400" />
               </button>
               <Link
-                href="/projects/default-model/editor"
+                href="/projects"
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-xs font-semibold text-white shadow-md shadow-cyan-600/20 transition-all"
               >
                 <span>Open Symbolic Canvas</span>
@@ -223,6 +256,7 @@ export const WorkflowTour: React.FC = () => {
           {/* Right Column: Live Interactive Mockup / Telemetry Preview */}
           <div className="lg:col-span-6">
             <div className="rounded-xl border border-white/[0.08] bg-slate-900/90 backdrop-blur-xl p-5 shadow-tactile-card space-y-4">
+              <p className="text-[10px] font-mono text-slate-400">Illustrative interface only · no run or export performed</p>
               {/* Window Controls Bar */}
               <div className="flex items-center justify-between pb-3 border-b border-white/10 text-xs font-mono text-slate-400">
                 <div className="flex items-center gap-2">
@@ -270,8 +304,8 @@ export const WorkflowTour: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-[10px] text-emerald-400 flex items-center gap-1.5 pt-1">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    <span>All 3 physical dimensions validated against SI base standard.</span>
+                    <Atom aria-hidden="true" className="h-3.5 w-3.5" />
+                    <span>Example quantities shown; no validation performed.</span>
                   </div>
                 </div>
               )}
@@ -298,38 +332,33 @@ export const WorkflowTour: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-[10px] text-cyan-400 flex items-center justify-between">
-                    <span>AST Depth: 2 / 15</span>
-                    <span>Node Count: 4 / 100</span>
-                    <span className="text-emerald-400">Acyclic Verified</span>
+                    <span>Example AST structure</span>
+                    <span>Illustrative nodes</span>
+                    <span>Not evaluated</span>
                   </div>
                 </div>
               )}
 
               {activeStep.mockupType === "verification" && (
                 <div data-testid="mockup-verification" className="space-y-2.5 font-mono text-xs">
-                  <div className="text-[11px] text-slate-400">6-Layer Reality Constraint Matrix:</div>
+                  <div className="text-[11px] text-slate-400">Illustrative validation categories · no run performed:</div>
                   <div className="space-y-1.5">
                     {[
-                      { l: 1, name: "AST Syntax & Complexity", status: "PASS", time: "1.2ms" },
-                      { l: 2, name: "Boundary Asymptotics", status: "PASS", time: "2.4ms" },
-                      { l: 3, name: "Pint SI Homogeneity", status: "PASS", time: "3.1ms" },
-                      { l: 4, name: "Noether Invariants", status: "PASS", time: "1.8ms" },
-                      { l: 5, name: "Empirical Correlation", status: "PASS", time: "2.0ms" },
-                      { l: 6, name: "Epistemic Logic DAG", status: "PASS", time: "1.5ms" },
+                      { l: 1, name: "Syntax and semantics" },
+                      { l: 2, name: "Boundaries" },
+                      { l: 3, name: "Dimensions" },
+                      { l: 4, name: "Physical constraints" },
+                      { l: 5, name: "Empirical evidence" },
+                      { l: 6, name: "Additional review" },
                     ].map((row) => (
                       <div
                         key={row.l}
-                        className="px-2.5 py-1.5 rounded bg-slate-950/70 border border-emerald-500/20 flex items-center justify-between text-[11px]"
+                        className="px-2.5 py-1.5 rounded bg-slate-950/70 border border-white/10 flex items-center justify-between text-[11px]"
                       >
                         <span className="text-slate-300">
-                          Layer {row.l}: {row.name}
+                          Layer {row.l}: {row.l === 6 ? "Definition unresolved" : row.name}
                         </span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-slate-500">{row.time}</span>
-                          <span className="text-emerald-400 font-bold flex items-center gap-1">
-                            <CheckCircle2 className="h-3 w-3" /> {row.status}
-                          </span>
-                        </div>
+                        <span className="text-slate-400 text-[10px]">Not run</span>
                       </div>
                     ))}
                   </div>
@@ -338,30 +367,27 @@ export const WorkflowTour: React.FC = () => {
 
               {activeStep.mockupType === "bundle" && (
                 <div data-testid="mockup-bundle" className="space-y-3 font-mono text-xs">
-                  <div className="text-[11px] text-slate-400">Cryptographic Verification Manifest:</div>
+                  <div className="text-[11px] text-slate-400">Illustrative package contents · not generated:</div>
                   <div className="p-3 rounded-lg bg-slate-950/90 border border-amber-500/30 space-y-2">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-amber-300 font-bold flex items-center gap-1.5">
                         <FileArchive className="h-4 w-4" />
                         verification_bundle_v1.zip
                       </span>
-                      <span className="text-slate-400">14.8 KB</span>
+                      <span className="text-slate-400">Example</span>
                     </div>
                     <div className="text-[10px] text-slate-400 break-all bg-slate-900 p-2 rounded border border-white/5">
                       <span className="text-slate-500 block mb-0.5">SHA-256 Digest:</span>
-                      <span className="text-cyan-300">
-                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-                      </span>
+                      <span className="text-cyan-300">No digest generated</span>
                     </div>
                     <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
                       <span>• canonical_ast.json</span>
-                      <span>• telemetry_log.json</span>
-                      <span>• proof_manifest.md</span>
+                    <span>• run_record.json</span>
+                    <span>• provenance.json</span>
                     </div>
                   </div>
-                  <div className="text-[10px] text-emerald-400 flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    <span>Cryptographically verified &amp; audit-ready for preprint submission.</span>
+                  <div className="text-[10px] text-slate-300 flex items-center gap-1.5">
+                    <span>Illustrative package layout; no export or cryptographic verification performed.</span>
                   </div>
                 </div>
               )}

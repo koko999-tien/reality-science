@@ -247,15 +247,15 @@ export const ScientificPresetsBar: React.FC<ScientificPresetsBarProps> = ({
           <div className="flex items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
             <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
-              1-Click Scientific Presets Engine
+              Local model examples
             </span>
           </div>
           <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-cyan-400" />
-            Pre-Verified Physical Laws & Formulas
+            Illustrative Equation Presets
           </h2>
           <p className="text-xs text-slate-400">
-            Instant 1-click loading with canonical Pint SI units and automatic 6-layer verification run.
+            Load an example into the local canvas. Verification runs only when explicitly requested.
           </p>
         </div>
 

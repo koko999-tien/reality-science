@@ -51,6 +51,7 @@ async def test_dispatch_compute_job_formats_celery_envelope():
 async def test_fetch_finding_result_reads_from_db1():
     mock_redis_result = AsyncMock()
     mock_result_data = {
+        "task_id": "test-job-uuid-1234",
         "status": "SUCCESS",
         "result": {
             "job_id": "test-job-uuid-1234",

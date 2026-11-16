@@ -1,0 +1,9 @@
+{
+  "kind": "failure",
+  "injected": true,
+  "job_id": "d6c72b6e-0ee2-4310-a1b3-290cb7cd85f9",
+  "version_id": "109c6a22-9c3c-4302-bc44-9c4ad181f153",
+  "response_status": 503,
+  "persisted_runs": 0,
+  "result_key_removed": true
+}

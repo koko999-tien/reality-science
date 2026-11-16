@@ -5,6 +5,10 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.main import app
+from app.modules.evidence_lab.service import (
+    parse_and_validate_dataset_json,
+    register_empirical_dataset,
+)
 from shared.fixtures.empirical.loader import load_cern_z_resonance
 
 
@@ -75,7 +79,7 @@ async def test_upload_dataset_json():
 
     assert response.status_code == 201
     data = response.json()
-    assert data["dataset_id"] == "test-json-upload-1"
+    assert data["dataset_id"] != "test-json-upload-1"
     assert data["point_count"] == 3
     assert "sha256_hash" in data
     assert len(data["sha256_hash"]) == 64
@@ -87,6 +91,74 @@ async def test_upload_dataset_json():
     retrieved = get_res.json()
     assert retrieved["dataset_name"] == "Test JSON Ingestion"
     assert len(retrieved["points"]) == 3
+
+
+@pytest.mark.asyncio
+async def test_upload_cannot_overwrite_dataset_with_client_chosen_id():
+    first = {
+        "dataset_id": "shared-client-id",
+        "dataset_name": "First Upload",
+        "dataset_type": "custom",
+        "points": [
+            {"independent_variable": 1, "observed_value": 2},
+            {"independent_variable": 2, "observed_value": 4},
+        ],
+    }
+    second = {**first, "dataset_name": "Second Upload", "points": [
+        {"independent_variable": 10, "observed_value": 20},
+        {"independent_variable": 20, "observed_value": 40},
+    ]}
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        first_response = await ac.post(
+            "/api/v1/evidence/upload",
+            files={"file": ("first.json", json.dumps(first).encode(), "application/json")},
+        )
+        second_response = await ac.post(
+            "/api/v1/evidence/upload",
+            files={"file": ("second.json", json.dumps(second).encode(), "application/json")},
+        )
+
+        assert first_response.status_code == 201
+        assert second_response.status_code == 201
+        first_id = first_response.json()["dataset_id"]
+        second_id = second_response.json()["dataset_id"]
+        assert first_id != "shared-client-id"
+        assert second_id != "shared-client-id"
+        assert first_id != second_id
+
+        stored_first = await ac.get(f"/api/v1/evidence/datasets/{first_id}")
+        stored_second = await ac.get(f"/api/v1/evidence/datasets/{second_id}")
+        assert stored_first.json()["dataset_name"] == "First Upload"
+        assert stored_second.json()["dataset_name"] == "Second Upload"
+
+
+def test_dataset_registry_rejects_duplicate_server_id():
+    dataset, digest = parse_and_validate_dataset_json(json.dumps({
+        "dataset_name": "Duplicate Guard",
+        "dataset_type": "custom",
+        "points": [
+            {"independent_variable": 1, "observed_value": 2},
+            {"independent_variable": 2, "observed_value": 4},
+        ],
+    }).encode())
+    register_empirical_dataset(dataset, digest)
+    with pytest.raises(ValueError, match="already exists"):
+        register_empirical_dataset(dataset, digest)
+
+
+@pytest.mark.asyncio
+async def test_upload_rejects_request_over_limit():
+    from app.modules.evidence_lab.router import MAX_DATASET_REQUEST_BYTES
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        response = await ac.post(
+            "/api/v1/evidence/upload",
+            content=b"x" * (MAX_DATASET_REQUEST_BYTES + 1),
+            headers={"content-type": "application/json"},
+        )
+
+    assert response.status_code == 413
 
 
 @pytest.mark.asyncio
