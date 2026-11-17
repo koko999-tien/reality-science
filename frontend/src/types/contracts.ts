@@ -128,6 +128,8 @@ export interface ValidationRunModel {
   version_id: string;
   status: string;
   overall_state: FindingState;
+  input_revision?: number | null;
+  is_current?: boolean;
   started_at?: string;
   completed_at?: string;
   created_at: string;
@@ -142,6 +144,7 @@ export interface ResearchVersionModel {
   content_hash?: string;
   publication_status: string;
   is_frozen: boolean;
+  revision?: number;
   created_at: string;
 }
 
@@ -152,6 +155,27 @@ export interface ResearchProjectModel {
   description?: string;
   visibility: string;
   is_frozen: boolean;
+  can_edit?: boolean;
   created_at: string;
   versions?: ResearchVersionModel[];
+}
+
+export interface DraftEquationInput {
+  id?: string;
+  label: string;
+  latex_raw: string;
+  canonical_ast_json: ExprNode;
+}
+
+export interface DraftContent {
+  equations: DraftEquationInput[];
+  variables: VariableSpec[];
+  units: UnitSpec[];
+}
+
+export interface DraftSnapshot {
+  version: ResearchVersionModel;
+  equations: EquationModel[];
+  variables: VariableModel[];
+  units: UnitSpec[];
 }

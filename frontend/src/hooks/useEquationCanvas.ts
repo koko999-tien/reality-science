@@ -3,17 +3,18 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { addEdge, applyEdgeChanges, applyNodeChanges, type Connection, type OnEdgesChange, type OnNodesChange } from "@xyflow/react";
 import type { MathCanvasEdge, MathCanvasNode } from "@/types/canvas";
-import type { ExprNode, FindingResult, VariableSpec } from "@/types/contracts";
+import type { ExprNode, FindingResult, VariableSpec, UnitSpec } from "@/types/contracts";
 import type { NodeTypeToAdd } from "@/components/equations/canvas/CanvasToolbar";
 import { astToGraph, graphToAst } from "@/lib/ast_graph_converter";
 import { exprNodeToLatex } from "@/lib/ast";
 import { evaluateAstNumeric, type EvaluationResult } from "@/lib/formula_evaluator";
 import { validateEquationAst } from "@/lib/api";
 
-interface CanvasState {
+export interface CanvasState {
   nodes: MathCanvasNode[];
   edges: MathCanvasEdge[];
   variables: VariableSpec[];
+  units: UnitSpec[];
 }
 
 const emptyCalculation: EvaluationResult = { value: null, error: null };
@@ -63,7 +64,7 @@ function layoutNodes(canvas: CanvasState): MathCanvasNode[] {
 }
 
 export function useEquationCanvas() {
-  const [canvas, setCanvas] = useState<CanvasState>({ nodes: [], edges: [], variables: [] });
+  const [canvas, setCanvas] = useState<CanvasState>({ nodes: [], edges: [], variables: [], units: [] });
   const latestCanvas = useRef(canvas);
   const [validationResult, setValidationResult] = useState<FindingResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
@@ -91,16 +92,34 @@ export function useEquationCanvas() {
     requestId.current += 1;
   }, []);
 
-  const replaceCanvas = useCallback((ast: ExprNode | null, variables: VariableSpec[]) => {
+  const replaceCanvas = useCallback((ast: ExprNode | null, variables: VariableSpec[], units: UnitSpec[] = []) => {
     const graph = ast ? astToGraph(ast, variables) : { nodes: [], edges: [] };
     invalidateValidation();
-    updateCanvas(() => ({ ...graph, edges: graph.edges.map((edge) => ({ ...edge, type: "pulseFlow" })), variables }));
+    updateCanvas(() => ({ ...graph, edges: graph.edges.map((edge) => ({ ...edge, type: "pulseFlow" })), variables, units }));
+  }, [invalidateValidation, updateCanvas]);
+
+  const getCanvasSnapshot = useCallback(() => latestCanvas.current, []);
+  const restoreCanvas = useCallback((snapshot: CanvasState) => {
+    invalidateValidation();
+    updateCanvas(() => snapshot);
   }, [invalidateValidation, updateCanvas]);
 
   const handleVariablesChange = useCallback((variables: VariableSpec[]) => {
     invalidateValidation();
     updateCanvas((previous) => ({ ...previous, variables }));
   }, [invalidateValidation, updateCanvas]);
+
+  const handleUnitsChange = useCallback((units: UnitSpec[]) => {
+    invalidateValidation();
+    updateCanvas((previous) => ({ ...previous, units }));
+  }, [invalidateValidation, updateCanvas]);
+
+  const getSaveSnapshot = useCallback(() => {
+    const snapshot = latestCanvas.current;
+    const preview = previewCanvas(snapshot);
+    if (preview.error) throw new Error(preview.error);
+    return { ast: preview.ast, latex: preview.latex, variables: snapshot.variables, units: snapshot.units };
+  }, []);
 
   const onNodesChange: OnNodesChange<MathCanvasNode> = useCallback((changes) => {
     if (changes.some((change) => ["add", "remove", "replace"].includes(change.type))) invalidateValidation();
@@ -174,7 +193,8 @@ export function useEquationCanvas() {
     try {
       const snapshot = latestCanvas.current;
       const ast = graphToAst(snapshot.nodes, snapshot.edges, snapshot.variables);
-      const finding = await validateEquationAst({ expression_ast: ast, variables: snapshot.variables });
+      const finding = await validateEquationAst({ expression_ast: ast, variables: snapshot.variables,
+        ...(snapshot.units.length ? { units: snapshot.units } : {}) });
       if (currentRequest === requestId.current) setValidationResult(finding);
     } catch (cause) {
       if (currentRequest === requestId.current) {
@@ -192,10 +212,10 @@ export function useEquationCanvas() {
     : node), [canvas.nodes, preview]);
 
   return {
-    nodes, edges: canvas.edges, variables: canvas.variables,
+    nodes, edges: canvas.edges, variables: canvas.variables, units: canvas.units,
     currentAst: preview.ast, currentLatex: preview.latex, computedResult: preview.calculation,
     translationError: preview.error ?? actionError, validationResult, isValidating,
-    replaceCanvas, cancelPendingValidation, handleVariablesChange, handleNodeDataChange,
+    replaceCanvas, restoreCanvas, getCanvasSnapshot, cancelPendingValidation, handleVariablesChange, handleNodeDataChange, handleUnitsChange, getSaveSnapshot,
     onNodesChange, onEdgesChange, onConnect, handleAddNode, handleAutoLayout, handleClear, handleValidate,
   };
 }

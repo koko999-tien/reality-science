@@ -1,0 +1,10 @@
+{
+  "injected_exception": "SoftTimeLimitExceeded",
+  "helper": "limit",
+  "version_id": "3bb5047a-706c-40bc-b01a-0f593e45d7d5",
+  "target_id": "a7c23ce9-ab9a-40c2-9c3d-b63c4c7ca620",
+  "http_status": 503,
+  "persisted_runs": 0,
+  "persisted_findings": 0,
+  "publication_preserved": "preprint"
+}

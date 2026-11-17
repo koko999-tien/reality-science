@@ -1,0 +1,25 @@
+........................................................................ [ 50%]
+................................................................FF.....  [100%]
+================================== FAILURES ===================================
+_ test_claim_comparison_does_not_turn_deadline_into_no_contradiction[symbolic] _
+tests\test_soft_deadline.py:115: in test_claim_comparison_does_not_turn_deadline_into_no_contradiction
+    claims = [ClaimSpec(claim_id=str(i), claim_code=f"C{i}", claim_type="derivation", statement="test",
+tests\test_soft_deadline.py:115: in <listcomp>
+    claims = [ClaimSpec(claim_id=str(i), claim_code=f"C{i}", claim_type="derivation", statement="test",
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for ClaimSpec
+E   claim_type
+E     Input should be 'AXIOM', 'HYPOTHESIS', 'DERIVATION', 'EMPIRICAL_OBSERVATION', 'PREDICTION' or 'DOMAIN_CONSTRAINT' [type=enum, input_value='derivation', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.14/v/enum
+_ test_claim_comparison_does_not_turn_deadline_into_no_contradiction[interval] _
+tests\test_soft_deadline.py:115: in test_claim_comparison_does_not_turn_deadline_into_no_contradiction
+    claims = [ClaimSpec(claim_id=str(i), claim_code=f"C{i}", claim_type="derivation", statement="test",
+tests\test_soft_deadline.py:115: in <listcomp>
+    claims = [ClaimSpec(claim_id=str(i), claim_code=f"C{i}", claim_type="derivation", statement="test",
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for ClaimSpec
+E   claim_type
+E     Input should be 'AXIOM', 'HYPOTHESIS', 'DERIVATION', 'EMPIRICAL_OBSERVATION', 'PREDICTION' or 'DOMAIN_CONSTRAINT' [type=enum, input_value='derivation', input_type=str]
+E       For further information visit https://errors.pydantic.dev/2.14/v/enum
+=========================== short test summary info ===========================
+FAILED tests/test_soft_deadline.py::test_claim_comparison_does_not_turn_deadline_into_no_contradiction[symbolic]
+FAILED tests/test_soft_deadline.py::test_claim_comparison_does_not_turn_deadline_into_no_contradiction[interval]
+2 failed, 141 passed in 12.83s

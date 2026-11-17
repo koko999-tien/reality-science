@@ -1,0 +1,6 @@
+{
+  "data_directory": "C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-draft-save-pg-20261117/data",
+  "port": "54761",
+  "listen_addresses": "127.0.0.1",
+  "cluster_name": "rs_test_4058a17f49d64a9f9c0eb3b5b41a5966"
+}

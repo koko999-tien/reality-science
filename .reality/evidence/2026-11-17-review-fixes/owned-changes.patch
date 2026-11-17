@@ -1,0 +1,742 @@
+diff --git a/worker/worker/tasks/dimensional.py b/worker/worker/tasks/dimensional.py
+--- a/worker/worker/tasks/dimensional.py
++++ b/worker/worker/tasks/dimensional.py
+@@ -1,4 +1,5 @@
+ from typing import Dict, List, Tuple
++from celery.exceptions import SoftTimeLimitExceeded
+ from shared.schemas.math_ast import ExprNode, VariableSpec, UnitSpec
+ from worker.core.dimension_engine import (
+     evaluate_ast_dimensions,
+@@ -30,5 +31,7 @@
+         if "requires dimensionless input" in str(e):
+             return False, "", DiagnosticCode.DIMENSIONED_TRANSCENDENTAL_ARGUMENT.value
+         return False, "", DiagnosticCode.DIMENSIONAL_MISMATCH.value
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception as e:
+         return False, "", f"DIMENSIONAL_ERROR: {str(e)}"
+diff --git a/worker/worker/core/boundary_engine.py b/worker/worker/core/boundary_engine.py
+--- a/worker/worker/core/boundary_engine.py
++++ b/worker/worker/core/boundary_engine.py
+@@ -1,6 +1,7 @@
+ from dataclasses import dataclass, field
+ import math
+ from typing import Dict, List, Optional, Set, Tuple, Union
++from celery.exceptions import SoftTimeLimitExceeded
+ import sympy as sp
+ from shared.schemas.math_ast import (
+     ExprNode,
+@@ -43,6 +44,8 @@
+             _, denom = sympy_expr.as_numer_denom()
+             if denom != 1 and denom != sp.Integer(1):
+                 denominators.add(denom)
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             pass
+ 
+@@ -52,6 +55,8 @@
+             try:
+                 if subexpr.exp.is_number and subexpr.exp < 0:
+                     denominators.add(subexpr.base)
++            except SoftTimeLimitExceeded:
++                raise
+             except Exception:
+                 pass
+ 
+@@ -82,6 +87,8 @@
+             domain_type = var_domain_map.get(sym.name, "real")
+             try:
+                 roots = sp.solveset(denom, sym, domain=sp.S.Reals)
++            except SoftTimeLimitExceeded:
++                raise
+             except Exception:
+                 continue
+ 
+@@ -165,8 +172,10 @@
+                 boundary_limits[f"{sym.name} -> -oo"] = str(lim_neg_inf)
+                 if lim_neg_inf.is_infinite:
+                     divergences.append(f"Asymptotic divergence as {sym.name} -> -oo: {lim_neg_inf}")
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+-            # Undetermined limit or CAS timeout
++            # An undetermined limit may fall back; a task deadline may not.
+             continue
+ 
+     return boundary_limits, divergences
+@@ -191,6 +200,8 @@
+             val = float(diff_expr.evalf())
+             is_zero = abs(val) < tolerance
+             return is_zero, abs(val), [f"Constant difference: {val}"]
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             return False, float("inf"), ["Evaluation failed on constant difference"]
+ 
+@@ -231,6 +242,8 @@
+                     max_err,
+                     [f"Stratified sampling divergence at point {i}: |diff| = {err} >= {tolerance} for {subs_dict}"],
+                 )
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception as ex:
+             return False, float("inf"), [f"Exception evaluating point {i}: {str(ex)}"]
+ 
+@@ -272,6 +285,8 @@
+             message=str(e),
+             diagnostics=[str(e)],
+         )
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception as e:
+         return BoundaryAnalysisResult(
+             is_valid=False,
+diff --git a/worker/worker/core/dimension_engine.py b/worker/worker/core/dimension_engine.py
+--- a/worker/worker/core/dimension_engine.py
++++ b/worker/worker/core/dimension_engine.py
+@@ -1,4 +1,5 @@
+ from typing import Dict, List
++from celery.exceptions import SoftTimeLimitExceeded
+ import pint
+ from shared.schemas.math_ast import (
+     AllowedFunction,
+@@ -43,6 +44,8 @@
+     def_str = f"{unit_spec.name} = {scale} * ({dim_expr}) = {unit_spec.symbol}"
+     try:
+         ureg.define(def_str)
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         pass
+ 
+diff --git a/worker/worker/core/physical_invariants.py b/worker/worker/core/physical_invariants.py
+--- a/worker/worker/core/physical_invariants.py
++++ b/worker/worker/core/physical_invariants.py
+@@ -7,6 +7,7 @@
+ """
+ 
+ from __future__ import annotations
++from celery.exceptions import SoftTimeLimitExceeded
+ import math
+ import re
+ from typing import Any, Dict, List, Optional, Set, Tuple
+@@ -76,6 +77,8 @@
+     try:
+         q = ureg(unit_str)
+         return q.dimensionality == VELOCITY_DIM
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         return False
+ 
+@@ -104,6 +107,8 @@
+         if q.dimensionality == VELOCITY_DIM:
+             si_val = float(q.to("meter / second").magnitude)
+             return si_val, abs(si_val)
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         pass
+     return val_f, abs(val_f)
+@@ -114,6 +119,8 @@
+     try:
+         q = ureg(unit_str)
+         return q.dimensionality == ENERGY_DIM
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         return False
+ 
+@@ -123,6 +130,8 @@
+     try:
+         q = ureg(unit_str)
+         return q.dimensionality == MOMENTUM_DIM
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         return False
+ 
+@@ -162,6 +171,8 @@
+     try:
+         ast_dim = evaluate_ast_dimensions(ast, var_map, {})
+         has_velocity_dim = (ast_dim.dimensionality == VELOCITY_DIM)
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         has_velocity_dim = False
+ 
+@@ -169,6 +180,8 @@
+     if has_velocity_dim:
+         try:
+             ast_unit_str = str(ast_dim.units)
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             pass
+ 
+@@ -519,6 +532,8 @@
+                                         "Lorentz factor singularity: division by zero at v = c",
+                                     ],
+                                 )
++                        except SoftTimeLimitExceeded:
++                            raise
+                         except Exception:
+                             pass
+ 
+@@ -562,6 +577,8 @@
+                 dim_r = evaluate_ast_dimensions(ast.right, var_map, {})
+                 if dim_l.dimensionality == ENERGY_DIM and dim_r.dimensionality == ENERGY_DIM:
+                     is_energy_delta = True
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             pass
+ 
+@@ -698,6 +715,8 @@
+                 dim_r = evaluate_ast_dimensions(ast.right, var_map, {})
+                 if dim_l.dimensionality == MOMENTUM_DIM and dim_r.dimensionality == MOMENTUM_DIM:
+                     is_momentum_delta = True
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             pass
+ 
+diff --git a/worker/worker/core/empirical_engine.py b/worker/worker/core/empirical_engine.py
+--- a/worker/worker/core/empirical_engine.py
++++ b/worker/worker/core/empirical_engine.py
+@@ -14,6 +14,7 @@
+ 
+ from __future__ import annotations
+ 
++from celery.exceptions import SoftTimeLimitExceeded
+ import math
+ from typing import Any, Dict, List, Optional, Set, Tuple, Union
+ import mpmath
+@@ -231,6 +232,8 @@
+             # Regularized upper incomplete gamma Q(a, z) = Gamma(a, z) / Gamma(a)
+             p_val_mp = mpmath.gammainc(dof / 2.0, chi2 / 2.0, regularized=True)
+             p_value = float(p_val_mp)
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             p_value = None
+ 
+@@ -360,6 +363,8 @@
+             is_valid=False,
+             diagnostics=[str(err)],
+         )
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception as err:
+         return EmpiricalCorrelationResult(
+             job_id="",
+diff --git a/worker/worker/core/epistemic_engine.py b/worker/worker/core/epistemic_engine.py
+--- a/worker/worker/core/epistemic_engine.py
++++ b/worker/worker/core/epistemic_engine.py
+@@ -10,6 +10,7 @@
+ 
+ from __future__ import annotations
+ 
++from celery.exceptions import SoftTimeLimitExceeded
+ from collections import defaultdict, deque
+ from typing import Any, Dict, List, Optional, Set, Tuple
+ 
+@@ -262,6 +263,8 @@
+                                 )
+                             )
+ 
++                    except SoftTimeLimitExceeded:
++                        raise
+                     except Exception:
+                         pass
+ 
+@@ -290,6 +293,8 @@
+                                     severity=FindingState.FAIL,
+                                 )
+                             )
++                    except SoftTimeLimitExceeded:
++                        raise
+                     except Exception:
+                         pass
+ 
+diff --git a/.reality/evidence/2026-11-16-compute-queue/run_live.py b/.reality/evidence/2026-11-16-compute-queue/run_live.py
+--- a/.reality/evidence/2026-11-16-compute-queue/run_live.py
++++ b/.reality/evidence/2026-11-16-compute-queue/run_live.py
+@@ -20,15 +20,100 @@
+ 
+ def stop_owned_process(process):
+     if process is not None and process.poll() is None:
+-        subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],check=True,capture_output=True)
++        subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],check=True,capture_output=True,timeout=30)
+         process.wait(timeout=20)
+ 
+ 
+-def run(command,name,env):
++def run(command,name,env,timeout=600):
+     with (E/(name+'.log')).open('w',encoding='utf-8') as log:
+-        code=subprocess.run(command,cwd=BACKEND,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=600).returncode
++        process=subprocess.Popen(command,cwd=BACKEND,env=env,stdout=log,stderr=subprocess.STDOUT)
++        try:
++            code=process.wait(timeout=timeout)
++        except BaseException as error:
++            # Keep the live parent handle until its descendants (including the
++            # Windows venv launcher and Uvicorn) have been stopped as a tree.
++            try:
++                stop_owned_process(process)
++            except Exception as cleanup_error:
++                error.add_note(f'Test process tree cleanup failed: {cleanup_error}')
++            raise
+     print((E/(name+'.log')).read_text(encoding='utf-8'))
+     return {'command':command,'exit':code}
++
++
++def cleanup_resources(name,manifest,manifest_path,worker,broker,client,broker_id,port,logs,codes):
++    """Attempt each owned-resource teardown even when an earlier stage fails."""
++    errors=[]
++
++    def attempt(stage,operation):
++        try:
++            return operation()
++        except Exception as error:
++            errors.append({'stage':stage,'type':type(error).__name__,'message':str(error)})
++            return None
++
++    attempt('worker',lambda:stop_owned_process(worker))
++
++    def stop_broker():
++        if broker is None or broker.poll() is not None:
++            return
++        if broker_id is None:
++            stop_owned_process(broker)
++            return
++        # Network shutdown is permitted only for the identified, marked broker.
++        if client.info('server')['run_id']!=broker_id or client.get('reality-test-instance')!=name+'-'+broker_id:
++            raise RuntimeError('Broker identity mismatch; refusing network shutdown')
++        client.shutdown(nosave=True)
++        broker.wait(timeout=15)
++
++    attempt('broker-shutdown',stop_broker)
++    # A lost Redis connection must not strand the process we started. This uses
++    # the retained Popen handle, never a historical PID or an arbitrary server.
++    attempt('broker-process',lambda:stop_owned_process(broker))
++    if client is not None:
++        attempt('redis-client',client.close)
++
++    def stop_postgres():
++        if not manifest.get('stopped'):
++            asyncio.run(identity(manifest))
++            codes['stop']=stop_cluster(manifest,E/(name+'-stop.log'))
++            if codes['stop']!=0:
++                raise RuntimeError('PostgreSQL shutdown returned nonzero')
++
++    attempt('postgres',stop_postgres)
++    attempt('manifest',lambda:manifest_path.write_text(json.dumps(manifest,indent=2)))
++    for index,log in enumerate(logs):
++        attempt(f'log-{index}',log.close)
++
++    ports={manifest['port']}
++    if port: ports.add(port)
++
++    def collect_api_ports():
++        for log in (E/(name+'-pytest')).glob('*/api.log'):
++            ports.update(int(p) for p in re.findall(r'Uvicorn running on http://127\.0\.0\.1:(\d+)',log.read_text()))
++
++    attempt('api-port-discovery',collect_api_ports)
++    listening={}
++    for p in ports:
++        def check_port(p=p):
++            with socket.socket() as sock:
++                sock.settimeout(.5)
++                return sock.connect_ex(('127.0.0.1',p))==0
++        listening[str(p)]=attempt(f'port-{p}',check_port)
++    cleanup={'codes':codes,'ports_accepting':listening,'postgres_stopped':manifest.get('stopped'),
++             'worker_exit':attempt('worker-status',worker.poll) if worker else None,
++             'broker_exit':attempt('broker-status',broker.poll) if broker else None,
++             'postgres_control':attempt('postgres-control',lambda:control_data(manifest)),
++             'errors':errors}
++    if (not manifest.get('stopped') or any(value is not False for value in listening.values())
++            or (worker is not None and cleanup['worker_exit'] is None)
++            or (broker is not None and cleanup['broker_exit'] is None)):
++        errors.append({'stage':'verification','type':'RuntimeError','message':'Incomplete owned-resource cleanup'})
++    attempt('cleanup-evidence',lambda:(E/(name+'-cleanup.json')).write_text(json.dumps(cleanup,indent=2)))
++    print(json.dumps(cleanup,indent=2))
++    if errors:
++        raise RuntimeError('Cleanup failures: '+', '.join(error['stage'] for error in errors))
++    return cleanup
+ 
+ 
+ async def identity(manifest):
+@@ -107,35 +192,7 @@
+             'worker_started':worker is not None},indent=2))
+         return codes['tests']['exit']
+     finally:
+-        stop_owned_process(worker)
+-        if broker is not None and broker.poll() is None:
+-            if broker_id is not None:
+-                assert client.info('server')['run_id']==broker_id
+-                assert client.get('reality-test-instance')==name+'-'+broker_id
+-                client.shutdown(nosave=True)
+-                broker.wait(timeout=15)
+-            else:
+-                stop_owned_process(broker)
+-        if client is not None: client.close()
+-        if not manifest.get('stopped'):
+-            asyncio.run(identity(manifest))
+-            codes['stop']=stop_cluster(manifest,E/(name+'-stop.log'))
+-            manifest_path.write_text(json.dumps(manifest,indent=2))
+-        for log in logs: log.close()
+-        ports={manifest['port']}
+-        if port: ports.add(port)
+-        for log in (E/(name+'-pytest')).glob('*/api.log'):
+-            ports.update(int(p) for p in re.findall(r'Uvicorn running on http://127\.0\.0\.1:(\d+)',log.read_text()))
+-        listening={}
+-        for p in ports:
+-            with socket.socket() as sock:
+-                sock.settimeout(.5); listening[str(p)]=sock.connect_ex(('127.0.0.1',p))==0
+-        cleanup={'codes':codes,'ports_accepting':listening,'postgres_stopped':manifest['stopped'],
+-                 'worker_exit':worker.poll() if worker else None,'broker_exit':broker.poll() if broker else None,
+-                 'postgres_control':control_data(manifest)}
+-        (E/(name+'-cleanup.json')).write_text(json.dumps(cleanup,indent=2))
+-        assert manifest['stopped'] and not any(listening.values())
+-        print(json.dumps(cleanup,indent=2))
++        cleanup_resources(name,manifest,manifest_path,worker,broker,client,broker_id,port,logs,codes)
+ 
+ 
+ if __name__=='__main__': raise SystemExit(main())
+diff --git a/worker/tests/test_soft_deadline.py b/worker/tests/test_soft_deadline.py
+new file mode 100644
+--- /dev/null
++++ b/worker/tests/test_soft_deadline.py
+@@ -0,0 +1,122 @@
++"""A Celery deadline must escape scientific fallbacks at the actual helper seam."""
++from types import SimpleNamespace
++from unittest.mock import Mock, patch
++
++from celery.exceptions import SoftTimeLimitExceeded
++import numpy as np
++import pytest
++import sympy as sp
++
++from shared.schemas.finding_result import FindingResult, FindingState
++from shared.schemas.epistemic_logic import ClaimGraph, ClaimSpec
++from shared.schemas.job_bundle import JobBundle
++from shared.schemas.math_ast import ExprNode, UnitSpec, VariableSpec
++from shared.schemas.physical_invariants import SystemContext
++from worker.core import boundary_engine, dimension_engine, empirical_engine, epistemic_engine, physical_invariants
++from worker.tasks.compute_tasks import verify_equation_ast
++
++
++def bundle():
++    return JobBundle(
++        job_id="soft-deadline-job", version_id="soft-deadline-version",
++        target_entity_type="EQUATION", target_entity_id="soft-deadline-equation",
++        expression_ast=ExprNode(node_type="variable", value="x"),
++        variables=[VariableSpec(symbol="x", name="position", unit="m")],
++    )
++
++
++@pytest.mark.parametrize("target", [
++    "worker.tasks.dimensional.evaluate_ast_dimensions",
++    "worker.core.boundary_engine.sp.limit",
++    "worker.core.boundary_engine.ast_to_sympy",
++])
++def test_nested_deadline_is_operational_result_with_original_provenance(target):
++    job = bundle()
++    with patch(target, side_effect=SoftTimeLimitExceeded()) as operation:
++        result = FindingResult.model_validate(verify_equation_ast.run(job.model_dump()))
++    operation.assert_called()
++    assert result.state == FindingState.NEEDS_EXPERT_REVIEW
++    assert result.diagnostic_code == "COMPUTE_TIMEOUT_EXCEEDED"
++    assert result.dimensions_verified is False
++    assert result.job_id == job.job_id
++    assert result.version_id == job.version_id
++    assert result.target_entity_id == job.target_entity_id
++    assert result.bundle_sha256 == job.fingerprint()
++
++
++def test_denominator_extraction_does_not_swallow_deadline():
++    expression = SimpleNamespace(as_numer_denom=Mock(side_effect=SoftTimeLimitExceeded()))
++    with pytest.raises(SoftTimeLimitExceeded):
++        boundary_engine.extract_denominators(expression)
++
++
++def test_pole_solver_does_not_swallow_deadline():
++    x = sp.Symbol("x")
++    with patch.object(boundary_engine.sp, "solveset", side_effect=SoftTimeLimitExceeded()):
++        with pytest.raises(SoftTimeLimitExceeded):
++            boundary_engine.check_singularities_and_poles(1 / (x + 1), bundle().variables)
++
++
++@pytest.mark.parametrize("symbols", [set(), {sp.Symbol("x")}], ids=["constant", "sample"])
++def test_sampling_does_not_turn_deadline_into_numerical_evidence(symbols):
++    expression = SimpleNamespace(free_symbols=symbols, evalf=Mock(side_effect=SoftTimeLimitExceeded()))
++    with pytest.raises(SoftTimeLimitExceeded):
++        boundary_engine.execute_richardson_stratified_sampling(expression, bundle().variables)
++
++
++def test_custom_unit_registration_does_not_swallow_deadline():
++    unit = UnitSpec(name="deadline_unique_unit", symbol="deadline_unique_symbol",
++                    dimensionality="[length]", scale_factor=2)
++    with patch.object(dimension_engine.ureg, "define", side_effect=SoftTimeLimitExceeded()):
++        with pytest.raises(SoftTimeLimitExceeded):
++            dimension_engine.register_custom_unit(unit)
++
++
++@pytest.mark.parametrize("operation", [
++    physical_invariants.is_velocity_unit,
++    physical_invariants.is_energy_unit,
++    physical_invariants.is_momentum_unit,
++])
++def test_unit_classification_does_not_turn_deadline_into_inapplicability(monkeypatch, operation):
++    monkeypatch.setattr(physical_invariants, "ureg", Mock(side_effect=SoftTimeLimitExceeded()))
++    with pytest.raises(SoftTimeLimitExceeded):
++        operation("m/s")
++
++
++def test_velocity_conversion_does_not_swallow_deadline(monkeypatch):
++    registry = SimpleNamespace(Quantity=Mock(side_effect=SoftTimeLimitExceeded()))
++    monkeypatch.setattr(physical_invariants, "ureg", registry)
++    with pytest.raises(SoftTimeLimitExceeded):
++        physical_invariants.to_si_velocity(1, "m/s")
++
++
++def test_empirical_p_value_does_not_swallow_deadline():
++    with patch.object(empirical_engine.mpmath, "gammainc", side_effect=SoftTimeLimitExceeded()):
++        with pytest.raises(SoftTimeLimitExceeded):
++            empirical_engine.compute_empirical_metrics(np.array([1., 2.]), np.array([1., 2.]))
++
++
++def test_empirical_evaluator_does_not_turn_deadline_into_invalid_ast():
++    dataset = SimpleNamespace(independent_variable_symbol="x", to_xy_sigma=lambda: ([1, 2], [1, 2], [1, 1]))
++    with patch.object(empirical_engine, "safe_evaluate_ast_numerical", side_effect=SoftTimeLimitExceeded()):
++        with pytest.raises(SoftTimeLimitExceeded):
++            empirical_engine.correlate_empirical_data(bundle().expression_ast, bundle().variables, dataset)
++
++
++def test_physical_dimension_inference_does_not_swallow_deadline():
++    with patch.object(physical_invariants, "evaluate_ast_dimensions", side_effect=SoftTimeLimitExceeded()):
++        with pytest.raises(SoftTimeLimitExceeded):
++            physical_invariants._check_speed_of_light(bundle().expression_ast, bundle().variables,
++                                                      sp.Symbol("x"), SystemContext())
++
++
++@pytest.mark.parametrize("kind", ["symbolic", "interval"])
++def test_claim_comparison_does_not_turn_deadline_into_no_contradiction(kind):
++    claims = [ClaimSpec(claim_id=str(i), claim_code=f"C{i}", claim_type="DERIVATION", statement="test",
++                        target_variable="x", expression_ast=bundle().expression_ast if kind == "symbolic" else None,
++                        metadata={"interval": [0, 1]} if kind == "interval" else {}) for i in range(2)]
++    graph = ClaimGraph(graph_id="timeout-graph", version_id="v", claims=claims, variables=bundle().variables)
++    target = "worker.core.epistemic_engine.ast_to_sympy" if kind == "symbolic" else "worker.core.epistemic_engine.sp.Interval"
++    with patch(target, side_effect=SoftTimeLimitExceeded()):
++        with pytest.raises(SoftTimeLimitExceeded):
++            epistemic_engine.detect_contradictions(graph)
+diff --git a/backend/tests/unit/test_live_queue_lifecycle.py b/backend/tests/unit/test_live_queue_lifecycle.py
+new file mode 100644
+--- /dev/null
++++ b/backend/tests/unit/test_live_queue_lifecycle.py
+@@ -0,0 +1,150 @@
++"""Failure-path checks for the local-only PostgreSQL/queue evidence runner."""
++import importlib.util
++import json
++import os
++from pathlib import Path
++import socket
++import subprocess
++import sys
++from types import SimpleNamespace
++from unittest.mock import Mock
++
++import pytest
++
++ROOT = Path(__file__).resolve().parents[3]
++
++
++@pytest.fixture
++def runner(monkeypatch, tmp_path):
++    path = ROOT / '.reality/evidence/2026-11-16-compute-queue/run_live.py'
++    spec = importlib.util.spec_from_file_location('queue_lifecycle_under_test', path)
++    module = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(module)
++    monkeypatch.setattr(module, 'E', tmp_path)
++    return module
++
++
++@pytest.mark.skipif(os.name != 'nt', reason='The local evidence harness uses Windows taskkill')
++def test_timeout_stops_live_parent_and_its_listener_descendant(runner, tmp_path, monkeypatch):
++    """Real child listener; deliberately no Python/pytest teardown to rescue it."""
++    child = tmp_path / 'listener.py'
++    child.write_text(
++        'import json, os, socket, sys, time\n'
++        'from pathlib import Path\n'
++        'with socket.socket() as s:\n'
++        '    s.bind(("127.0.0.1", 0)); s.listen()\n'
++        '    Path(sys.argv[1]).write_text(json.dumps({"pid": os.getpid(), "port": s.getsockname()[1]}))\n'
++        '    time.sleep(60)\n'
++    )
++    parent = tmp_path / 'parent.py'
++    parent.write_text(
++        'import subprocess, sys, time\n'
++        'subprocess.Popen([sys.executable, sys.argv[1], sys.argv[2]])\n'
++        'time.sleep(60)\n'
++    )
++    marker = tmp_path / 'listener.json'
++    owned = []
++    original = runner.stop_owned_process
++
++    def stop(process):
++        owned.append((process, process.poll()))
++        original(process)
++
++    monkeypatch.setattr(runner, 'stop_owned_process', stop)
++    with pytest.raises(subprocess.TimeoutExpired):
++        runner.run([sys.executable, str(parent), str(child), str(marker)], 'timeout-tree', os.environ.copy(), timeout=3)
++    assert len(owned) == 1 and owned[0][1] is None, 'Parent must still be alive when tree cleanup starts'
++    assert owned[0][0].poll() is not None
++    identity = json.loads(marker.read_text())
++    with socket.socket() as sock:
++        sock.settimeout(.5)
++        assert sock.connect_ex(('127.0.0.1', identity['port'])) != 0
++
++
++@pytest.mark.parametrize('fault', ['worker', 'info', 'shutdown', 'wait', 'client-close', 'identity', 'postgres', 'log-close'])
++def test_each_cleanup_failure_still_attempts_remaining_resources(runner, monkeypatch, tmp_path, fault):
++    events = []
++    worker = SimpleNamespace(pid=123, returncode=None)
++    worker.poll = lambda: worker.returncode
++    broker = SimpleNamespace(pid=124, returncode=None)
++    broker.poll = lambda: broker.returncode
++    manifest = {'stopped': False, 'port': 60001}
++
++    def event(name):
++        events.append(name)
++        if name == fault:
++            raise RuntimeError('injected ' + name)
++
++    def stop(process):
++        event('worker' if process is worker else 'broker-process')
++        process.returncode = 1
++
++    def info(section):
++        event('info')
++        return {'run_id': 'owned'}
++
++    def shutdown(**kwargs):
++        event('shutdown')
++
++    def wait(**kwargs):
++        event('wait')
++        broker.returncode = 0
++
++    async def identity(unused):
++        event('identity')
++
++    def stop_cluster(unused, log):
++        event('postgres')
++        manifest['stopped'] = True
++        return 0
++
++    broker.wait = wait
++    client = SimpleNamespace(info=info, get=lambda key: 'fault-owned', shutdown=shutdown,
++                             close=lambda: event('client-close'))
++    log = SimpleNamespace(close=lambda: event('log-close'))
++    monkeypatch.setattr(runner, 'stop_owned_process', stop)
++    monkeypatch.setattr(runner, 'identity', identity)
++    monkeypatch.setattr(runner, 'stop_cluster', stop_cluster)
++    monkeypatch.setattr(runner, 'control_data', lambda unused: {'state': 'mocked'})
++    sock = Mock()
++    sock.__enter__ = Mock(return_value=sock)
++    sock.__exit__ = Mock(return_value=False)
++    sock.connect_ex.return_value = 1
++    # Replace only the runner's reference; asyncio needs the real socket module.
++    monkeypatch.setattr(runner, 'socket', SimpleNamespace(socket=lambda: sock))
++    with pytest.raises(RuntimeError, match='Cleanup failures'):
++        runner.cleanup_resources('fault', manifest, tmp_path / 'manifest.json', worker, broker,
++                                 client, 'owned', 60002, [log], {})
++    assert 'client-close' in events and 'identity' in events and 'log-close' in events
++    if fault != 'identity':
++        assert 'postgres' in events
++    else:
++        assert 'postgres' not in events, 'Failed ownership verification must prevent shutdown'
++    assert broker.poll() is not None
++    evidence = json.loads((tmp_path / 'fault-cleanup.json').read_text())
++    assert evidence['errors']
++    assert any('injected ' + fault in item['message'] for item in evidence['errors'])
++    assert json.loads((tmp_path / 'manifest.json').read_text()) == manifest
++
++
++def test_multiple_failures_are_recorded_before_raising(runner, monkeypatch, tmp_path):
++    class FailingLog:
++        def close(self):
++            raise OSError('injected log')
++
++    async def wrong_identity(unused):
++        raise RuntimeError('injected identity')
++
++    monkeypatch.setattr(runner, 'identity', wrong_identity)
++    monkeypatch.setattr(runner, 'control_data', lambda unused: {})
++    stop = Mock()
++    monkeypatch.setattr(runner, 'stop_cluster', stop)
++    with socket.socket() as sock:
++        sock.bind(('127.0.0.1', 0))
++        port = sock.getsockname()[1]
++    with pytest.raises(RuntimeError, match='postgres.*log-0.*verification'):
++        runner.cleanup_resources('many', {'stopped': False, 'port': port}, tmp_path / 'manifest.json',
++                                 None, None, None, None, None, [FailingLog()], {})
++    stop.assert_not_called()
++    evidence = json.loads((tmp_path / 'many-cleanup.json').read_text())
++    assert {'postgres', 'log-0', 'verification'} <= {error['stage'] for error in evidence['errors']}
+diff --git a/backend/tests/integration/test_compute_soft_deadline_live.py b/backend/tests/integration/test_compute_soft_deadline_live.py
+new file mode 100644
+--- /dev/null
++++ b/backend/tests/integration/test_compute_soft_deadline_live.py
+@@ -0,0 +1,49 @@
++"""Real API/queue/DB with a deliberately injected worker helper deadline.
++
++Windows solo cannot deliver a prefork soft signal. The separate evidence
++bootstrap injects the real exception; all transport and persistence are real.
++"""
++import json
++import os
++
++import pytest
++from sqlalchemy import text
++
++from tests.integration.test_decision3_postgres_rls import pg, live_api, context
++from tests.integration.test_compute_queue_live import (
++    require_owned_queue, assert_queue_identity, seed_version, assert_no_persisted_run,
++)
++
++
++@pytest.mark.asyncio
++async def test_helper_soft_deadline_is_rejected_without_persistence(live_api, pg, tmp_path):
++    mode = os.environ.get('REALITY_TEST_SOFT_DEADLINE')
++    if mode not in {'dimensions', 'limit'}:
++        pytest.skip('Explicit fault-injecting worker lifecycle required')
++    await assert_queue_identity()
++    headers, actor, version = await seed_version(pg, live_api)
++    route = f'/api/v1/versions/{version}'
++    equation = await live_api.post(route + '/equations', headers=headers, json={
++        'label': 'Deadline fixture', 'latex_raw': 'x',
++        'canonical_ast_json': {'node_type': 'variable', 'value': 'x'},
++    })
++    assert equation.status_code == 201, equation.text
++    variable = await live_api.post(route + '/variables', headers=headers, json={
++        'symbol': 'x', 'name': 'position', 'unit': 'm',
++    })
++    assert variable.status_code == 201, variable.text
++    response = await live_api.post(route + '/validate', headers=headers)
++    assert response.status_code == 503, response.text
++    await assert_no_persisted_run(live_api, pg, headers, actor, version)
++    async with pg.begin() as connection:
++        await context(connection, actor)
++        count = (await connection.execute(text(
++            'SELECT count(*) FROM validation_findings WHERE target_entity_id=:id'
++        ), {'id': equation.json()['id']})).scalar_one()
++        assert count == 0
++    (tmp_path / 'soft-deadline-evidence.json').write_text(json.dumps({
++        'injected_exception': 'SoftTimeLimitExceeded', 'helper': mode,
++        'version_id': version, 'target_id': equation.json()['id'],
++        'http_status': response.status_code, 'persisted_runs': 0, 'persisted_findings': count,
++        'publication_preserved': 'preprint',
++    }, indent=2))

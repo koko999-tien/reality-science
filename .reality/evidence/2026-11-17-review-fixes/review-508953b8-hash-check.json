@@ -1,0 +1,22 @@
+{
+  "time_utc": "2026-11-16T17:42:20.585808+00:00",
+  "message_id": "508953b8-19b9-44df-8a6b-5638bf8f0f90",
+  "head": "595e3f0232e06e3f76fa770430a05213f6cda7d2",
+  "recorded_head_matches": true,
+  "hash_checks": {
+    "owned-source-sha256.json": {
+      "files": 10,
+      "mismatches": []
+    },
+    "verification-inputs-sha256.json": {
+      "files": 164,
+      "mismatches": []
+    },
+    "evidence-files-sha256.json": {
+      "files": 175,
+      "mismatches": []
+    }
+  },
+  "tests_rerun": false,
+  "services_started": false
+}

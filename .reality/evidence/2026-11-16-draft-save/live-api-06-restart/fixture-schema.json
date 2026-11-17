@@ -1,0 +1,15 @@
+{
+  "identity": {
+    "data": "C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-draft-final-pg-20261117/data",
+    "cluster": "rs_test_83bbe857739e4a88926ca272f799717e",
+    "system_id": "7708844250640355612",
+    "database": "rs_test_83bbe857739e4a88926ca272f799717e",
+    "role": "rs_test_admin",
+    "host": "127.0.0.1",
+    "port": 51280
+  },
+  "migration_sha256": "44290a3f0a701c511ede577715e741c28778decbac63bc070821bba25bafa99a",
+  "math_trigger": "CREATE OR REPLACE FUNCTION public.fn_math_content_revision()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\n    DECLARE parent_id varchar(36); frozen boolean;\n    BEGIN\n        IF TG_OP = 'UPDATE' AND NEW.version_id IS DISTINCT FROM OLD.version_id THEN\n            RAISE EXCEPTION 'CANNOT_REPARENT_MATH_CONTENT';\n        END IF;\n        IF TG_OP = 'DELETE' THEN parent_id := OLD.version_id;\n        ELSE parent_id := NEW.version_id; END IF;\n        SELECT is_frozen INTO frozen FROM research_versions WHERE id = parent_id FOR UPDATE;\n        IF frozen THEN\n            RAISE EXCEPTION 'CANNOT_MODIFY_FROZEN_VERSION: %', parent_id;\n        END IF;\n        -- Serialize every mathematical write with draft save, including legacy CRUD.\n        UPDATE research_versions SET revision = revision + 1 WHERE id = parent_id;\n        IF TG_OP = 'DELETE' THEN RETURN OLD; ELSE RETURN NEW; END IF;\n    END;\n    $function$\n",
+  "equation_position": true,
+  "audit_sequence": true
+}

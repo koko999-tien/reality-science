@@ -363,7 +363,7 @@ describe("E2E Modernization Test Suite", () => {
         const input = screen.getByLabelText("Constant value for node c_test");
         expect(input).toHaveValue(299792458);
         fireEvent.change(input, { target: { value: "300000000" } });
-        expect(onChange).toHaveBeenCalledWith(300000000);
+        expect(onChange).toHaveBeenCalledWith("300000000");
       });
 
       it("EquationRootNode renders KaTeX preview and validate button", () => {
@@ -868,6 +868,10 @@ describe("E2E Modernization Test Suite", () => {
   describe("Tier 4: Real-World Application Scenarios", () => {
     describe("4.1 Local equation draft workflow", () => {
       it("does not treat an unknown route slug as a project record", async () => {
+        const originalFetch = global.fetch;
+        global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 404,
+          statusText: "Not Found", json: async () => ({ detail: "Project not found" }) });
+        try {
         // Mount EquationEditorPage
         render(
           <EquationEditorPage
@@ -875,23 +879,26 @@ describe("E2E Modernization Test Suite", () => {
           />
         );
 
-        await screen.findByText("Local equation draft");
-        expect(screen.getByText(/not persisted to a project/i)).toBeInTheDocument();
+        await screen.findByText(/Stored project records could not be loaded: Failed to fetch project: Project not found/);
+        expect(screen.getByText("Project records are unavailable.")).toBeInTheDocument();
 
-        // 2. Verify canvas is populated with mock nodes and initial formula
+        // Failed hydration must not substitute sample mathematics or writable content.
         const canvas = screen.getByTestId("xyflow-mock-canvas");
         expect(canvas).toBeInTheDocument();
-        expect(parseInt(canvas.getAttribute("data-node-count") || "0")).toBeGreaterThan(0);
+        expect(canvas).toHaveAttribute("data-node-count", "0");
 
         // 3. Trigger verification action via text query
         const validateBtn = screen.getByText(/Run Compute Verification/i);
         expect(validateBtn).toBeInTheDocument();
-        fireEvent.click(validateBtn);
+        expect(validateBtn).toBeDisabled();
 
         await waitFor(() => {
           expect(screen.getByTestId("finding-state-badge")).toHaveTextContent("NOT YET TESTED");
         });
         expect(screen.queryByText("PASS")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Save draft" })).not.toBeInTheDocument();
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        } finally { global.fetch = originalFetch; }
       });
     });
 

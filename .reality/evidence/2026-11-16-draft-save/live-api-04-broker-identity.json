@@ -1,0 +1,41 @@
+{
+  "pid_handle": 16504,
+  "server": {
+    "redis_version": "8.10.3",
+    "redis_git_sha1": "c38b716e",
+    "redis_git_dirty": 0,
+    "redis_build_id": "b3cf1e54bddf6297",
+    "redis_mode": "standalone",
+    "os": "CYGWIN_NT-10.0-26300 3.6.12-1.x86_64 x86_64",
+    "arch_bits": 64,
+    "monotonic_clock": "POSIX clock_gettime",
+    "multiplexing_api": "select",
+    "atomicvar_api": "c11-builtin",
+    "gcc_version": "14.4.0",
+    "process_id": 602,
+    "process_supervised": "no",
+    "run_id": "fabff0a12e1c16050619d5d9a90e37b7b0cb76e0",
+    "tcp_port": 64647,
+    "server_time_usec": 1794852736045751,
+    "uptime_in_seconds": 1,
+    "uptime_in_days": 0,
+    "hz": 10,
+    "configured_hz": 10,
+    "lru_clock": 16467840,
+    "executable": "/Redis-8.10.3-Windows-x64-cygwin/redis-server",
+    "config_file": "/cygdrive/c/Users/TIEN PC/AppData/Local/Temp/opencode/reality-compute-queue-20261116/live-api-04-redis.conf",
+    "io_threads_active": 0,
+    "listener0": {
+      "name": "tcp",
+      "bind": "127.0.0.1",
+      "port": 64647
+    }
+  },
+  "config": {
+    "bind": "127.0.0.1",
+    "dir": "/cygdrive/c/Users/TIEN PC/AppData/Local/Temp/opencode/reality-compute-queue-20261116",
+    "port": "64647"
+  },
+  "marker": "live-api-04-fabff0a12e1c16050619d5d9a90e37b7b0cb76e0",
+  "executable": "C:\\Users\\TIEN PC\\AppData\\Local\\Temp\\opencode\\reality-compute-queue-20261116\\broker\\Redis-8.10.3-Windows-x64-cygwin\\redis-server.exe"
+}

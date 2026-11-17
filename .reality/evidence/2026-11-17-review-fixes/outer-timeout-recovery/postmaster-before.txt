@@ -1,0 +1,8 @@
+40240
+C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-postgres-83c0e945/data
+1794849990
+60655
+
+127.0.0.1
+
+ready   

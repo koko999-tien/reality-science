@@ -1,0 +1,12 @@
+{
+  "observed_at": "2026-11-16T16:44:22.285041+00:00",
+  "intake_head": "c6062783f760f126ca87340f3c0736d11010d659",
+  "handoff_head": "595e3f0232e06e3f76fa770430a05213f6cda7d2",
+  "local_origin_main_ref": "595e3f0232e06e3f76fa770430a05213f6cda7d2",
+  "current_slice_hash_count": 19,
+  "current_slice_hash_mismatches": [],
+  "baseline_hash_count": 13,
+  "baseline_hash_mismatches": [],
+  "agent_commit_push_deploy_actions": [],
+  "note": "Shared checkout HEAD changed externally during evidence finalization. The local remote-tracking ref matches the new HEAD; this read-only check made no remote request and does not establish deployment state."
+}

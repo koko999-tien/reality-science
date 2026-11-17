@@ -1,0 +1,19 @@
+{
+  "origin": "http://127.0.0.1:63711",
+  "api": "http://127.0.0.1:63627",
+  "bridge": "http://127.0.0.1:63712",
+  "slug": "openbot-draft-1d297e2eaebf48079f3c42652f3cc518",
+  "frontend_pid_handle": 34124,
+  "project": {
+    "id": "e8d0de44-8259-4db0-93b1-0f0d34954e53",
+    "slug": "openbot-draft-1d297e2eaebf48079f3c42652f3cc518",
+    "title": "OpenBot draft acceptance",
+    "description": null,
+    "owner_actor_id": "852a6344-bb2e-4751-9644-6352a647e334",
+    "visibility": "private_draft",
+    "is_frozen": false,
+    "created_at": "2026-11-17T02:26:20.423163Z",
+    "versions": [],
+    "can_edit": true
+  }
+}

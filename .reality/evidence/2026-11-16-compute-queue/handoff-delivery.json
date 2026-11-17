@@ -1,0 +1,41 @@
+{
+  "assignment_message_id": "6927175a-fd31-4b86-981d-3cb60ee2b1f9",
+  "recipient_agent_id": "agent-048ce096-1eb3-4dde-a617-7959474ecbf7",
+  "expects_reply": false,
+  "send_result": {
+    "messageId": "f8ddbe96-0702-41d2-904d-9f712667ff80",
+    "deliveries": [
+      {
+        "id": "22be4737-c92f-4a7c-9cd3-886ee05d0af2",
+        "recipientAgentId": "agent-048ce096-1eb3-4dde-a617-7959474ecbf7",
+        "status": "queued",
+        "position": 1,
+        "outcome": "queued",
+        "queuedBecause": "provider-unsupported"
+      }
+    ]
+  },
+  "attachment_result": {
+    "status": "attached",
+    "messageId": "agent-attachments:85ae1ba59ca6c54e2f20855babf8ac22",
+    "attachments": [
+      {
+        "id": "d3d43c88-a419-4756-bf7f-75ade5c03e17",
+        "name": "reality-science-compute-queue-6927175a-2026-11-16.md"
+      },
+      {
+        "id": "21615e14-b2f0-42a2-a2c2-613a79ddd1da",
+        "name": "reality-science-compute-queue-6927175a-2026-11-16.zip"
+      }
+    ]
+  },
+  "ownership": {
+    "slice_code_write_owner": "ALL",
+    "implementation_owner_finished": true,
+    "shared_trackers_owner": "ALL",
+    "effective_event": "Final handoff accepted into OpenBot queue",
+    "recipient_read_or_integration_confirmed": false
+  },
+  "archive_sha256": "7081eb34cff5a33bffbe70c4867754e4769ce96a6a159dcbfee9ff0aa36da94c",
+  "note": "Delivery is queued, not confirmed read. OpenBot reports provider-unsupported. This receipt was written after sealing the pre-delivery archive and is intentionally external to it."
+}

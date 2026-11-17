@@ -1,0 +1,114 @@
+{
+  "status": "PASS",
+  "browser": "159.0.8154.6",
+  "origin": "http://127.0.0.1:54117",
+  "api_origin": "http://127.0.0.1:54063",
+  "version_id": "d7704c81-78b1-4928-a799-cfd2db16ef81",
+  "saved": {
+    "version": {
+      "id": "d7704c81-78b1-4928-a799-cfd2db16ef81",
+      "project_id": "2ee680a7-ccc8-4bd9-9085-e0c6edd352ad",
+      "version_number": 1,
+      "title": "Browser-created draft",
+      "content_hash": null,
+      "publication_status": "draft",
+      "is_frozen": false,
+      "revision": 5,
+      "created_at": "2026-11-17T01:17:10.850044+07:00"
+    },
+    "equations": [
+      {
+        "id": "ca1f9fad-981f-4e9e-b45c-67393b5fbe6e",
+        "version_id": "d7704c81-78b1-4928-a799-cfd2db16ef81",
+        "label": "Primary equation",
+        "latex_raw": "0.5 \\cdot m \\cdot {v}^{2}",
+        "canonical_ast_json": {
+          "node_type": "binary_op",
+          "op": "*",
+          "left": {
+            "node_type": "binary_op",
+            "op": "*",
+            "left": {
+              "node_type": "constant",
+              "value": 0.5
+            },
+            "right": {
+              "node_type": "variable",
+              "value": "m"
+            }
+          },
+          "right": {
+            "node_type": "binary_op",
+            "op": "**",
+            "left": {
+              "node_type": "variable",
+              "value": "v"
+            },
+            "right": {
+              "node_type": "constant",
+              "value": 2
+            }
+          }
+        },
+        "sympy_expr": null,
+        "created_at": "2026-11-17T01:17:14.381287+07:00"
+      }
+    ],
+    "variables": [
+      {
+        "id": "3a4509dd-aaa2-4768-96cf-774d35f53093",
+        "version_id": "d7704c81-78b1-4928-a799-cfd2db16ef81",
+        "symbol": "probe",
+        "name": "Browser declaration",
+        "unit": "browser_length",
+        "domain": "real",
+        "latex_presentation": "probe",
+        "created_at": "2026-11-17T01:17:14.400483+07:00"
+      },
+      {
+        "id": "cba19020-4551-45e9-96da-8434249a4fad",
+        "version_id": "d7704c81-78b1-4928-a799-cfd2db16ef81",
+        "symbol": "v",
+        "name": "Velocity",
+        "unit": "meter / second",
+        "domain": "real",
+        "latex_presentation": "v",
+        "created_at": "2026-11-17T01:17:14.400483+07:00"
+      },
+      {
+        "id": "e40777eb-8b20-4c9b-9a0b-affe78b2f9ff",
+        "version_id": "d7704c81-78b1-4928-a799-cfd2db16ef81",
+        "symbol": "m",
+        "name": "Mass",
+        "unit": "kilogram",
+        "domain": "positive_real",
+        "latex_presentation": "m",
+        "created_at": "2026-11-17T01:17:14.400483+07:00"
+      }
+    ],
+    "units": [
+      {
+        "name": "browser_length",
+        "symbol": "brlen",
+        "dimensionality": "[length]",
+        "scale_factor": 2.5
+      }
+    ]
+  },
+  "winner_revision": 13,
+  "pg_pid_before": 13068,
+  "pg_pid_after": 36484,
+  "checks": [
+    "real UI login",
+    "empty create",
+    "AST/variable/custom unit save",
+    "reload",
+    "fresh DB read",
+    "two-tab conflict",
+    "offline preserves edits",
+    "semantic edit clears finding",
+    "exact version selection",
+    "frozen read-only"
+  ],
+  "page_errors": []
+}

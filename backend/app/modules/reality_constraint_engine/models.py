@@ -16,6 +16,7 @@ class Equation(Base):
     latex_raw: Mapped[str] = mapped_column(Text, nullable=False)
     canonical_ast_json: Mapped[dict] = mapped_column(JSON, nullable=False)
     sympy_expr: Mapped[str | None] = mapped_column(Text, nullable=True)
+    position: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
     )
@@ -47,6 +48,7 @@ class ValidationRun(Base):
     )
     status: Mapped[str] = mapped_column(String(30), default="pending", nullable=False)
     overall_state: Mapped[str] = mapped_column(String(30), default="NOT_YET_TESTED", nullable=False)
+    input_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(

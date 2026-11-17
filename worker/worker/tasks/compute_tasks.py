@@ -246,7 +246,7 @@ def _verify_equation_ast(bundle_data: dict) -> dict:
         l4_res = None
         if bundle.system_context is not None:
             l4_res = verify_physical_invariants(
-                bundle.expression_ast, bundle.variables, bundle.system_context
+                bundle.expression_ast, bundle.variables, bundle.system_context, units=bundle.units
             )
             layer_findings[4] = LayerFinding(
                 layer=4,

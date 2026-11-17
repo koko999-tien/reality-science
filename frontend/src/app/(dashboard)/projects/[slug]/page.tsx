@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, use } from "react";
+import React, { useEffect, useState, useCallback, useRef, use } from "react";
 import Link from "next/link";
 import {
   fetchProjectBySlug,
-  fetchVersionEquations,
-  fetchVersionVariables,
+  fetchVersionDraft,
   fetchVersionClaims,
   fetchVersionRuns,
   validateVersion,
@@ -53,12 +52,16 @@ export default function ProjectDetailsPage({
   const [dataErrors, setDataErrors] = useState<string[]>([]);
   const [actionError, setActionError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"overview" | "equations" | "variables" | "claims" | "history">("overview");
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
+  const requestId = useRef(0);
 
-  const activeVersion = project?.versions && project.versions.length > 0 ? project.versions[0] : null;
+  const activeVersion = project?.versions?.find((v) => v.id === selectedVersionId) ?? null;
   const versionId = activeVersion?.id;
 
   const loadData = useCallback(async () => {
+    const request = ++requestId.current;
     setIsLoading(true);
+    setIsValidating(false); setActionError(null);
     setError(null);
     setDataErrors([]);
     setProject(null);
@@ -68,52 +71,70 @@ export default function ProjectDetailsPage({
     setRuns([]);
     try {
       const proj = await fetchProjectBySlug(slug);
+      if (request !== requestId.current) return;
       setProject(proj);
 
-      const vId = proj.versions && proj.versions.length > 0 ? proj.versions[0].id : null;
+      const selected = new URLSearchParams(window.location.search).get("version");
+      const vId = selected || proj.versions?.[0]?.id || null;
+      if (vId && !proj.versions?.some((v) => v.id === vId)) throw new Error("Selected version is not available in this project.");
+      setSelectedVersionId(vId);
       if (vId) {
         const results = await Promise.allSettled([
-          fetchVersionEquations(vId),
-          fetchVersionVariables(vId),
+          fetchVersionDraft(vId),
           fetchVersionClaims(vId),
           fetchVersionRuns(vId),
         ]);
-        const [eqs, vars, clms, valRuns] = results;
-        if (eqs.status === "fulfilled") setEquations(eqs.value);
-        if (vars.status === "fulfilled") setVariables(vars.value);
+        if (request !== requestId.current) return;
+        const [snapshot, clms, valRuns] = results;
+        if (snapshot.status === "fulfilled") {
+          setEquations(snapshot.value.equations); setVariables(snapshot.value.variables);
+          setProject({ ...proj, versions: proj.versions?.map((v) => v.id === vId ? snapshot.value.version : v) });
+        }
         if (clms.status === "fulfilled") setClaims(clms.value);
         if (valRuns.status === "fulfilled") setRuns(valRuns.value);
         setDataErrors(results.flatMap((result, index) => result.status === "rejected"
-          ? [`${["Equations", "Variables", "Claims", "Validation history"][index]} could not be loaded.`]
+          ? [`${["Draft records", "Claims", "Validation history"][index]} could not be loaded.`]
           : []));
       }
     } catch (err: unknown) {
+      if (request !== requestId.current) return;
       const msg = err instanceof Error ? err.message : "Failed to load project details.";
       setError(msg);
     } finally {
-      setIsLoading(false);
+      if (request === requestId.current) setIsLoading(false);
     }
   }, [slug]);
 
   useEffect(() => {
+    const lifecycle = requestId;
     loadData();
+    return () => { lifecycle.current++; };
   }, [loadData]);
 
   const handleRunValidation = async () => {
     if (!versionId) return;
     setIsValidating(true);
     setActionError(null);
+    const request = requestId.current;
     try {
       const newRun = await validateVersion(versionId);
-      setRuns((prev) => [newRun, ...prev]);
+      if (request !== requestId.current) return;
+      // Reconcile the revision too: another tab may have saved while compute ran.
+      const snapshot = await fetchVersionDraft(versionId);
+      if (request !== requestId.current) return;
+      setEquations(snapshot.equations); setVariables(snapshot.variables);
+      setProject((previous) => previous ? { ...previous, versions: previous.versions?.map(
+        (version) => version.id === versionId ? snapshot.version : version) } : previous);
+      setRuns((prev) => [newRun, ...prev].map((run) => ({ ...run,
+        is_current: run.input_revision != null && run.input_revision === snapshot.version.revision })));
     } catch (err: any) {
-      setActionError(`Validation was not completed: ${err.message}`);
+      if (request === requestId.current) setActionError(`Validation was not completed: ${err.message}`);
     } finally {
-      setIsValidating(false);
+      if (request === requestId.current) setIsValidating(false);
     }
   };
 
-  const latestRun = runs.length > 0 ? runs[0] : null;
+  const latestRun = runs.find((run) => run.is_current === true && run.input_revision === activeVersion?.revision) ?? null;
 
   // Convert latest run findings to LayerFinding map for LayerPipelineMatrix
   const latestLayers: Record<number, LayerFinding> = {};
@@ -185,7 +206,7 @@ export default function ProjectDetailsPage({
         {/* Global Action Buttons */}
         <div className="flex items-center gap-3 flex-wrap">
           <Link
-            href={`/projects/${slug}/editor`}
+            href={`/projects/${slug}/editor${versionId ? `?version=${versionId}` : ""}`}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all focus:outline-none focus:ring-2 focus:ring-sky-400"
           >
             <Sparkles className="w-3.5 h-3.5 text-sky-200" />
@@ -227,7 +248,7 @@ export default function ProjectDetailsPage({
 
           <button
             onClick={handleRunValidation}
-            disabled={isValidating || !versionId}
+            disabled={isValidating || !versionId || !project?.can_edit}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 transition"
           >
             {isValidating ? (
@@ -239,6 +260,13 @@ export default function ProjectDetailsPage({
           </button>
         </div>
       </div>
+
+      {!!project?.versions?.length && <label className="block text-sm">Version
+        <select aria-label="Version" value={versionId ?? ""} className="ml-3 min-h-11 border border-slate-600 bg-slate-950 px-3"
+          onChange={(event) => { const url = new URL(window.location.href); url.searchParams.set("version", event.target.value); window.history.replaceState(null, "", url); void loadData(); }}>
+          {project.versions.map((v) => <option key={v.id} value={v.id}>{`v${v.version_number} · ${v.title}`}</option>)}
+        </select>
+      </label>}
 
       {error && (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border border-rose-300 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">
@@ -374,13 +402,13 @@ export default function ProjectDetailsPage({
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden divide-y divide-slate-200 dark:divide-slate-800">
           {equations.length === 0 ? (
             <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400 flex flex-col items-center justify-center gap-3">
-              <p>No equations are recorded for this version. The editor opens a local draft; its changes are not saved to project records.</p>
+              <p>No equations are recorded for this version. Open the editor to create and save a draft.</p>
               <Link
-                href={`/projects/${slug}/editor`}
+                href={`/projects/${slug}/editor${versionId ? `?version=${versionId}` : ""}`}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/20 hover:from-sky-400 hover:to-indigo-500 transition-all"
               >
                 <Sparkles className="w-3.5 h-3.5 text-sky-200" />
-                Open local equation editor &rarr;
+                Open equation editor &rarr;
               </Link>
             </div>
           ) : (
@@ -403,7 +431,7 @@ export default function ProjectDetailsPage({
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden">
           {variables.length === 0 ? (
             <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-              No variables are recorded for this version. The editor can hold a local draft, but its changes are not saved to project records.
+              No variables are recorded for this version. Declare variables in the editor and save the draft.
             </div>
           ) : (
             <table className="w-full text-left text-xs text-slate-600 dark:text-slate-400">
@@ -463,6 +491,7 @@ export default function ProjectDetailsPage({
               <div key={r.id} className="p-4 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400">{r.is_current ? `Revision ${r.input_revision}` : "Historical · not current"}</span>
                     <span className="font-semibold text-xs font-mono text-slate-800 dark:text-slate-200">
                       Run #{r.id.slice(0, 8)}
                     </span>

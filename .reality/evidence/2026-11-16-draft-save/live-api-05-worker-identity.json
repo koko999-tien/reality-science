@@ -1,0 +1,24 @@
+{
+  "pid": 38076,
+  "database_env_guard": "PASS",
+  "database_drivers_present": [],
+  "environment_keys": [
+    "APPDATA",
+    "CELERY_BROKER_URL",
+    "CELERY_RESULT_BACKEND",
+    "COMSPEC",
+    "LOCALAPPDATA",
+    "NUMBER_OF_PROCESSORS",
+    "PATH",
+    "PROCESSOR_ARCHITECTURE",
+    "PYTHONIOENCODING",
+    "PYTHONPATH",
+    "REALITY_TEST_RUN",
+    "SYSTEMDRIVE",
+    "SYSTEMROOT",
+    "TEMP",
+    "TMP",
+    "USERPROFILE",
+    "WINDIR"
+  ]
+}

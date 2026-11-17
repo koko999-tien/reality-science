@@ -1,0 +1,6 @@
+{
+  "data_directory": "C:/Users/TIEN PC/AppData/Local/Temp/opencode/reality-postgres-83c0e945/data",
+  "port": "60655",
+  "listen_addresses": "127.0.0.1",
+  "cluster_name": "rs_test_74caee9603bb4ea986e62cb223864982"
+}

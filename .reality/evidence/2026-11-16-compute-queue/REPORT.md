@@ -4,6 +4,8 @@ Ngày: 2026-11-16. Checkout: `D:/Reality_Science`.
 Phân công từ ALL: `6927175a-fd31-4b86-981d-3cb60ee2b1f9`.
 HEAD tại lúc nhận việc nằm trong `head.txt`; checkout đã có dirty work, được giữ nguyên trong baseline.
 
+Trong lúc chốt evidence, một thao tác ngoài phiên thực hiện slice đã đổi HEAD từ `c6062783f760f126ca87340f3c0736d11010d659` sang `595e3f0232e06e3f76fa770430a05213f6cda7d2` lúc23:42:11+07:00. Local `origin/main` ref cũng trỏ commit mới; không gọi remote hoặc xác minh deploy trong lượt kiểm tra này. Cả19 hash source/test/runner và13 baseline vẫn khớp, nên evidence của slice giữ nguyên phạm vi. Xem `concurrent-head-change.json`; không suy diễn kết quả test của slice thành nghiệm thu toàn commit mới.
+
 ## Kết quả
 
 Đã sửa nguyên nhân compute/history HTTP 503: API từng import worker trong process có biến môi trường DB, khiến guard zero-DB của worker chặn đúng thiết kế. Hai endpoint `/validation/verify` và `/versions/{id}/validate` nay đi qua Redis/Celery thật, worker riêng tính toán rồi trả kết quả để API kiểm tra và ghi PostgreSQL. API vẫn giữ cấu hình DB. Guard worker giữ nguyên.
@@ -20,7 +22,9 @@ Luồng local đã chứng minh: HTTP → Redis broker → Celery worker riêng 
 - Worker kiểm tra Celery task ID khớp input, thêm provenance vào output. Unexpected engine exception trở thành Celery failure; soft-timeout result được API chuyển thành lỗi unavailable.
 - Cluster dispatcher không có transport báo lỗi rõ `Cluster node transport is not configured`; bỏ direct-worker/fake PASS fallback. Transport được cấu hình luôn phải kiểm tra provenance, kể cả khi một mock executor không được dùng cũng có mặt.
 
-17 file product/test được ghi trong `slice-files.json`, cùng 2 script lifecycle evidence. `slice.patch` là diff từ **baseline dirty tại lúc nhận slice**, bao gồm đầy đủ file mới; không phải diff toàn checkout so với Git HEAD. `slice-sha256.json` chứa hash của 19 file này. `artifact-integrity.json` xác nhận cả 19 hash hiện tại và 13 hash baseline khớp, patch tái sinh giống hệt; kiểm tra AST bỏ docstring cho live85 cũng khớp. Stage1 được snapshot nhưng không sửa. Bộ live85 chỉ sửa docstring cũ; assertion vẫn giữ nguyên.
+17 file product/test được ghi trong `slice-files.json`, cùng 2 script lifecycle evidence. `slice.patch` là diff từ **baseline dirty tại lúc nhận slice**, bao gồm đầy đủ file mới; không phải diff toàn checkout so với Git HEAD. `slice-sha256.json` chứa hash của 19 file này. `artifact-integrity.json` xác nhận cả 19 hash hiện tại và 13 hash baseline khớp; kiểm tra AST bỏ docstring cho live85 cũng khớp. Stage1 được snapshot nhưng không sửa. Bộ live85 chỉ sửa docstring cũ; assertion vẫn giữ nguyên.
+
+Kiểm tra áp patch ban đầu phát hiện script evidence xuất CRLF trên Windows; lỗi và bản cũ được giữ trong `patch-format-first.json`/`slice-initial-crlf.patch`. Đã sửa riêng `finalize_evidence.py` để xuất LF. `patch-roundtrip.json` ghi `git apply --check --whitespace=error-all` và áp thật lên bản sao baseline tạm đều exit0; cả19 file tái tạo khớp nội dung hiện tại khi chuẩn hóa CRLF/LF. Product/test/runner bytes và các hash đã kiểm thử không đổi. SHA256 patch cuối: `184c787c28bcea8663b95c45aec093ec75003fffa4b487008c0bdf1154673cdd`.
 
 ## Kiểm chứng đã chạy
 
@@ -37,6 +41,7 @@ Luồng local đã chứng minh: HTTP → Redis broker → Celery worker riêng 
 | Không có worker, API deadline | 1 PASS, 8 deselected | 20.02 s | `live-no-worker.log` |
 | Real-broker fault injection | 11 PASS, 9 deselected | 52.78 s | `live-faults.log` |
 | `git diff --check` | PASS | — | `diff-check.json` |
+| Patch áp lại lên baseline tạm | PASS, 19 file khớp | — | `patch-roundtrip.json` |
 
 Không cộng các checkpoints thành tổng test. Backend default 107 SKIP chính là 85 PostgreSQL + 2 owner-transfer + 20 queue tests yêu cầu disposable DB/broker. Tất cả đã được chọn chạy trong các lifecycle tương ứng: live95, no-worker1, faults11. Hai cảnh báo hiện có là pytest-asyncio chưa đặt loop scope và passlib dùng argon2.__version__; không có selected test fail ở lượt cuối.
 
@@ -88,6 +93,6 @@ Review độc lập hoàn tất: **No blocker found** trong phạm vi source/bas
 
 ## Bàn giao
 
-Artifact chính: `REPORT.md`, `REVIEW.md`, `WORK.md`, `slice.patch`, `slice-files.json`, `slice-sha256.json`, `baseline-sha256.json`, `artifact-integrity.json`, `diff-check.json`, `cleanup-fresh.json`, logs/identities/cleanup và JSON evidence từ tests. Shared `.reality/{STATE,NEXT_ACTION,EXECUTION_LOG,TEST_MATRIX,DECISIONS}` thuộc ALL; báo cáo này là đầu vào cập nhật các tracker đó.
+Artifact chính: `REPORT.md`, `REVIEW.md`, `WORK.md`, `HANDOFF.md`, `slice.patch`, `slice-files.json`, `slice-sha256.json`, `baseline-sha256.json`, `artifact-integrity.json`, `patch-roundtrip.json`, `diff-check.json`, `cleanup-fresh.json`, logs/identities/cleanup và JSON evidence từ tests. Shared `.reality/{STATE,NEXT_ACTION,EXECUTION_LOG,TEST_MATRIX,DECISIONS}` thuộc ALL; báo cáo này là đầu vào cập nhật các tracker đó.
 
-Không commit/push/deploy, không migration/reset DB production hoặc DB người dùng, không sửa secrets/global settings. Bước tiếp theo thuộc điều phối ALL: tích hợp bằng chứng local queue/history và xác định milestone scientific/model/save tiếp theo, giữ nguyên các giới hạn nêu trên.
+Agent thực hiện slice này không commit/push/deploy, không migration/reset DB production hoặc DB người dùng, không sửa secrets/global settings. Checkout đã có commit mới từ thao tác đồng thời nêu ở đầu report; các tài liệu chốt bàn giao tiếp tục là thay đổi local. Bước tiếp theo thuộc điều phối ALL: tích hợp bằng chứng local queue/history và xác định milestone scientific/model/save tiếp theo, giữ nguyên các giới hạn nêu trên.

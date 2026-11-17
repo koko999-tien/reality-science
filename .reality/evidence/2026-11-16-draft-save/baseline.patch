@@ -1,0 +1,693 @@
+diff --git a/.reality/EXECUTION_LOG.md b/.reality/EXECUTION_LOG.md
+index bf2abd5..a2c868f 100644
+--- a/.reality/EXECUTION_LOG.md
++++ b/.reality/EXECUTION_LOG.md
+@@ -242,3 +242,18 @@ Append-only milestone checkpoints. Record actual commands, outcomes, changed fil
+ - Read repository instructions, milestone/decision records, Master Brief and approved ADR-006. Source still imports worker inside both RCE endpoints and cluster dispatcher; this conflicts with the documented queue boundary and explains the retained503. No scientific Layer6 decision was made.
+ - Assigned new slice6927175a (delivery4293afda queued) to Lực: actual Redis/Celery dispatch/result ingestion, retained worker zero-DB isolation, original85+2 live cases, durable successful history/publication/access checks, negative result/timeout cases, isolated worker/backend regressions, read-only review and cleanup. Evidence goes to2026-11-16-compute-queue; ALL owns shared trackers, Lực owns necessary implementation. Existing save/freeze/accessibility/Layer6 gates remain open.
+ - Updated STATE/NEXT_ACTION/TEST_MATRIX/this log and wrote parent-receipt.md only. Root `git diff --check` exit0 after documentation updates. No parent application/test changes, commit, push, deployment, secret access, new runtime or temporary files. Whole M-002 remains IN PROGRESS; no user action is required for the queued next slice.
++
++## 2026-11-16 — Parent integrates local compute/queue handoff
++- User requested current progress. Read owner's final REPORT/HANDOFF/REVIEW/logs/integrity/cleanup and handoff-delivery.json in2026-11-16-compute-queue. Local valid compute/history503 resolved; owner final95 live PASS, separate1 no-worker and11 fault-injection PASS, backend237 PASS/107 SKIP, worker126 PASS, shared53 PASS. Review source-only reports no blocker. No independent runtime repetition or whole-milestone acceptance claim.
++- Direct parent check23:54:10+07:00: all19 slice hashes match;37 recorded ports have0 listeners. HEAD and local origin/main are595e3f0232e06e3f76fa770430a05213f6cda7d2 after concurrent changes. No parent git write/remote request; current deployment and whole-commit verification are unknown. Owner reports0 task processes and clean PostgreSQL shutdown. Final deliveryf8ddbe96 is queued; ownership returned to ALL in the saved receipt.
++- Assigned next draft-save requestc5dc40e6, delivery1f1a3fda queued as own turn to Lực: inspect approved contracts then create/edit/atomic-save/reload with owner/frozen/conflict/rollback checks, real browser/API/DB evidence and relevant regressions/review/cleanup. Consequential unresolved version/publication contracts must be recorded, not invented. ALL retains trackers; numeric input/Layer6 semantics remain separate.
++- Updated four shared trackers only; no application/test edit, test rerun, runtime startup, DB operation, temporary files, commit/push/deploy or secrets access. M-000/M-002 remain IN PROGRESS. Prior ‘uncommitted/undeployed’ statements describe their historical checkpoints and must not be reused for current shared HEAD.
++
++## 2026-11-17 — Direct final handoff and analyst addendum received
++- Received finalf8ddbe96 and addendum98a215a5 for6927175a. Original analysteb8fa3b7 is now accounted for: source-read earlier snapshot, seven proposed groups, analyst runtime NOT RUN. Its mapping is distinct from the independent source review and owner95/1/11 runtime results. Corrected current trackers: the historical503 was POST validate before successful-history assertions, not an established GET-history503.
++- Inspected service/dispatcher/ingestion/router, cleanup-on-failure unit test, worker configuration, DB session, Brief/ADRs and current state. Confirmed same-job DB-failure/restart recovery NOT IMPLEMENTED: finally deletes result even when caller commit fails; one-day single-use dispatch claim blocks retry; input identity exists in the request and no connected durable recovery registry/listener is implemented. No recovery runtime was run. New source confirmation does not invalidate bounded successful persistence/access checks.
++- Direct parent hash check at00:01:21.6619449+07:00: five inspected source/test hashes match the final slice; addendum Markdown SHA256e866886331576afc7187a06e8cd59eba7d6f9c277c84e362a8d883f2d9ce6006 matches its JSON. HEAD595e3f0 unchanged. The previous19-hash/37-port checkpoint remains historical; no new process cleanup scan was performed here.
++- Applied reality-milestone-orchestrator workflow. Read official Celery tasks docs and PostgreSQL17 INSERT docs: acknowledge-late can redeliver and retry IDs do not ensure API commit recovery; ON CONFLICT does not supply full run/input transaction semantics. Celery stable rendered5.7, while pinned5.6.3 URL renders5.6.2 title; no new5.7 behavior or dependency upgrade was assumed. Exact sources and source hashes saved in `evidence/2026-11-16-compute-queue/parent-addendum-receipt.md`.
++- Checked Lực status: working with two queued messages, active request not identifiable from status. Draft-save evidence path absent at inspection; no claim of started implementation. Preserved draft-savec5dc40e6 first. Assigned subsequent recovery4e310270, delivery7d4d0c0c queued as its own turn at position3: durable staging/identity, commit-aware retention, restart/idempotent ingestion, fresh-read fault tests, stale-draft/auth checks, independent review and cleanup. Evidence destination2026-11-17-compute-recovery. Lực owns implementation; ALL owns trackers; no overlapping application writer opened.
++- Added parent receipt and updated STATE/NEXT_ACTION/TEST_MATRIX/this log, including historical deployment wording. No application/test changes, suite rerun, runtime start, DB operation, commit/push/deploy or secrets access. M-000/M-002 stay IN PROGRESS; no user action is needed for the queued follow-up.
++- Receipt verification: root `git diff --check` exit0 after documentation changes; only the existing CRLF-to-LF normalization warning for compute-queue/diff-check.json. Explicit comparison at00:05:30+07:00 confirms all five gap-related source/test hashes match `slice-sha256.json` (zero mismatches). Tracker readback confirms the queued order and recovery NOT IMPLEMENTED/NOT RUN distinction.
+diff --git a/.reality/NEXT_ACTION.md b/.reality/NEXT_ACTION.md
+index 7605e84..f424b59 100644
+--- a/.reality/NEXT_ACTION.md
++++ b/.reality/NEXT_ACTION.md
+@@ -7,23 +7,29 @@ Additional reviewer reply `8db36602` is received and scoped in `analyst-reconcil
+ Write ownership is released to ALL per request409f90e2 after `evidence/2026-11-16-canvas/owner-handoff-to-all.md`. The implementation owner has completed review integration and will not start overlapping code/state writes or build/dev/test jobs. ALL owns subsequent final evidence integration and the milestone action below. The shared handoff is saved; no direct internal message was sent because that tool is unavailable in this session.
+ 
+ ## Exact next action
+-Integrate Lực's new compute-queue slice `6927175a-fd31-4b86-981d-3cb60ee2b1f9`, delivery4293afda queued after receiving the completed backend fixes. Goal: resolve compute/history503 through the approved ADR-006 API→Redis/Celery→isolated worker→validated API ingestion boundary. Target RCE router, compute/cluster dispatchers, result ingestion, shared schemas and worker configuration/tests as necessary; inspect existing contracts and current official documentation first. Lực owns the necessary backend/worker code and tests; ALL owns shared coordination. New evidence belongs in `.reality/evidence/2026-11-16-compute-queue/`. No competing implementation writer. Keep worker zero-DB guard, no in-process compute fallback, no compute mock in live acceptance, no API DB-env removal to bypass the guard. Preserve Layer6 neutrality and defer save/freeze semantics.
++Integrate Lực's next draft/version-save slice `c5dc40e6-49c6-403d-970c-d7eefee5880b`, delivery1f1a3fda queued as its own turn after current work. Goal: requirements-grounded create/edit/atomic draft save/reload from editor through API/PostgreSQL. Start with AGENTS, Brief/ADRs, version models/routes/schemas and current editor; establish existing version/revision/concurrency/frozen-content contracts before implementation. Implement unambiguous authorized behavior and record any consequential unresolved contract for decision. Lực owns needed frontend/backend implementation/tests; ALL owns shared trackers. Evidence: `.reality/evidence/2026-11-16-draft-save/`. Preserve queue zero-DB boundary, dirty/shared work and neutral Layer6; no new numeric-value or publication semantics in this slice.
++
++Order confirmed on2026-11-17: keep draft-save first, then recovery request `4e310270-7d74-4eeb-ab0d-e3adc7605f87` (delivery7d4d0c0c queued as own turn, position3). No additional application writer. Final handofff8ddbe96 and analyst addendum98a215a5 are received; see `evidence/2026-11-16-compute-queue/parent-addendum-receipt.md`. A status read showed Lực working with queued messages; it did not identify which request was active. Draft evidence directory was absent at inspection, so implementation progress is not yet established by that evidence path.
+ 
+ Backend fixes23e7ed68 are received and checked: migration004, eager project response and publication independence implemented. Owner full85 live84 PASS/1 FAIL at503; separate2 owner-transfer live PASS; default210 PASS/87 SKIP; runner22 PASS. ALL recomputed8 changed and16 verification hashes, all match, and fresh0 task processes/listeners on60655/51531/51578. This is log/hash verification, not a parent test rerun. Runtime: identified task-owned PostgreSQL17.12 cluster at revision004; use checked-start after verifying current identity, never historical PIDs. Reuse permitted local broker/worker setup or create an isolated task-owned runtime without global services or production access.
+ 
+-Next acceptance: run original85 live cases plus2 owner-transfer through real HTTP/PostgreSQL; verify successful validation and history/findings from fresh requests/connections through actual Redis/Celery computation, with unchanged publication status and access controls. Cover interactive verification, result/job/target correlation, malformed/error/timeout/replay paths as applicable and no false persisted PASS. Run backend default and isolated-worker regressions, independent read-only review, source hashes/diff and task cleanup. Verify16m/s/6N only if the existing scientific contract supports numeric inputs/results; otherwise explicitly record NOT RUN. Local process evidence does not prove container/network isolation. Save/freeze, full accessibility and Layer6 remain later gates.
++Bounded compute-queue success/rejection acceptance passed locally: final95 live PASS, separate no-worker1 and faults11 PASS, backend237 PASS/107 opt-in SKIP, worker126 and shared53 PASS. Recovery is NOT IMPLEMENTED and is not closed by those tests. The old503 occurred at POST validate, before successful-history assertions; GET-history503 was not proved. Owner handoff/report/review inspected; parent19 hashes matched and37 ports were closed at23:54:10+07:00. Five gap-related hashes still match at00:01:21+07:00. Do not rerun unchanged gates. HEAD/local origin/main concurrently changed to595e3f0; current deployment and whole-commit acceptance remain unknown.
++
++Next acceptance: owner create→edit→save→reload through real browser/API/identified task PostgreSQL, fresh connection reads, unauthorized/frozen/invalid/conflicting-save cases and rollback without partial content. Semantic edits must not leave an old scientific finding marked current. Add relevant regressions, independent read-only review, hashes/diff and cleanup. No mock persistence claim. Preserve existing queue checks; rerun relevant suites when changes justify them. Full accessibility, assigned numeric values16m/s/6N, Layer6 and Linux/container acceptance remain separate gates.
++
++Recovery follow-up after draft-save: inspect `compute_orchestrator/{dispatcher,ingestion,service}.py`, RCE persistence/model/service boundaries, current version revision/provenance and any existing outbox/registry under ADR-005/006. Implement durable job/input/actor/version identity, retention tied to durable commit, restart-capable API-owned recovery and idempotent persistence. Evidence goes to `evidence/2026-11-17-compute-recovery/`. Required runtime checks: failed/uncertain commit, restart after result-before-persist, commit-before-lost-response/cleanup, concurrent same-job ingestion, unknown/mismatched/unauthorized input, pending computation across semantic edits and reversed successful completions. Fresh reads must show one correlated run/six findings, unchanged publication and no stale-current result. Select targeted pytest commands only after the new tests and disposable target identity exist; record actual commands/results, hashes, review and cleanup. Merely changing cleanup, relying on the run PK or allowing redispatch does not satisfy this gate.
+ 
+ Initial setup/contract inspection is recorded in `evidence/2026-11-16-canvas/handoff-receipt-parent.md`: the existing live test falls back to an application database and commits fixtures, so it was not run; PATH/standard-directory checks found no PostgreSQL/container runtime but are not exhaustive. Backend Python and uv are present. The bounded canvas handoff is accepted: current71 hashes match, root diff check passes, and ports3100/3101 have no listeners. Owner final focused3/104 and full15/219 remain separate from parent219/20; application inputs match the earlier build/browser checkpoint. Preserve shared edits and remaining accessibility/Layer6 gates; repeat canvas checks only for a new change or unresolved concern.
+ 
+ ## Target
+-After the bounded local slice is verified, remaining milestone acceptance includes owner/non-owner/public access, transaction-local actor/org context across commits, and durable run/history persistence using an identified disposable PostgreSQL database. Bounded current-tree offline browser checks now exist; extend them to live auth, timeout/4xx/5xx/project-context behavior and complete accessibility. Keep numeric known-answer examples (16 m/s and 6 N) as separate live API checks. Existing deployment metadata is historical; current uncommitted edits remain undeployed.
++After the bounded local slice is verified, remaining milestone acceptance includes broader owner/non-owner/public access, recoverable run/history persistence and actor/org context in restarted ingestion using identified disposable PostgreSQL. Bounded current-tree offline browser checks now exist; extend them to live auth, timeout/4xx/5xx/project-context behavior and complete accessibility. Keep numeric known-answer examples (16 m/s and6 N) as separate live API checks. Existing deployment metadata is historical; current deployment has not been verified after the shared HEAD change.
+ 
+ Begin with `backend/tests/integration/test_decision3_postgres_rls.py`, `backend/tests/conftest.py`, research-core router/service/schema contracts and approved ADRs. Inspect the integration-test fixture and run its live DB command only after the target is explicitly identified as disposable; record expected read-after-write and positive/negative access assertions before execution. Source inspection alone cannot close these gates.
+ 
+ ## Dependencies
+ - Shell execution is repaired through the documented global `shell` option selecting the installed System32 Windows PowerShell. Actual process path and repeated tests/builds verified it; historical WindowsApps `pwsh.exe` OS5 failures were unexecuted commands. Keep this working selection; no execution-policy/ACL change is needed for the verified remedy.
+ - The combined frontend worktree includes concurrent teammate changes. Preserve them; do not reset or overwrite the shared checkout.
+-- QA Tester reports deployed-baseline failures: API refusal still displayed PASS/VERIFIED, 390px viewport overflowed to 475px, and a legacy create-project action routed to `default-model`. Read-only Vercel metadata confirms deployment SHA equals repository HEAD; current uncommitted working-tree edits are not deployed.
++- QA Tester reports historical deployed-baseline failures: API refusal still displayed PASS/VERIFIED,390px viewport overflowed to475px, and a legacy create-project action routed to `default-model`. Vercel metadata confirmed parity with HEAD at that checkpoint; current deployment parity after the shared HEAD change is unknown.
+ - Final focused3 suites/33 tests and full15 suites/188 tests PASS after the review fixes; production build, lint and Git diff check PASS. Exact depth/node/shared-DAG limits, both preset collections, layout/identity/batching, declaration and overlapping response tests executed. Logs: `jest-declarations.log`, `jest-final.log`, `build-final.log`, `lint-final.log`.
+ - Later owner report reconciliation: focused3/104 PASS13.876s, full15/219 PASS16.587s after final test edits; TypeScript/lint/diff PASS. All8 analyst groups mapped in `analyst-reconciliation.md`; APIs/canvas rendering mocked where stated. Only3 tests differ from the build checkpoint; no product fix or new production build was needed in this follow-up.
+ - Current previews derive from one canvas snapshot; all writes use an event/effect-only gateway that also supplies same-batch validation. Auto-layout preserves IDs/topology; undeclared variable controls preserve the actual selected symbol. Bounded independent source re-review found the three defects addressed, no concrete new regression. This and jsdom tests do not establish live browser behavior. Advisory scope is documented separately in `declaration-follow-up.md`.
+diff --git a/.reality/STATE.md b/.reality/STATE.md
+index c4f2f07..8c77a48 100644
+--- a/.reality/STATE.md
++++ b/.reality/STATE.md
+@@ -2,7 +2,9 @@
+ 
+ Parent receipt update: original Test Analyst relay `d2fe2b9d-2d5c-4f2d-876a-020307228b72` is received and reconciled in `.reality/evidence/2026-11-16-canvas/analyst-relay-parent.md`. All8 proposal groups map to existing executed regressions; current71 input hashes match the final parent checkpoint. No analyst-run checks or new live acceptance are claimed.
+ 
+-Last updated: 2026-11-16
++Last updated: 2026-11-17
++
++Latest compute-queue receipt: final handofff8ddbe96 and addendum98a215a5 are now directly received. The bounded local queue/history slice remains IMPLEMENTED WITH WARNINGS: final live95 PASS; separate no-worker1 PASS and real-broker faults11 PASS; backend237 PASS/107 SKIP; isolated worker126 PASS; shared53 PASS. Counts are separate checkpoints. The earlier503 occurred at POST `/versions/{id}/validate`, before successful-history assertions; no GET-history503 was established. Recovery after DB failure/API restart is NOT IMPLEMENTED: current cleanup deletes a valid result even after failed persistence, dispatch claim blocks same-ID retry, and no connected durable pending/input registry or background recovery exists. Analysteb8fa3b7's seven groups were source proposals, NOT RUN by the analyst. Parent confirmed the gap against five unchanged source/test hashes at00:01:21+07:00. See `evidence/2026-11-16-compute-queue/parent-addendum-receipt.md`. M-000/M-002 remain IN PROGRESS. Draft-savec5dc40e6 stays first; new recovery follow-up4e310270 is queued to Lực after it. ALL owns shared trackers.
+ 
+ Backend-fix receipt: ALL received Lực's result8e4d4064 for request23e7ed68, read REPORT/REVIEW and execution logs, and recomputed8 changed-file hashes plus16 verification-input hashes with0 mismatches. Migration004 protects owner-only writes on8 tables while preserving SELECT visibility; real project POST201 and fresh request/connection reads pass. Publication independence passes8 mocked-DB/real-compute regressions. Owner checkpoints: full85 live84 PASS/1 FAIL at compute/history503; separate2 owner-transfer live PASS; final default210 PASS/87 SKIP; runner22 PASS. No parent test rerun is claimed. Fresh parent inventory at21:42:50+07:00 finds0 task processes/listeners on60655/51531/51578. Next slice6927175a is queued to Lực to fix the API/Redis/worker boundary under approved ADR-006 and verify durable findings/history with real queue/compute/DB. ALL retains shared trackers. M-002 remains IN PROGRESS. See `evidence/2026-11-16-backend-fixes/parent-receipt.md`.
+ 
+@@ -14,7 +16,7 @@ Coordination handoff: in response to ALL message `409f90e2`, the implementation
+ M-000 repository reality audit (IN PROGRESS); M-002 Research Workspace UI and Verification Integrity (IN PROGRESS).
+ 
+ ## Verified facts
+-- Authorized checkout `D:\Reality_Science`, branch `main`, HEAD `c6062783f760f126ca87340f3c0736d11010d659`, tracking `origin/main`.
++- Authorized checkout `D:\Reality_Science`, branch `main`. Parent verified HEAD and local origin/main at `595e3f0232e06e3f76fa770430a05213f6cda7d2` at23:54:10+07:00, changed concurrently from intake `c6062783f760f126ca87340f3c0736d11010d659`. ALL and implementation owner did not commit/push in these slices. All19 compute slice hashes still match. Local tracking refs do not prove remote or deployed state; whole new commit was not reviewed/tested as a unit.
+ - Product requirements define deterministic scientific verification first; generative AI cannot assert truth or write validation outcomes. Symbol-first AST authoring, no arbitrary code, and a three-axis publication/validation/evidence status model are explicit requirements.
+ - Latest parent-verified frontend checks on 2026-11-16: full15 suites/219 tests PASS23.549s after additional regressions; final editor follow-up1 suite/20 tests PASS8.551s after that test file changed again, with TypeScript and affected-file lint exit0. All71 inputs remained identical across the final focused checks. These are separate checkpoints, not one final-tree full219 run. Application/configuration/dependency hashes still match the preceding stable188-test production build/browser checkpoint (Next15.5.29,7 static pages, build/lint PASS). Evidence: `test-expansion-parent.md` and `review-integrated-parent.md` under `.reality/evidence/2026-11-16-canvas/`.
+ - Final implementation-owner reconciliation: focused3 suites/104 tests PASS13.876s; full15 suites/219 tests PASS16.587s after the final test edits; TypeScript `--noEmit --incremental false`, lint and root Git diff check PASS. These owner runs are separate from the parent's219/20 checkpoints above. Current71 recorded inputs match both the owner's final hashes and the parent's final focused checkpoint; only3 test files differ from the preceding build checkpoint. All8 original analyst groups are mapped to executed regressions in `analyst-reconciliation.md`. API calls and editor graph rendering remain mocked in those tests; no application/dependency fix was needed during reconciliation.
+@@ -24,15 +26,15 @@ M-000 repository reality audit (IN PROGRESS); M-002 Research Workspace UI and Ve
+ - `npm.cmd ls next react react-dom eslint-config-next --depth=0` verified installed Next/config 15.5.29 and React/ReactDOM 19.0.9. Manifest and lockfile were read/diff-inspected and agree; no overrides or forced audit fixes. Official release/npm sources are linked in the evidence README.
+ - Upstream advisory scope was checked directly: React GHSA-xqc2-xf4c-x3h3 names `react-server-dom-*` under server/framework conditions; it does not establish a flaw in the client package alone. Next GHSA-673q-mjm6-r5xr names Next16.0.0–16.4.0, not Next15. The existing versions are a compatible maintenance/security update, not proof that every cited advisory applied or that all security gaps are closed.
+ - The editor uses API-backed project/version hydration and explicit unavailable/local-draft states. Jest covers no-version empty state, malformed stored AST without sample substitution, stale-result clearing, transport rejection, and canvas reset. Canonical AST shape validation is structural, not scientific verification. Ad hoc checks omit persisted version identity.
+-- `ScientificPresetDemo` and `WorkflowTour` use illustrative/unrun labels rather than synthetic findings, benchmarks, latency, digests, or export claims. Jest assertions for this presentation and arrow/Home/End tab navigation PASS. Workflow Layer 6 remains "Definition unresolved". These components and tests are uncommitted local changes.
++- `ScientificPresetDemo` and `WorkflowTour` use illustrative/unrun labels rather than synthetic findings, benchmarks, latency, digests, or export claims. Jest assertions for this presentation and arrow/Home/End tab navigation PASS. Workflow Layer 6 remains "Definition unresolved". Their uncommitted status belonged to the earlier canvas checkpoint; the later shared HEAD change prevents reusing that description for the current tree.
+ - The active landing page's `ScientificModelExample` has linked tab/panel semantics and arrow/Home/End selection/focus; its component assertions PASS in jsdom. Local browser ArrowRight also selected/focused Newton's second law and rendered its panel. Full focus/ARIA/screen-reader acceptance remains open.
+ - The duplicate `Atom` import and duplicate bundle assertion remain removed; the current frontend test suite and production build now execute successfully.
+ - `ValidationStatusBar` presents local preflight as amber `PREFLIGHT` and suppresses local PASS-shaped fields and layer details from backend results. Its regression tests PASS; this does not establish live API provenance.
+-- Backend verification: historical guard/default182/85 and failing live reproduction remain in `2026-11-16-backend-live/`. New `2026-11-16-backend-fixes/` owner execution supersedes the public DELETE/takeover/reparenting and project POST500 failures: original85 live84 PASS/1 FAIL, with compute/history503 remaining; separate2 owner-transfer live PASS. Final default210 PASS/87 SKIP and runner22 PASS are log-inspected by ALL, not parent reruns. Independent source review found one runner cleanup P2, fixed/re-reviewed; real cleanup fault injection passed. Publication8 regressions use mocked DB/access with actual compute; persisted publication after successful queued validation remains unverified. Current8 changed and16 verification hashes match. Full live computation/history, production and broader privacy acceptance remain open.
++- Historical backend-fix checkpoint: `2026-11-16-backend-fixes/` superseded public DELETE/takeover/reparenting and project POST500 failures. Owner original85 live84 PASS/1 FAIL at POST validation503; separate2 owner-transfer live PASS; default210 PASS/87 SKIP and runner22 PASS. Publication8 regressions used mocked DB/access with actual compute. Later compute-queue evidence supersedes the missing successful-history/publication acceptance for the exact95/1/11 cases, but not recovery, production or broad privacy acceptance. Prior8 changed and16 verification hash checks were parent reads, not suite reruns. Independent source review's runner cleanup P2 was fixed/re-reviewed and real cleanup fault injection passed.
+ - Worker verification in a separate Python 3.11.18 environment with `worker/requirements.lock`: 123 PASS, including database-driver/source/credential guards. An earlier run in the backend environment had 122 PASS / 1 FAIL because backend database drivers violate the worker-only environment check; no isolation assertion was relaxed. Host tests do not prove deployed container/network isolation.
+ - Minimal fixes exposed by the retry: declare `pydantic[email]` and worker NumPy dependencies with regenerated locks; move `Tuple_Validation` before its first annotation use; use a valid owner email fixture; add the worker source path to backend test setup. Stage 4 now tests complete and missing acceleration declarations, checking actual PASS/FAIL and matching history run IDs/states in the mock session.
+ - Project persistence remains deliberately absent from the editor. Inspected API routers expose equation and variable creation via append-only POST endpoints, but no update/delete endpoint or version-creation route was found in the inspected routes. The project detail empty-variable state says editor changes are local and not saved. Mock-session authorization tests now pass; durable editor persistence and live endpoint behavior remain unverified.
+-- Read-only Vercel metadata for alias `reality-science-iota.vercel.app` identifies production deployment `dpl_Fn7wUnCQFFqkyHyLKQoQWBArsVgN`, READY, created 2026-11-15T18:57:49.542Z, sourced from `main` commit `c6062783f760f126ca87340f3c0736d11010d659`. This equals the shared checkout's recorded HEAD; current uncommitted working-tree edits are not deployed. No production write was performed.
++- Historical read-only Vercel metadata for alias `reality-science-iota.vercel.app` identified deployment `dpl_Fn7wUnCQFFqkyHyLKQoQWBArsVgN`, READY, created2026-11-15T18:57:49.542Z, sourced from `main` commit `c6062783f760f126ca87340f3c0736d11010d659`. It matched HEAD then. Current HEAD is595e3f0 and current deployment has not been checked; no present parity/undeployed assertion follows from the old metadata. No production write was performed.
+ - Master Project Brief §4 and `docs/architecture/reality_science_validation_security_and_ops.md` §1 define RCE Layer 6 as Reproducibility & Replication. `PROJECT.md` §Feature Inventory/M10-M11 and `docs/STAGE_4_FINAL_HANDOVER.md` define it as Epistemic Logic. No approved ADR resolving this conflict was found in ADR-001..006.
+ - `PROJECT.md` and Stage 4 handover report M1-M14 complete; `.reality/STATE.md` had been uninitialized and `.reality/MILESTONES.md` contained TBD placeholders before this audit. This is a documentation-state contradiction, not independent proof that prior work is absent or complete.
+ - Frontend package scripts are `build: next build`, `lint: next lint`, `test: jest`.
+@@ -44,7 +46,7 @@ M-000 repository reality audit (IN PROGRESS); M-002 Research Workspace UI and Ve
+ - The user authorizes local changes to modernize the web and align it to scientific research; no deployment, push, or production operations.
+ 
+ ## Unknowns
+-- QA Tester's exact browser authentication context remains unknown; deployment identity and commit are now confirmed from Vercel metadata.
++- QA Tester's exact browser authentication context remains unknown; the historical deployment identity/commit were confirmed, but current deployment after the shared HEAD change is unknown.
+ - Whether backend-connected workflows are operational in the current deployment; QA reproduced localhost validation connection refusal while the deployed UI showed PASS/VERIFIED.
+ - Whether the exact numeric known-answer examples (16 m/s and 6 N) can be executed through a live API with durable provenance. Existing worker and ASGI tests pass but do not establish that live workflow.
+ - Canonical Layer 6 contract and how finding taxonomy relates to publication_status, validation_status, and evidence_maturity.
+@@ -55,10 +57,10 @@ M-000 repository reality audit (IN PROGRESS); M-002 Research Workspace UI and Ve
+ - Owner's OpenBot/browser catalog loss was session-specific; parent browser integration worked. Bounded independent source review found3 P2 issues (layout identity/shared topology, undeclared select mismatch, same-batch stale validation), all fixed and re-reviewed. Parent then verified latest-source browser behavior: shared constant remains one node with the same edges after layout,1→2 yields local4; undeclared symbol/units/restore display is correct; real API refusal and extra-root preflight leave NOT YET TESTED. See `source-review-follow-up.md` and `browser-review-integrated-parent.md`. This is not full dirty-tree/security/live-API approval.
+ - Existing uncommitted changes were present before implementation: backend/app/core/config.py; backend/app/modules/cluster_orchestrator/{registry.py,router.py}; frontend/src/app/{globals.css,page.tsx}; frontend/tests/{ScientificPresetDemo.test.tsx,e2e_modernization.test.tsx}. Preserve and review these changes; they are not attributable to this milestone without further evidence.
+ - Concurrent frontend work was integrated in the shared checkout; exact authorship of the final combined files is not reliably attributable. Subsequent additions affected three test files only; parent verified them as recorded in `test-expansion-parent.md`. Owner's bounded final handoff and report reconciliation are now recorded in `analyst-reconciliation.md`, with current hashes matching both final checkpoints. Preserve shared work and tie verification claims to those recorded hashes.
+-- Live PostgreSQL now verifies the bounded8-table read/write policy matrix, actor-context isolation and project POST/read-after-commit after migration004/service fixes. Compute/history still returns503 because the DB-configured API imports worker code in-process, triggering the worker zero-DB guard. The next assigned slice must use the approved Redis/Celery boundary; successful persisted findings/history/export, full scientific workflows and broader authorization remain open. Do not infer complete API security from passing subsets.
++- Local POST-validation503 is resolved for tested valid requests by actual Redis/Celery dispatch and validated API ingestion. Final95 live cases cover the original85 plus2 owner-transfer and8 queued cases, with fresh HTTP/DB reads and publication preservation. Timeout/invalid/correlation/late-result faults return503 without false persisted findings. Worker zero-DB guard remains enforced. Recovery from failed DB commit/API restart is NOT IMPLEMENTED, confirmed by source; recovery runtime tests are NOT RUN. Reverse successful completion, complete malformed/pending/boundary inputs, broker/worker loss, Linux prefork/network isolation, assigned numerical values16m/s/6N, full-model multi-equation behavior, version-create/editor save/freeze and broader privacy acceptance remain open. Draft-save stays ahead of recovery request4e310270. Do not infer complete API/scientific acceptance from passing subsets.
+ - Production startup source rejects JWT signing configuration that is absent/shorter than 32 bytes, has fewer than 16 distinct bytes, equals the known development key, or uses an unsupported algorithm. These checks do not prove randomness or uniqueness across environments. `.env.production` was not opened, so deployed configuration compatibility is unknown. Public registration has no inspected throttling/email-verification policy, and `/validation/verify` remains unauthenticated; broader API threat review is still required.
+ - Layer 6 taxonomy remains unresolved; no UI or acceptance claim may select one of the conflicting definitions.
+-- Production QA report (2026-11-15) is FAIL on deployed baseline `c6062783f760f126ca87340f3c0736d11010d659`: validation POST to localhost:8000 was refused twice while UI still showed PASS/VERIFIED; mobile document width was 475px at a 390px viewport; legacy “New Mathematical Model” navigated to `/projects/default-model/editor` instead of creating a project. Read-only Vercel metadata confirms this deploy equals repository HEAD, while current uncommitted working-tree edits are not included. No production change is authorized or made.
++- Production QA report (2026-11-15) is FAIL on deployed baseline `c6062783f760f126ca87340f3c0736d11010d659`: validation POST to localhost:8000 was refused twice while UI still showed PASS/VERIFIED; mobile document width was475px at390px; legacy “New Mathematical Model” navigated to `/projects/default-model/editor` instead of creating a project. Vercel metadata matched the repository HEAD at that historical checkpoint. Current deployment parity is unknown after the shared HEAD change. No production change is authorized or made by ALL.
+ - Accessibility Desk follow-up relayed by ALL (2026-11-16) corrects the earlier count to five serious and two minor findings. Historical live report: 320px landing/projects width 475px, editor 489px; white-on-cyan contrast 3.68:1; unnamed login/register password fields; graph focus indicator absent; reduced-motion not respected; variable errors and tab relationships deficient. Those deployed findings remain historical FAIL. Current local browser retested only a subset: Navbar wrapping fixes homepage/editor overflow at 320/375/390/768/1440px; login fields now have associated labels, autocomplete and visible password focus; homepage ArrowRight works. Full screen-reader, contrast, reduced-motion, registration, graph focus/keyboard and 200% zoom acceptance remain open.
+ - Local Chromium with a deliberately blocked API origin showed explicit project/validation fetch errors, NOT YET TESTED and no scientific findings. Extra-root validation sent no additional fetch and cleared AST/root previews; deleting a used declaration cleared AST; preset restoration/auto-layout restored a valid untested preview. Login with a test-only fixture displayed failure, kept the form and created no token. This is bounded offline browser evidence, not live authentication or scientific acceptance. See `browser-checks.md` for exact origin, measurements and limitations.
+ - Both original reports received and reconciled: Test Analyst message `407d499d-3f07-40e7-9042-c23cac3f978a` proposed8 groups, explicitly NOT RUN by the analyst; its older `syncAst`/declaration-preview observations do not apply to current source. Owner mapped and executed the cases in the104/219 runs. Change Reviewer message `e2ceae8a-7536-41ba-a67c-bf938c8eeb40` and parent relay `8ee46d38-3b32-4897-b2b3-7a7049c38602` report no concrete new findings,16 independent Node converter checks and scoped diff PASS within their bounded snapshot scope. Later source re-review and parent gates cover subsequent hook/node fixes. Review verdicts do not authorize merge/deployment or close live acceptance. See `analyst-reconciliation.md`.
+@@ -69,6 +71,10 @@ M-000 repository reality audit (IN PROGRESS); M-002 Research Workspace UI and Ve
+ - Python imports, Git checks, frontend checks, and non-live-DB Python tests now have execution evidence. Session event wiring against PostgreSQL, production env compatibility, registration abuse controls, and unauthenticated interactive verification remain open. No `.env.production` access, migration, push, or deploy occurred.
+ 
+ ## Last verified checkpoint
++2026-11-17 final receipt/addendum: source-confirmed recovery NOT IMPLEMENTED; no new runtime test. Five inspected source/test hashes and the addendum hash match at00:01:21+07:00; HEAD595e3f0 unchanged. Final handofff8ddbe96 and analyst addendum98a215a5 are received, with POST-validation503 wording corrected. Draft-savec5dc40e6 remains first and recovery4e310270 is queued afterward. Receipt and current upstream reference check are in `parent-addendum-receipt.md`. M-000/M-002 remain IN PROGRESS.
++
++2026-11-16 local compute/queue/history: IMPLEMENTED WITH WARNINGS. Owner95 live, separate1 deadline and11 injected faults PASS; backend237/107 SKIP, worker126 and shared53 PASS; source-only review reports no blocker within its scope. Parent read artifacts and verified19 hashes plus37 closed ports; no rerun. The2026-11-17 addendum above makes the missing recovery behavior explicit without invalidating those bounded successes. Numeric values, full accessibility, Layer6 and Linux/container/deployment acceptance remain open. Subsequent entries are historical checkpoints.
++
+ 2026-11-16 backend-fix slice: IMPLEMENTED WITH WARNINGS. Three assigned defects have execution evidence at matching source hashes; whole backend live acceptance remains PARTIAL because one original live case fails at503 before findings/history assertions. Owner84/1 live, separate2 live, default210/87 and runner22 are distinct checkpoints. Parent inspected logs/source boundary, hashes and fresh cleanup inventory; did not rerun tests or start services. Compute-queue follow-up6927175a queued; M-000/M-002 remain IN PROGRESS.
+ 
+ 2026-11-16 canvas-integrity slice: IMPLEMENTED WITH WARNINGS. Both original reports reconciled and bounded owner handoff recorded. Owner final focused3/104 and full15/219 PASS; TypeScript/lint/diff PASS. Parent full219 and final editor20 remain separate checkpoints. Current71 hashes match both final records; application/configuration/dependency inputs match the earlier successful build/browser checkpoint. Three independent source findings fixed and re-reviewed. Parent browser verified declaration display/redeclaration, shared-node layout, real connection refusal and extra-root request blocking, then cleaned up its task tab/server. Delayed-response tests use mocked APIs. Homepage aesthetic/full accessibility acceptance, PostgreSQL/RLS/persistence, live scientific cases and deployed behavior remain open; Layer6 unresolved and M-000/M-002 IN PROGRESS. Reconciliation writes:3 tests, `.reality` records/logs/hashes and normal test/lint caches; no application/dependency change, commit, push, deployment, DB operation or secret change.
+diff --git a/.reality/TEST_MATRIX.md b/.reality/TEST_MATRIX.md
+index c52a877..283fdc1 100644
+--- a/.reality/TEST_MATRIX.md
++++ b/.reality/TEST_MATRIX.md
+@@ -104,7 +104,7 @@ Evidence base: `evidence/2026-11-16-backend-fixes/`. ALL received result8e4d4064
+ 
+ | Check | Status | Evidence and limits |
+ |---|---|---|
+-| Original85 live PostgreSQL/API cases | FAIL overall;84 PASS/1 FAIL | `live-all.log`,24.08s; no SKIP or teardown errors. Remaining failure is compute/history HTTP503. |
++| Original85 live PostgreSQL/API cases | FAIL overall;84 PASS/1 FAIL | `live-all.log`,24.08s; no SKIP or teardown errors. POST `/versions/{id}/validate` returned503 before successful-history assertions. This does not prove GET history returned503. |
+ |8-table visibility and owner-only writes | PASS, bounded live | Original suite:83 SQL cases pass, including public/org/anonymous read controls, non-owner deletion/takeover/reparenting rejection, old/new parent ownership and context reuse. `policy-comparison.json` records32 command policies and unchanged8 SELECT expressions. |
+ | Live project create and durable read | PASS | Original suite's project case POST201, versions[], subsequent GET and new DB connection read correct committed project; anonymous/spoofed/outsider404 and invalid JWT401. No implicit version creation. |
+ | Project NEW-owner transfer | PASS, separate live checkpoint | `review-live/owner-transfer.log`:2 PASS,1.53s; private/public owner cannot transfer project ownership; fresh connection verifies unchanged owner. |
+@@ -113,7 +113,40 @@ Evidence base: `evidence/2026-11-16-backend-fixes/`. ALL received result8e4d4064
+ | Disposable runner guard/lifecycle | PASS | `runner-review-fix.log`:22 PASS. Independent review P2 fixed; `restart-failure-check/result.json` confirms real post-start fault-injection cleanup and unchanged DB marker. |
+ | Bounded independent source review | PASS after fix | `REVIEW.md`:cleanup P2 addressed, no remaining scoped correctness finding. Reviewer did not independently run tests. |
+ | Matching handoff source and cleanup | PASS, parent |8 changed hashes and16 verification hashes match; fresh parent inventory21:42:50+07:00 finds0 task processes/listeners at60655/51531/51578. Read-only host checks; no parent DB restart/kill. |
+-| Queued computation and persisted history | FAIL at current checkpoint | API direct worker import triggers zero-DB guard; actual503 retained in live test. Subsequent run/history/findings/export assertions NOT RUN. New slice6927175a queued to Lực under ADR-006. |
++| Queued computation and persisted history | FAIL at this historical checkpoint | API direct worker import triggers zero-DB guard; POST validate503 retained in live test. Subsequent run/history/findings/export assertions NOT RUN then. Later slice6927175a results follow below. |
++
++### Local compute/queue final checkpoint — 2026-11-16
++
++Evidence base: `evidence/2026-11-16-compute-queue/`. ALL inspected final logs, REPORT/HANDOFF/REVIEW and evidence inventories. All suite executions below belong to the implementation owner; no parent rerun or independent reviewer runtime is claimed. Prior503 failure entries are historical.
++
++| Check | Status | Evidence and limits |
++|---|---|---|
++| Real HTTP/queue/worker/PostgreSQL history | PASS | `live-final.log`:95 PASS,12 deselected; original85 +2 owner-transfer +8 queue cases. Symbolic PASS/negative FAIL, publication preservation, run/target/input correlation and fresh HTTP/DB reads. |
++| Worker unavailable/deadline | PASS | `live-no-worker.log`:1 PASS; expected503, zero persisted runs and unchanged publication. |
++| Real-broker malformed/correlation/replay/late-result faults | PASS | `live-faults.log`:11 PASS; deliberate invalid envelopes, not scientific compute evidence. No false finding; duplicate publication rejected. Does not prove exactly-once worker execution. |
++| Backend final default | PASS | `backend-final.log`:237 PASS/107 SKIP;107 opt-in cases executed in the separate95/1/11 lifecycles, not added as one run. |
++| Isolated worker/shared regressions | PASS | `worker-default.log`:126 PASS; `shared-default.log`:53 PASS. Separate commands/checkpoints. |
++| Source review and artifacts | PASS, scoped | `REVIEW.md` reports no blocker; no reviewer suite execution. Owner patch roundtrip19 files PASS, tracked diff exit0. |
++| Current source/cleanup receipt | PASS, parent |23:54:10+07:00:19 SHA256 hashes match,0 listeners across37 recorded task ports. Owner inventory records0 task processes and shutdown cluster. Parent did not restart or kill processes. |
++| Assigned numeric input/output, save/freeze, Linux/network isolation | NOT RUN | Current VariableSpec lacks assigned numeric values; version fixtures SQL-seeded. Windows solo and socket observation do not prove Linux prefork or network sandbox. Draft-save requestc5dc40e6 queued. |
++| Whole concurrent commit/deployment | NOT RUN | HEAD/local origin/main595e3f0 observed; only19 slice hashes checked. No remote/deployment request, attribution or full-commit acceptance. |
++
++### Final receipt and recovery-gap reconciliation — 2026-11-17
++
++Final handofff8ddbe96 and analyst addendum98a215a5 are received. Analysteb8fa3b7 read an earlier snapshot and executed none of its seven proposed groups. Parent inspected current dispatcher/service/ingestion/persistence and the cleanup-on-DB-failure test, and verified five matching source/test hashes plus the addendum SHA256 at00:01:21+07:00. This is source/artifact evidence, not a new test run. See `evidence/2026-11-16-compute-queue/parent-addendum-receipt.md`.
++
++| Check | Status | Evidence and limits |
++|---|---|---|
++| Same-job ingestion after failed DB commit | NOT RUN | Implementation NOT IMPLEMENTED: `service.py:57` finally discards result after caller failure; dispatch claim prevents same-ID dispatch; no connected durable pending/input registry/recovery. Existing unit test asserts cleanup on failure, not recoverability. |
++| API restart/crash and uncertain commit recovery | NOT RUN | No lifecycle evidence after result-before-commit or commit-before-lost-response/cleanup. Run PK alone does not establish idempotent retry, complete input provenance or recovery. Follow-up4e310270 queued after draft-save. |
++| Concurrent duplicate ingestion and two successes completing in reverse order | NOT RUN | Existing replay test measures duplicate dispatch, and existing late-result test rejects a mismatched result. Neither exercises these success/recovery scenarios. |
++| Unauthorized request queue side effects | NOT RUN | Existing live401/404/access tests pass; direct queue publication counts following denied requests are not measured. |
++| Complete status/malformed/boundary input matrix | NOT RUN | Only documented subsets passed. Pending states/null result, timeout0/121 and empty-ID cases lack full runtime coverage; IDs lack `min_length`, AST is optional for claims. No blanket422/no-publish claim. |
++| Broker loss, worker loss, commit interruption | NOT RUN | No-worker deadline and injected result faults do not exercise these process/transport failures. Windows solo does not verify Linux limits. |
++| Worker soft timeout handling | NOT RUN for new live timeout execution | Source deliberately maps `COMPUTE_TIMEOUT_EXCEEDED` to API503 without scientific persistence; earlier mocked-boundary checks remain separate. Analyst expectation of persisted scientific timeout is not the current slice contract. |
++| API-only image and deployed network isolation | NOT RUN | Worker environment guards and observed Redis-only sockets do not prove routing enforcement or container packaging. |
++
++The95/1/11 local owner results above remain valid for their bounded success/rejection cases. Recovery status is explicitly NOT IMPLEMENTED; its test gate remains NOT RUN until the new follow-up executes. M-000/M-002 remain IN PROGRESS.
+ 
+ - PASS: test actually ran and passed.
+ - FAIL: test actually ran and failed.
+diff --git a/.reality/evidence/2026-11-16-compute-queue/REPORT.md b/.reality/evidence/2026-11-16-compute-queue/REPORT.md
+index c2809d5..385bed6 100644
+--- a/.reality/evidence/2026-11-16-compute-queue/REPORT.md
++++ b/.reality/evidence/2026-11-16-compute-queue/REPORT.md
+@@ -4,6 +4,8 @@ Ngày: 2026-11-16. Checkout: `D:/Reality_Science`.
+ Phân công từ ALL: `6927175a-fd31-4b86-981d-3cb60ee2b1f9`.
+ HEAD tại lúc nhận việc nằm trong `head.txt`; checkout đã có dirty work, được giữ nguyên trong baseline.
+ 
++Trong lúc chốt evidence, một thao tác ngoài phiên thực hiện slice đã đổi HEAD từ `c6062783f760f126ca87340f3c0736d11010d659` sang `595e3f0232e06e3f76fa770430a05213f6cda7d2` lúc23:42:11+07:00. Local `origin/main` ref cũng trỏ commit mới; không gọi remote hoặc xác minh deploy trong lượt kiểm tra này. Cả19 hash source/test/runner và13 baseline vẫn khớp, nên evidence của slice giữ nguyên phạm vi. Xem `concurrent-head-change.json`; không suy diễn kết quả test của slice thành nghiệm thu toàn commit mới.
++
+ ## Kết quả
+ 
+ Đã sửa nguyên nhân compute/history HTTP 503: API từng import worker trong process có biến môi trường DB, khiến guard zero-DB của worker chặn đúng thiết kế. Hai endpoint `/validation/verify` và `/versions/{id}/validate` nay đi qua Redis/Celery thật, worker riêng tính toán rồi trả kết quả để API kiểm tra và ghi PostgreSQL. API vẫn giữ cấu hình DB. Guard worker giữ nguyên.
+@@ -20,7 +22,9 @@ Luồng local đã chứng minh: HTTP → Redis broker → Celery worker riêng
+ - Worker kiểm tra Celery task ID khớp input, thêm provenance vào output. Unexpected engine exception trở thành Celery failure; soft-timeout result được API chuyển thành lỗi unavailable.
+ - Cluster dispatcher không có transport báo lỗi rõ `Cluster node transport is not configured`; bỏ direct-worker/fake PASS fallback. Transport được cấu hình luôn phải kiểm tra provenance, kể cả khi một mock executor không được dùng cũng có mặt.
+ 
+-17 file product/test được ghi trong `slice-files.json`, cùng 2 script lifecycle evidence. `slice.patch` là diff từ **baseline dirty tại lúc nhận slice**, bao gồm đầy đủ file mới; không phải diff toàn checkout so với Git HEAD. `slice-sha256.json` chứa hash của 19 file này. `artifact-integrity.json` xác nhận cả 19 hash hiện tại và 13 hash baseline khớp, patch tái sinh giống hệt; kiểm tra AST bỏ docstring cho live85 cũng khớp. Stage1 được snapshot nhưng không sửa. Bộ live85 chỉ sửa docstring cũ; assertion vẫn giữ nguyên.
++17 file product/test được ghi trong `slice-files.json`, cùng 2 script lifecycle evidence. `slice.patch` là diff từ **baseline dirty tại lúc nhận slice**, bao gồm đầy đủ file mới; không phải diff toàn checkout so với Git HEAD. `slice-sha256.json` chứa hash của 19 file này. `artifact-integrity.json` xác nhận cả 19 hash hiện tại và 13 hash baseline khớp; kiểm tra AST bỏ docstring cho live85 cũng khớp. Stage1 được snapshot nhưng không sửa. Bộ live85 chỉ sửa docstring cũ; assertion vẫn giữ nguyên.
++
++Kiểm tra áp patch ban đầu phát hiện script evidence xuất CRLF trên Windows; lỗi và bản cũ được giữ trong `patch-format-first.json`/`slice-initial-crlf.patch`. Đã sửa riêng `finalize_evidence.py` để xuất LF. `patch-roundtrip.json` ghi `git apply --check --whitespace=error-all` và áp thật lên bản sao baseline tạm đều exit0; cả19 file tái tạo khớp nội dung hiện tại khi chuẩn hóa CRLF/LF. Product/test/runner bytes và các hash đã kiểm thử không đổi. SHA256 patch cuối: `184c787c28bcea8663b95c45aec093ec75003fffa4b487008c0bdf1154673cdd`.
+ 
+ ## Kiểm chứng đã chạy
+ 
+@@ -37,6 +41,7 @@ Luồng local đã chứng minh: HTTP → Redis broker → Celery worker riêng
+ | Không có worker, API deadline | 1 PASS, 8 deselected | 20.02 s | `live-no-worker.log` |
+ | Real-broker fault injection | 11 PASS, 9 deselected | 52.78 s | `live-faults.log` |
+ | `git diff --check` | PASS | — | `diff-check.json` |
++| Patch áp lại lên baseline tạm | PASS, 19 file khớp | — | `patch-roundtrip.json` |
+ 
+ Không cộng các checkpoints thành tổng test. Backend default 107 SKIP chính là 85 PostgreSQL + 2 owner-transfer + 20 queue tests yêu cầu disposable DB/broker. Tất cả đã được chọn chạy trong các lifecycle tương ứng: live95, no-worker1, faults11. Hai cảnh báo hiện có là pytest-asyncio chưa đặt loop scope và passlib dùng argon2.__version__; không có selected test fail ở lượt cuối.
+ 
+@@ -88,6 +93,6 @@ Review độc lập hoàn tất: **No blocker found** trong phạm vi source/bas
+ 
+ ## Bàn giao
+ 
+-Artifact chính: `REPORT.md`, `REVIEW.md`, `WORK.md`, `slice.patch`, `slice-files.json`, `slice-sha256.json`, `baseline-sha256.json`, `artifact-integrity.json`, `diff-check.json`, `cleanup-fresh.json`, logs/identities/cleanup và JSON evidence từ tests. Shared `.reality/{STATE,NEXT_ACTION,EXECUTION_LOG,TEST_MATRIX,DECISIONS}` thuộc ALL; báo cáo này là đầu vào cập nhật các tracker đó.
++Artifact chính: `REPORT.md`, `REVIEW.md`, `WORK.md`, `HANDOFF.md`, `slice.patch`, `slice-files.json`, `slice-sha256.json`, `baseline-sha256.json`, `artifact-integrity.json`, `patch-roundtrip.json`, `diff-check.json`, `cleanup-fresh.json`, logs/identities/cleanup và JSON evidence từ tests. Shared `.reality/{STATE,NEXT_ACTION,EXECUTION_LOG,TEST_MATRIX,DECISIONS}` thuộc ALL; báo cáo này là đầu vào cập nhật các tracker đó.
+ 
+-Không commit/push/deploy, không migration/reset DB production hoặc DB người dùng, không sửa secrets/global settings. Bước tiếp theo thuộc điều phối ALL: tích hợp bằng chứng local queue/history và xác định milestone scientific/model/save tiếp theo, giữ nguyên các giới hạn nêu trên.
++Agent thực hiện slice này không commit/push/deploy, không migration/reset DB production hoặc DB người dùng, không sửa secrets/global settings. Checkout đã có commit mới từ thao tác đồng thời nêu ở đầu report; các tài liệu chốt bàn giao tiếp tục là thay đổi local. Bước tiếp theo thuộc điều phối ALL: tích hợp bằng chứng local queue/history và xác định milestone scientific/model/save tiếp theo, giữ nguyên các giới hạn nêu trên.
+diff --git a/.reality/evidence/2026-11-16-compute-queue/WORK.md b/.reality/evidence/2026-11-16-compute-queue/WORK.md
+index 70237c6..284e131 100644
+--- a/.reality/evidence/2026-11-16-compute-queue/WORK.md
++++ b/.reality/evidence/2026-11-16-compute-queue/WORK.md
+@@ -10,10 +10,17 @@ Assignment: ALL message6927175a-fd31-4b86-981d-3cb60ee2b1f9. Local checkout only
+ - [x] Backend/worker/shared suites and final live checks; cleanup verified.
+ - [x] Independent read-only review: No blocker found; source-only scope recorded in REVIEW.md.
+ - [x] Final tracked diff check and fresh process/listener inventory recorded.
+-- [ ] Final artifact integrity, archive/attachment and handoff to ALL.
++- [x] Final artifact integrity: 19 current and 13 baseline hashes match; LF patch reconstructs all 19 files in a temporary copy.
++- [x] Vietnamese report/review and handoff prepared for ALL; archive and delivery receipts are recorded separately after packaging/sending.
+ 
+ Findings: RCE interactive/version endpoints import worker inside API carrying DB env. Cluster dispatcher additionally manufactures PASS on exception. Existing Redis v2 publisher and receiver are unconnected; receiver lacks status/task correlation. Worker configuration guard stays intact. Numerical VariableSpec has no assigned-value field, so symbolic verification does not establish16 m/s or6 N.
+ 
+ Scope: API orchestration, worker transport/result provenance, regression harness. Preserve dirty work, frontend, shared trackers, older evidence. No deployment, commits, user DB, reset, global setup, secrets or Layer6/save/freeze decision.
+ 
+ Final verification: backend 237 passed/107 skipped; worker 126 passed; shared 53 passed; final live 95 passed; no-worker 1 passed; live fault injection 11 passed; all task-owned runtimes cleaned up. Fresh inventory found no task-owned processes or listeners across all 37 recorded ports. Original live85 assertions are unchanged; its only source diff is a fixture docstring. See REPORT.md, REVIEW.md and slice.patch. Checkpoints are not added together.
++
++Handoff ownership: implementation/evidence preparation complete. Code write ownership returns to ALL when the final handoff message is successfully queued; the API response is saved in handoff-delivery.json. Shared trackers remain ALL-owned. The archive is a sealed pre-delivery snapshot; delivery metadata is written afterward.
++
++Delivery recorded: report and ZIP attached successfully; final message f8ddbe96-0702-41d2-904d-9f712667ff80 accepted into ALL's queue (provider-unsupported). Ownership released to ALL. Queue acceptance does not confirm ALL has read or integrated the result; see handoff-delivery.json. Archive168 entries passed CRC and SHA256 member checks; archive-info.json records the sealed archive hash.
++
++Concurrent checkout observation: HEAD changed externally from c6062783 to 595e3f02 during final packaging. This agent issued no commit/push/deploy. All 19 slice hashes and 13 baseline hashes remain unchanged; see concurrent-head-change.json. Do not describe the whole checkout as uncommitted or infer full new-commit verification from these slice checks.
+diff --git a/.reality/evidence/2026-11-16-compute-queue/diff-check.json b/.reality/evidence/2026-11-16-compute-queue/diff-check.json
+index 057ff6e..7c46476 100644
+--- a/.reality/evidence/2026-11-16-compute-queue/diff-check.json
++++ b/.reality/evidence/2026-11-16-compute-queue/diff-check.json
+@@ -1,5 +1,5 @@
+ {
+-  "checked_at": "2026-11-16T16:39:02.892529+00:00",
++  "checked_at": "2026-11-16T16:45:25.877284+00:00",
+   "command": [
+     "git",
+     "diff",
+@@ -8,7 +8,7 @@
+   "cwd": "D:\\Reality_Science",
+   "exit": 0,
+   "stdout": "",
+-  "stderr": "",
+-  "scope": "tracked working-tree diff; new files separately covered by exact slice patch and SHA256 inventory",
++  "stderr": "warning: in the working copy of '.reality/evidence/2026-11-16-compute-queue/diff-check.json', CRLF will be replaced by LF the next time Git touches it\n",
++  "scope": "Tracked working-tree diff. Slice baseline-to-final content additionally verified by patch-roundtrip and SHA256 inventory.",
+   "original_live85_ast_equal_excluding_docstrings": true
+ }
+\ No newline at end of file
+diff --git a/.reality/evidence/2026-11-16-compute-queue/run_live.py b/.reality/evidence/2026-11-16-compute-queue/run_live.py
+index ab481c8..355d39a 100644
+--- a/.reality/evidence/2026-11-16-compute-queue/run_live.py
++++ b/.reality/evidence/2026-11-16-compute-queue/run_live.py
+@@ -20,17 +20,102 @@
+ 
+ def stop_owned_process(process):
+     if process is not None and process.poll() is None:
+-        subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],check=True,capture_output=True)
++        subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],check=True,capture_output=True,timeout=30)
+         process.wait(timeout=20)
+ 
+ 
+-def run(command,name,env):
++def run(command,name,env,timeout=600):
+     with (E/(name+'.log')).open('w',encoding='utf-8') as log:
+-        code=subprocess.run(command,cwd=BACKEND,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=600).returncode
++        process=subprocess.Popen(command,cwd=BACKEND,env=env,stdout=log,stderr=subprocess.STDOUT)
++        try:
++            code=process.wait(timeout=timeout)
++        except BaseException as error:
++            # Keep the live parent handle until its descendants (including the
++            # Windows venv launcher and Uvicorn) have been stopped as a tree.
++            try:
++                stop_owned_process(process)
++            except Exception as cleanup_error:
++                error.add_note(f'Test process tree cleanup failed: {cleanup_error}')
++            raise
+     print((E/(name+'.log')).read_text(encoding='utf-8'))
+     return {'command':command,'exit':code}
+ 
+ 
++def cleanup_resources(name,manifest,manifest_path,worker,broker,client,broker_id,port,logs,codes):
++    """Attempt each owned-resource teardown even when an earlier stage fails."""
++    errors=[]
++
++    def attempt(stage,operation):
++        try:
++            return operation()
++        except Exception as error:
++            errors.append({'stage':stage,'type':type(error).__name__,'message':str(error)})
++            return None
++
++    attempt('worker',lambda:stop_owned_process(worker))
++
++    def stop_broker():
++        if broker is None or broker.poll() is not None:
++            return
++        if broker_id is None:
++            stop_owned_process(broker)
++            return
++        # Network shutdown is permitted only for the identified, marked broker.
++        if client.info('server')['run_id']!=broker_id or client.get('reality-test-instance')!=name+'-'+broker_id:
++            raise RuntimeError('Broker identity mismatch; refusing network shutdown')
++        client.shutdown(nosave=True)
++        broker.wait(timeout=15)
++
++    attempt('broker-shutdown',stop_broker)
++    # A lost Redis connection must not strand the process we started. This uses
++    # the retained Popen handle, never a historical PID or an arbitrary server.
++    attempt('broker-process',lambda:stop_owned_process(broker))
++    if client is not None:
++        attempt('redis-client',client.close)
++
++    def stop_postgres():
++        if not manifest.get('stopped'):
++            asyncio.run(identity(manifest))
++            codes['stop']=stop_cluster(manifest,E/(name+'-stop.log'))
++            if codes['stop']!=0:
++                raise RuntimeError('PostgreSQL shutdown returned nonzero')
++
++    attempt('postgres',stop_postgres)
++    attempt('manifest',lambda:manifest_path.write_text(json.dumps(manifest,indent=2)))
++    for index,log in enumerate(logs):
++        attempt(f'log-{index}',log.close)
++
++    ports={manifest['port']}
++    if port: ports.add(port)
++
++    def collect_api_ports():
++        for log in (E/(name+'-pytest')).glob('*/api.log'):
++            ports.update(int(p) for p in re.findall(r'Uvicorn running on http://127\.0\.0\.1:(\d+)',log.read_text()))
++
++    attempt('api-port-discovery',collect_api_ports)
++    listening={}
++    for p in ports:
++        def check_port(p=p):
++            with socket.socket() as sock:
++                sock.settimeout(.5)
++                return sock.connect_ex(('127.0.0.1',p))==0
++        listening[str(p)]=attempt(f'port-{p}',check_port)
++    cleanup={'codes':codes,'ports_accepting':listening,'postgres_stopped':manifest.get('stopped'),
++             'worker_exit':attempt('worker-status',worker.poll) if worker else None,
++             'broker_exit':attempt('broker-status',broker.poll) if broker else None,
++             'postgres_control':attempt('postgres-control',lambda:control_data(manifest)),
++             'errors':errors}
++    if (not manifest.get('stopped') or any(value is not False for value in listening.values())
++            or (worker is not None and cleanup['worker_exit'] is None)
++            or (broker is not None and cleanup['broker_exit'] is None)):
++        errors.append({'stage':'verification','type':'RuntimeError','message':'Incomplete owned-resource cleanup'})
++    attempt('cleanup-evidence',lambda:(E/(name+'-cleanup.json')).write_text(json.dumps(cleanup,indent=2)))
++    print(json.dumps(cleanup,indent=2))
++    if errors:
++        raise RuntimeError('Cleanup failures: '+', '.join(error['stage'] for error in errors))
++    return cleanup
++
++
+ async def identity(manifest):
+     conn,actual=await admin_connection(manifest)
+     try:
+@@ -107,35 +192,7 @@ def main():
+             'worker_started':worker is not None},indent=2))
+         return codes['tests']['exit']
+     finally:
+-        stop_owned_process(worker)
+-        if broker is not None and broker.poll() is None:
+-            if broker_id is not None:
+-                assert client.info('server')['run_id']==broker_id
+-                assert client.get('reality-test-instance')==name+'-'+broker_id
+-                client.shutdown(nosave=True)
+-                broker.wait(timeout=15)
+-            else:
+-                stop_owned_process(broker)
+-        if client is not None: client.close()
+-        if not manifest.get('stopped'):
+-            asyncio.run(identity(manifest))
+-            codes['stop']=stop_cluster(manifest,E/(name+'-stop.log'))
+-            manifest_path.write_text(json.dumps(manifest,indent=2))
+-        for log in logs: log.close()
+-        ports={manifest['port']}
+-        if port: ports.add(port)
+-        for log in (E/(name+'-pytest')).glob('*/api.log'):
+-            ports.update(int(p) for p in re.findall(r'Uvicorn running on http://127\.0\.0\.1:(\d+)',log.read_text()))
+-        listening={}
+-        for p in ports:
+-            with socket.socket() as sock:
+-                sock.settimeout(.5); listening[str(p)]=sock.connect_ex(('127.0.0.1',p))==0
+-        cleanup={'codes':codes,'ports_accepting':listening,'postgres_stopped':manifest['stopped'],
+-                 'worker_exit':worker.poll() if worker else None,'broker_exit':broker.poll() if broker else None,
+-                 'postgres_control':control_data(manifest)}
+-        (E/(name+'-cleanup.json')).write_text(json.dumps(cleanup,indent=2))
+-        assert manifest['stopped'] and not any(listening.values())
+-        print(json.dumps(cleanup,indent=2))
++        cleanup_resources(name,manifest,manifest_path,worker,broker,client,broker_id,port,logs,codes)
+ 
+ 
+ if __name__=='__main__': raise SystemExit(main())
+diff --git a/worker/worker/core/boundary_engine.py b/worker/worker/core/boundary_engine.py
+index 2083084..740a195 100644
+--- a/worker/worker/core/boundary_engine.py
++++ b/worker/worker/core/boundary_engine.py
+@@ -1,6 +1,7 @@
+ from dataclasses import dataclass, field
+ import math
+ from typing import Dict, List, Optional, Set, Tuple, Union
++from celery.exceptions import SoftTimeLimitExceeded
+ import sympy as sp
+ from shared.schemas.math_ast import (
+     ExprNode,
+@@ -43,6 +44,8 @@ def extract_denominators(sympy_expr: sp.Expr) -> Set[sp.Expr]:
+             _, denom = sympy_expr.as_numer_denom()
+             if denom != 1 and denom != sp.Integer(1):
+                 denominators.add(denom)
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             pass
+ 
+@@ -52,6 +55,8 @@ def extract_denominators(sympy_expr: sp.Expr) -> Set[sp.Expr]:
+             try:
+                 if subexpr.exp.is_number and subexpr.exp < 0:
+                     denominators.add(subexpr.base)
++            except SoftTimeLimitExceeded:
++                raise
+             except Exception:
+                 pass
+ 
+@@ -82,6 +87,8 @@ def check_singularities_and_poles(
+             domain_type = var_domain_map.get(sym.name, "real")
+             try:
+                 roots = sp.solveset(denom, sym, domain=sp.S.Reals)
++            except SoftTimeLimitExceeded:
++                raise
+             except Exception:
+                 continue
+ 
+@@ -165,8 +172,10 @@ def evaluate_boundary_limits(
+                 boundary_limits[f"{sym.name} -> -oo"] = str(lim_neg_inf)
+                 if lim_neg_inf.is_infinite:
+                     divergences.append(f"Asymptotic divergence as {sym.name} -> -oo: {lim_neg_inf}")
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+-            # Undetermined limit or CAS timeout
++            # An undetermined limit may fall back; a task deadline may not.
+             continue
+ 
+     return boundary_limits, divergences
+@@ -191,6 +200,8 @@ def execute_richardson_stratified_sampling(
+             val = float(diff_expr.evalf())
+             is_zero = abs(val) < tolerance
+             return is_zero, abs(val), [f"Constant difference: {val}"]
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             return False, float("inf"), ["Evaluation failed on constant difference"]
+ 
+@@ -231,6 +242,8 @@ def execute_richardson_stratified_sampling(
+                     max_err,
+                     [f"Stratified sampling divergence at point {i}: |diff| = {err} >= {tolerance} for {subs_dict}"],
+                 )
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception as ex:
+             return False, float("inf"), [f"Exception evaluating point {i}: {str(ex)}"]
+ 
+@@ -272,6 +285,8 @@ def analyze_boundary_and_singularities(
+             message=str(e),
+             diagnostics=[str(e)],
+         )
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception as e:
+         return BoundaryAnalysisResult(
+             is_valid=False,
+diff --git a/worker/worker/core/dimension_engine.py b/worker/worker/core/dimension_engine.py
+index 30a921b..8fc08ef 100644
+--- a/worker/worker/core/dimension_engine.py
++++ b/worker/worker/core/dimension_engine.py
+@@ -1,4 +1,5 @@
+ from typing import Dict, List
++from celery.exceptions import SoftTimeLimitExceeded
+ import pint
+ from shared.schemas.math_ast import (
+     AllowedFunction,
+@@ -43,6 +44,8 @@ def register_custom_unit(unit_spec: UnitSpec) -> None:
+     def_str = f"{unit_spec.name} = {scale} * ({dim_expr}) = {unit_spec.symbol}"
+     try:
+         ureg.define(def_str)
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         pass
+ 
+diff --git a/worker/worker/core/empirical_engine.py b/worker/worker/core/empirical_engine.py
+index 3b7e07b..5f28606 100644
+--- a/worker/worker/core/empirical_engine.py
++++ b/worker/worker/core/empirical_engine.py
+@@ -14,6 +14,7 @@
+ 
+ from __future__ import annotations
+ 
++from celery.exceptions import SoftTimeLimitExceeded
+ import math
+ from typing import Any, Dict, List, Optional, Set, Tuple, Union
+ import mpmath
+@@ -231,6 +232,8 @@ def compute_empirical_metrics(
+             # Regularized upper incomplete gamma Q(a, z) = Gamma(a, z) / Gamma(a)
+             p_val_mp = mpmath.gammainc(dof / 2.0, chi2 / 2.0, regularized=True)
+             p_value = float(p_val_mp)
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             p_value = None
+ 
+@@ -360,6 +363,8 @@ def correlate_empirical_data(
+             is_valid=False,
+             diagnostics=[str(err)],
+         )
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception as err:
+         return EmpiricalCorrelationResult(
+             job_id="",
+diff --git a/worker/worker/core/epistemic_engine.py b/worker/worker/core/epistemic_engine.py
+index 476d325..4d25327 100644
+--- a/worker/worker/core/epistemic_engine.py
++++ b/worker/worker/core/epistemic_engine.py
+@@ -10,6 +10,7 @@
+ 
+ from __future__ import annotations
+ 
++from celery.exceptions import SoftTimeLimitExceeded
+ from collections import defaultdict, deque
+ from typing import Any, Dict, List, Optional, Set, Tuple
+ 
+@@ -262,6 +263,8 @@ def detect_contradictions(
+                                 )
+                             )
+ 
++                    except SoftTimeLimitExceeded:
++                        raise
+                     except Exception:
+                         pass
+ 
+@@ -290,6 +293,8 @@ def detect_contradictions(
+                                     severity=FindingState.FAIL,
+                                 )
+                             )
++                    except SoftTimeLimitExceeded:
++                        raise
+                     except Exception:
+                         pass
+ 
+diff --git a/worker/worker/core/physical_invariants.py b/worker/worker/core/physical_invariants.py
+index 7880f41..212822b 100644
+--- a/worker/worker/core/physical_invariants.py
++++ b/worker/worker/core/physical_invariants.py
+@@ -7,6 +7,7 @@
+ """
+ 
+ from __future__ import annotations
++from celery.exceptions import SoftTimeLimitExceeded
+ import math
+ import re
+ from typing import Any, Dict, List, Optional, Set, Tuple
+@@ -76,6 +77,8 @@ def is_velocity_unit(unit_str: str) -> bool:
+     try:
+         q = ureg(unit_str)
+         return q.dimensionality == VELOCITY_DIM
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         return False
+ 
+@@ -104,6 +107,8 @@ def to_si_velocity(val: float, unit_str: Optional[str]) -> Tuple[float, float]:
+         if q.dimensionality == VELOCITY_DIM:
+             si_val = float(q.to("meter / second").magnitude)
+             return si_val, abs(si_val)
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         pass
+     return val_f, abs(val_f)
+@@ -114,6 +119,8 @@ def is_energy_unit(unit_str: str) -> bool:
+     try:
+         q = ureg(unit_str)
+         return q.dimensionality == ENERGY_DIM
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         return False
+ 
+@@ -123,6 +130,8 @@ def is_momentum_unit(unit_str: str) -> bool:
+     try:
+         q = ureg(unit_str)
+         return q.dimensionality == MOMENTUM_DIM
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         return False
+ 
+@@ -162,6 +171,8 @@ def _check_speed_of_light(
+     try:
+         ast_dim = evaluate_ast_dimensions(ast, var_map, {})
+         has_velocity_dim = (ast_dim.dimensionality == VELOCITY_DIM)
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception:
+         has_velocity_dim = False
+ 
+@@ -169,6 +180,8 @@ def _check_speed_of_light(
+     if has_velocity_dim:
+         try:
+             ast_unit_str = str(ast_dim.units)
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             pass
+ 
+@@ -519,6 +532,8 @@ def _inspect_ast_lorentz(node: ExprNode, in_denominator: bool = False) -> Option
+                                         "Lorentz factor singularity: division by zero at v = c",
+                                     ],
+                                 )
++                        except SoftTimeLimitExceeded:
++                            raise
+                         except Exception:
+                             pass
+ 
+@@ -562,6 +577,8 @@ def _check_energy_conservation(
+                 dim_r = evaluate_ast_dimensions(ast.right, var_map, {})
+                 if dim_l.dimensionality == ENERGY_DIM and dim_r.dimensionality == ENERGY_DIM:
+                     is_energy_delta = True
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             pass
+ 
+@@ -698,6 +715,8 @@ def _check_momentum_conservation(
+                 dim_r = evaluate_ast_dimensions(ast.right, var_map, {})
+                 if dim_l.dimensionality == MOMENTUM_DIM and dim_r.dimensionality == MOMENTUM_DIM:
+                     is_momentum_delta = True
++        except SoftTimeLimitExceeded:
++            raise
+         except Exception:
+             pass
+ 
+diff --git a/worker/worker/tasks/dimensional.py b/worker/worker/tasks/dimensional.py
+index ddebea4..2e0ab0f 100644
+--- a/worker/worker/tasks/dimensional.py
++++ b/worker/worker/tasks/dimensional.py
+@@ -1,4 +1,5 @@
+ from typing import Dict, List, Tuple
++from celery.exceptions import SoftTimeLimitExceeded
+ from shared.schemas.math_ast import ExprNode, VariableSpec, UnitSpec
+ from worker.core.dimension_engine import (
+     evaluate_ast_dimensions,
+@@ -30,5 +31,7 @@ def execute_dimensional_verification(
+         if "requires dimensionless input" in str(e):
+             return False, "", DiagnosticCode.DIMENSIONED_TRANSCENDENTAL_ARGUMENT.value
+         return False, "", DiagnosticCode.DIMENSIONAL_MISMATCH.value
++    except SoftTimeLimitExceeded:
++        raise
+     except Exception as e:
+         return False, "", f"DIMENSIONAL_ERROR: {str(e)}"

@@ -1,0 +1,9 @@
+{
+  "worker/worker/tasks/dimensional.py": "5c1218d92a60a84ec6b85d3f023882444118a85085e8c7b833a950e6491f0750",
+  "worker/worker/core/boundary_engine.py": "08ad6f42a9a1dd81558f20dc41671501694b6b0585d498604ebdc74f931d5bb8",
+  "worker/worker/core/dimension_engine.py": "9c1710e18792300c4d29cf5331fbe758aaefb5fef438fd52d4e3ba298ace83d3",
+  "worker/worker/core/physical_invariants.py": "27dc1740cad178ee33e9716a367fdbde72e903bf34ea88ee7032976e1ec77cc4",
+  "worker/worker/core/empirical_engine.py": "e252db4f9d952d6dea3177854055a23c841f1ebc9bf3ab12d2bf622abe2f05b8",
+  "worker/worker/core/epistemic_engine.py": "ae895cb11a6ab55e0939521403077c5a495e5010b24b1a1d6d04dffd15f21f39",
+  ".reality/evidence/2026-11-16-compute-queue/run_live.py": "f2edef664c13e64866ace463930e135e0d3481f26d80aebcb0f998056df26903"
+}

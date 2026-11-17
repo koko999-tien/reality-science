@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-11-16T16:39:02.892529+00:00",
+  "checked_at": "2026-11-16T16:45:25.877284+00:00",
   "command": [
     "git",
     "diff",
@@ -8,7 +8,7 @@
   "cwd": "D:\\Reality_Science",
   "exit": 0,
   "stdout": "",
-  "stderr": "",
-  "scope": "tracked working-tree diff; new files separately covered by exact slice patch and SHA256 inventory",
+  "stderr": "warning: in the working copy of '.reality/evidence/2026-11-16-compute-queue/diff-check.json', CRLF will be replaced by LF the next time Git touches it\n",
+  "scope": "Tracked working-tree diff. Slice baseline-to-final content additionally verified by patch-roundtrip and SHA256 inventory.",
   "original_live85_ast_equal_excluding_docstrings": true
 }

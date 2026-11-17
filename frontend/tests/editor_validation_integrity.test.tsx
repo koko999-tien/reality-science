@@ -5,6 +5,7 @@ import {
   fetchProjectBySlug,
   fetchVersionEquations,
   fetchVersionVariables,
+  fetchVersionDraft,
   validateEquationAst,
 } from "@/lib/api";
 import { EquationModel, FindingResult, ResearchProjectModel, VariableModel } from "@/types/contracts";
@@ -51,6 +52,7 @@ jest.mock("@/lib/api", () => ({
   fetchProjectBySlug: jest.fn().mockResolvedValue({ slug: "test-project", versions: [] }),
   fetchVersionEquations: jest.fn(),
   fetchVersionVariables: jest.fn(),
+  fetchVersionDraft: jest.fn(),
 }));
 
 const passResult: FindingResult = {
@@ -74,7 +76,7 @@ function deferred<T>() {
 
 function projectFixture(slug: string, title: string): ResearchProjectModel {
   return {
-    id: slug, slug, title, visibility: "private_draft", is_frozen: false, created_at: "2026-11-16T00:00:00Z",
+    id: slug, slug, title, can_edit: true, visibility: "private_draft", is_frozen: false, created_at: "2026-11-16T00:00:00Z",
     versions: [{
       id: `${slug}-version`, project_id: slug, version_number: 1, title: `${title} draft`,
       publication_status: "draft", is_frozen: false, created_at: "2026-11-16T00:00:00Z",
@@ -93,10 +95,12 @@ describe("editor validation result integrity", () => {
   beforeEach(() => {
     mockSlug = "test-project";
     jest.resetAllMocks();
+    window.history.replaceState(null, "", "/projects/test-project/editor");
     (fetchProjectBySlug as jest.Mock).mockResolvedValue({
       slug: "test-project",
       title: "Test project",
-      versions: [{ id: "version-1", version_number: 1, title: "Draft" }],
+      can_edit: true,
+      versions: [{ id: "version-1", version_number: 1, title: "Draft", publication_status: "draft", revision: 0 }],
     });
     (fetchVersionEquations as jest.Mock).mockResolvedValue([{
       id: "equation-1",
@@ -107,6 +111,13 @@ describe("editor validation result integrity", () => {
       created_at: "2026-11-16T00:00:00Z",
     }]);
     (fetchVersionVariables as jest.Mock).mockResolvedValue([]);
+    // Compatibility fixtures exercise the same response races through the new
+    // single snapshot API; these mocks are UI tests, never persistence evidence.
+    (fetchVersionDraft as jest.Mock).mockImplementation(async (versionId: string) => {
+      const [equations, variables] = await Promise.all([fetchVersionEquations(versionId), fetchVersionVariables(versionId)]);
+      const title = versionId === "version-1" ? "Draft" : versionId === "project-b-version" ? "Project B draft" : "Project A draft";
+      return { version: { id: versionId, version_number: 1, title, publication_status: "draft", revision: 0 }, equations, variables, units: [] };
+    });
   });
 
   it("clears an earlier PASS while revalidating and after a transport failure", async () => {
@@ -180,7 +191,6 @@ describe("editor validation result integrity", () => {
 
     render(<EquationEditorPage params={Promise.resolve({ slug: "test-project" })} />);
 
-    await screen.findByText(/Version 1: Draft/i);
     expect(await screen.findByRole("alert")).toHaveTextContent("unknown AST node type");
     expect(screen.queryByText("Local equation draft")).not.toBeInTheDocument();
     expect(screen.getByText("Empty")).toBeInTheDocument();

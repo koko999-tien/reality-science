@@ -1,0 +1,325 @@
+D:\Reality_Science\backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+.FFFFFFFF.                                                               [100%]
+================================== FAILURES ===================================
+____ test_each_cleanup_failure_still_attempts_remaining_resources[worker] _____
+tests\unit\test_live_queue_lifecycle.py:117: in test_each_cleanup_failure_still_attempts_remaining_resources
+    assert 'client-close' in events and 'identity' in events and 'log-close' in events
+E   AssertionError: assert ('client-close' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...] and 'identity' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...])
+---------------------------- Captured stdout call -----------------------------
+{
+  "codes": {},
+  "ports_accepting": {
+    "60001": false,
+    "60002": false
+  },
+  "postgres_stopped": false,
+  "worker_exit": null,
+  "broker_exit": 1,
+  "postgres_control": {
+    "state": "mocked"
+  },
+  "errors": [
+    {
+      "stage": "worker",
+      "type": "RuntimeError",
+      "message": "injected worker"
+    },
+    {
+      "stage": "postgres",
+      "type": "TypeError",
+      "message": "test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.<lambda>() takes 0 positional arguments but 3 were given"
+    },
+    {
+      "stage": "verification",
+      "type": "RuntimeError",
+      "message": "Incomplete owned-resource cleanup"
+    }
+  ]
+}
+_____ test_each_cleanup_failure_still_attempts_remaining_resources[info] ______
+tests\unit\test_live_queue_lifecycle.py:117: in test_each_cleanup_failure_still_attempts_remaining_resources
+    assert 'client-close' in events and 'identity' in events and 'log-close' in events
+E   AssertionError: assert ('client-close' in ['worker', 'info', 'broker-process', 'client-close', 'log-close'] and 'identity' in ['worker', 'info', 'broker-process', 'client-close', 'log-close'])
+---------------------------- Captured stdout call -----------------------------
+{
+  "codes": {},
+  "ports_accepting": {
+    "60001": false,
+    "60002": false
+  },
+  "postgres_stopped": false,
+  "worker_exit": 1,
+  "broker_exit": 1,
+  "postgres_control": {
+    "state": "mocked"
+  },
+  "errors": [
+    {
+      "stage": "broker-shutdown",
+      "type": "RuntimeError",
+      "message": "injected info"
+    },
+    {
+      "stage": "postgres",
+      "type": "TypeError",
+      "message": "test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.<lambda>() takes 0 positional arguments but 3 were given"
+    },
+    {
+      "stage": "verification",
+      "type": "RuntimeError",
+      "message": "Incomplete owned-resource cleanup"
+    }
+  ]
+}
+___ test_each_cleanup_failure_still_attempts_remaining_resources[shutdown] ____
+tests\unit\test_live_queue_lifecycle.py:117: in test_each_cleanup_failure_still_attempts_remaining_resources
+    assert 'client-close' in events and 'identity' in events and 'log-close' in events
+E   AssertionError: assert ('client-close' in ['worker', 'info', 'shutdown', 'broker-process', 'client-close', 'log-close'] and 'identity' in ['worker', 'info', 'shutdown', 'broker-process', 'client-close', 'log-close'])
+---------------------------- Captured stdout call -----------------------------
+{
+  "codes": {},
+  "ports_accepting": {
+    "60001": false,
+    "60002": false
+  },
+  "postgres_stopped": false,
+  "worker_exit": 1,
+  "broker_exit": 1,
+  "postgres_control": {
+    "state": "mocked"
+  },
+  "errors": [
+    {
+      "stage": "broker-shutdown",
+      "type": "RuntimeError",
+      "message": "injected shutdown"
+    },
+    {
+      "stage": "postgres",
+      "type": "TypeError",
+      "message": "test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.<lambda>() takes 0 positional arguments but 3 were given"
+    },
+    {
+      "stage": "verification",
+      "type": "RuntimeError",
+      "message": "Incomplete owned-resource cleanup"
+    }
+  ]
+}
+_____ test_each_cleanup_failure_still_attempts_remaining_resources[wait] ______
+tests\unit\test_live_queue_lifecycle.py:117: in test_each_cleanup_failure_still_attempts_remaining_resources
+    assert 'client-close' in events and 'identity' in events and 'log-close' in events
+E   AssertionError: assert ('client-close' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...] and 'identity' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...])
+---------------------------- Captured stdout call -----------------------------
+{
+  "codes": {},
+  "ports_accepting": {
+    "60001": false,
+    "60002": false
+  },
+  "postgres_stopped": false,
+  "worker_exit": 1,
+  "broker_exit": 1,
+  "postgres_control": {
+    "state": "mocked"
+  },
+  "errors": [
+    {
+      "stage": "broker-shutdown",
+      "type": "RuntimeError",
+      "message": "injected wait"
+    },
+    {
+      "stage": "postgres",
+      "type": "TypeError",
+      "message": "test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.<lambda>() takes 0 positional arguments but 3 were given"
+    },
+    {
+      "stage": "verification",
+      "type": "RuntimeError",
+      "message": "Incomplete owned-resource cleanup"
+    }
+  ]
+}
+_ test_each_cleanup_failure_still_attempts_remaining_resources[client-close] __
+tests\unit\test_live_queue_lifecycle.py:117: in test_each_cleanup_failure_still_attempts_remaining_resources
+    assert 'client-close' in events and 'identity' in events and 'log-close' in events
+E   AssertionError: assert ('client-close' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...] and 'identity' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...])
+---------------------------- Captured stdout call -----------------------------
+{
+  "codes": {},
+  "ports_accepting": {
+    "60001": false,
+    "60002": false
+  },
+  "postgres_stopped": false,
+  "worker_exit": 1,
+  "broker_exit": 1,
+  "postgres_control": {
+    "state": "mocked"
+  },
+  "errors": [
+    {
+      "stage": "redis-client",
+      "type": "RuntimeError",
+      "message": "injected client-close"
+    },
+    {
+      "stage": "postgres",
+      "type": "TypeError",
+      "message": "test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.<lambda>() takes 0 positional arguments but 3 were given"
+    },
+    {
+      "stage": "verification",
+      "type": "RuntimeError",
+      "message": "Incomplete owned-resource cleanup"
+    }
+  ]
+}
+___ test_each_cleanup_failure_still_attempts_remaining_resources[identity] ____
+tests\unit\test_live_queue_lifecycle.py:117: in test_each_cleanup_failure_still_attempts_remaining_resources
+    assert 'client-close' in events and 'identity' in events and 'log-close' in events
+E   AssertionError: assert ('client-close' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...] and 'identity' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...])
+---------------------------- Captured stdout call -----------------------------
+{
+  "codes": {},
+  "ports_accepting": {
+    "60001": false,
+    "60002": false
+  },
+  "postgres_stopped": false,
+  "worker_exit": 1,
+  "broker_exit": 1,
+  "postgres_control": {
+    "state": "mocked"
+  },
+  "errors": [
+    {
+      "stage": "postgres",
+      "type": "TypeError",
+      "message": "test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.<lambda>() takes 0 positional arguments but 3 were given"
+    },
+    {
+      "stage": "verification",
+      "type": "RuntimeError",
+      "message": "Incomplete owned-resource cleanup"
+    }
+  ]
+}
+___ test_each_cleanup_failure_still_attempts_remaining_resources[postgres] ____
+tests\unit\test_live_queue_lifecycle.py:117: in test_each_cleanup_failure_still_attempts_remaining_resources
+    assert 'client-close' in events and 'identity' in events and 'log-close' in events
+E   AssertionError: assert ('client-close' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...] and 'identity' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...])
+---------------------------- Captured stdout call -----------------------------
+{
+  "codes": {},
+  "ports_accepting": {
+    "60001": false,
+    "60002": false
+  },
+  "postgres_stopped": false,
+  "worker_exit": 1,
+  "broker_exit": 1,
+  "postgres_control": {
+    "state": "mocked"
+  },
+  "errors": [
+    {
+      "stage": "postgres",
+      "type": "TypeError",
+      "message": "test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.<lambda>() takes 0 positional arguments but 3 were given"
+    },
+    {
+      "stage": "verification",
+      "type": "RuntimeError",
+      "message": "Incomplete owned-resource cleanup"
+    }
+  ]
+}
+___ test_each_cleanup_failure_still_attempts_remaining_resources[log-close] ___
+tests\unit\test_live_queue_lifecycle.py:117: in test_each_cleanup_failure_still_attempts_remaining_resources
+    assert 'client-close' in events and 'identity' in events and 'log-close' in events
+E   AssertionError: assert ('client-close' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...] and 'identity' in ['worker', 'info', 'shutdown', 'wait', 'broker-process', 'client-close', ...])
+---------------------------- Captured stdout call -----------------------------
+{
+  "codes": {},
+  "ports_accepting": {
+    "60001": false,
+    "60002": false
+  },
+  "postgres_stopped": false,
+  "worker_exit": 1,
+  "broker_exit": 1,
+  "postgres_control": {
+    "state": "mocked"
+  },
+  "errors": [
+    {
+      "stage": "postgres",
+      "type": "TypeError",
+      "message": "test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.<lambda>() takes 0 positional arguments but 3 were given"
+    },
+    {
+      "stage": "log-0",
+      "type": "RuntimeError",
+      "message": "injected log-close"
+    },
+    {
+      "stage": "verification",
+      "type": "RuntimeError",
+      "message": "Incomplete owned-resource cleanup"
+    }
+  ]
+}
+============================== warnings summary ===============================
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[worker]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[info]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[shutdown]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[wait]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[client-close]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[identity]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[postgres]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[log-close]
+  D:\Reality_Science\.reality\evidence\2026-11-16-compute-queue\run_live.py:53: RuntimeWarning: coroutine 'test_each_cleanup_failure_still_attempts_remaining_resources.<locals>.identity' was never awaited
+    return None
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[worker]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[info]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[shutdown]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[wait]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[client-close]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[identity]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[postgres]
+tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[log-close]
+  D:\Reality_Science\backend\.venv\Lib\site-packages\_pytest\unraisableexception.py:63: PytestUnraisableExceptionWarning: Exception ignored in: <function BaseEventLoop.__del__ at 0x0000016B42FDE520>
+  
+  Traceback (most recent call last):
+    File "C:\Users\TIEN PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\base_events.py", line 695, in __del__
+      self.close()
+    File "C:\Users\TIEN PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 696, in close
+      self._close_self_pipe()
+    File "C:\Users\TIEN PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\proactor_events.py", line 776, in _close_self_pipe
+      self._ssock.close()
+      ^^^^^^^^^^^
+  AttributeError: 'ProactorEventLoop' object has no attribute '_ssock'
+  
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+    warnings.warn(pytest.PytestUnraisableExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[worker]
+FAILED tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[info]
+FAILED tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[shutdown]
+FAILED tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[wait]
+FAILED tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[client-close]
+FAILED tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[identity]
+FAILED tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[postgres]
+FAILED tests/unit/test_live_queue_lifecycle.py::test_each_cleanup_failure_still_attempts_remaining_resources[log-close]
+8 failed, 2 passed, 16 warnings in 6.17s

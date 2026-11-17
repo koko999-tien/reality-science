@@ -10,6 +10,7 @@ ZERO SQL/database imports, ZERO database credentials, ZERO external graph librar
 
 from __future__ import annotations
 
+from celery.exceptions import SoftTimeLimitExceeded
 from collections import defaultdict, deque
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -262,6 +263,8 @@ def detect_contradictions(
                                 )
                             )
 
+                    except SoftTimeLimitExceeded:
+                        raise
                     except Exception:
                         pass
 
@@ -290,6 +293,8 @@ def detect_contradictions(
                                     severity=FindingState.FAIL,
                                 )
                             )
+                    except SoftTimeLimitExceeded:
+                        raise
                     except Exception:
                         pass
 

@@ -1,0 +1,176 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 001_initial_schema, Initial database schema with IAM, Research Core, and RLS metadata
+INFO  [alembic.runtime.migration] Running upgrade 001_initial_schema -> 002_stage1_validation_and_math, Stage 1 Validation and Math Schema: equations, variables, validation_runs, validation_findings with RLS
+INFO  [alembic.runtime.migration] Running upgrade 002_stage1_validation_and_math -> 003_stage3_claims_and_epistemic_logic, Stage 3 Claims and Epistemic Logic Schema: claims and claim_relations with Row-Level Security (RLS)
+INFO  [alembic.runtime.migration] Running upgrade 003_stage3_claims_and_epistemic_logic -> 004_owner_only_dml, Separate read visibility from owner-only project mutations.
+INFO  [alembic.runtime.migration] Running upgrade 004_owner_only_dml -> 005_atomic_drafts, Draft concurrency tokens, unit definitions and mathematical-content freeze.
+Traceback (most recent call last):
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 581, in _prepare_and_execute
+    prepared_stmt, attributes = await adapt_connection._prepare(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 819, in _prepare
+    prepared_stmt = await self._connection.prepare(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\asyncpg\connection.py", line 661, in prepare
+    return await self._prepare(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\asyncpg\connection.py", line 680, in _prepare
+    stmt = await self._get_statement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\asyncpg\connection.py", line 466, in _get_statement
+    statement = await self._protocol.prepare(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "asyncpg/protocol/protocol.pyx", line 161, in prepare
+    return await waiter
+asyncpg.exceptions.PostgresSyntaxError: cannot insert multiple commands into a prepared statement
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 656, in execute
+    await_(self._prepare_and_execute(operation, parameters))
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\util\concurrency.py", line 167, in await_
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\util\concurrency.py", line 205, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 618, in _prepare_and_execute
+    self._handle_exception(error)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 568, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 847, in _handle_exception
+    super()._handle_exception(error)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\connectors\asyncio.py", line 412, in _handle_exception
+    self._handle_exception_no_connection(self.dbapi, error)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 840, in _handle_exception_no_connection
+    raise translated_error from error
+sqlalchemy.dialects.postgresql.asyncpg.AsyncAdapt_asyncpg_dbapi.ProgrammingError: cannot insert multiple commands into a prepared statement
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\__main__.py", line 4, in <module>
+    main(prog="alembic")
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\config.py", line 1039, in main
+    CommandLine(prog=prog).main(argv=argv)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\config.py", line 1029, in main
+    self.run_cmd(cfg, options)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\config.py", line 963, in run_cmd
+    fn(
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\command.py", line 487, in upgrade
+    script.run_env()
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\script\base.py", line 550, in run_env
+    util.load_python_file(self.dir, "env.py")
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\util\pyfiles.py", line 114, in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\util\pyfiles.py", line 132, in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 940, in exec_module
+  File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
+  File "D:\Reality_Science\backend\app\db\migrations\env.py", line 61, in <module>
+    run_migrations_online()
+  File "D:\Reality_Science\backend\app\db\migrations\env.py", line 55, in run_migrations_online
+    asyncio.run(run_async_migrations())
+  File "C:\Users\TIEN PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\runners.py", line 190, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\TIEN PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\TIEN PC\AppData\Roaming\uv\python\cpython-3.11-windows-x86_64-none\Lib\asyncio\base_events.py", line 654, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\app\db\migrations\env.py", line 49, in run_async_migrations
+    await connection.run_sync(do_run_migrations)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\ext\asyncio\engine.py", line 907, in run_sync
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\util\concurrency.py", line 212, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\app\db\migrations\env.py", line 35, in do_run_migrations
+    context.run_migrations()
+  File "<string>", line 8, in run_migrations
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\runtime\environment.py", line 970, in run_migrations
+    self.get_context().run_migrations(**kw)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\runtime\migration.py", line 616, in run_migrations
+    step.migration_fn(**kw)
+  File "D:\Reality_Science\backend\app\db\migrations\versions\005_atomic_drafts.py", line 22, in upgrade
+    op.execute("""
+  File "<string>", line 8, in execute
+  File "<string>", line 3, in execute
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\operations\ops.py", line 2645, in execute
+    return operations.invoke(op)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\operations\base.py", line 448, in invoke
+    return fn(self, operation)
+           ^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\operations\toimpl.py", line 256, in execute_sql
+    operations.migration_context.impl.execute(
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\ddl\impl.py", line 259, in execute
+    self._exec(sql, execution_options)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\alembic\ddl\impl.py", line 252, in _exec
+    return conn.execute(construct, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1494, in execute
+    return meth(
+           ^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\sql\elements.py", line 534, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1714, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1868, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1996, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 2351, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\base.py", line 1977, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\engine\default.py", line 1192, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 656, in execute
+    await_(self._prepare_and_execute(operation, parameters))
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\util\concurrency.py", line 167, in await_
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\util\concurrency.py", line 205, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 618, in _prepare_and_execute
+    self._handle_exception(error)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 568, in _handle_exception
+    self._adapt_connection._handle_exception(error)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 847, in _handle_exception
+    super()._handle_exception(error)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\connectors\asyncio.py", line 412, in _handle_exception
+    self._handle_exception_no_connection(self.dbapi, error)
+  File "D:\Reality_Science\backend\.venv\Lib\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 840, in _handle_exception_no_connection
+    raise translated_error from error
+sqlalchemy.exc.ProgrammingError: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) cannot insert multiple commands into a prepared statement
+[SQL: 
+    CREATE FUNCTION fn_version_units_revision() RETURNS TRIGGER AS $$
+    BEGIN
+        IF NEW.units_json::jsonb IS DISTINCT FROM OLD.units_json::jsonb THEN
+            NEW.revision := GREATEST(NEW.revision, OLD.revision + 1);
+        END IF;
+        RETURN NEW;
+    END;
+    $$ LANGUAGE plpgsql;
+    CREATE TRIGGER trg_version_units_revision BEFORE UPDATE ON research_versions
+    FOR EACH ROW EXECUTE FUNCTION fn_version_units_revision();
+    ]
+(Background on this error at: https://sqlalche.me/e/21/f405)

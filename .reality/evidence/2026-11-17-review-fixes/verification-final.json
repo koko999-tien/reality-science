@@ -1,0 +1,12 @@
+{
+  "time_utc": "2026-11-16T17:41:25.889282+00:00",
+  "head": "595e3f0232e06e3f76fa770430a05213f6cda7d2",
+  "verification_inputs": 164,
+  "hash_mismatches": [],
+  "git_diff_check": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of '.reality/evidence/2026-11-16-compute-queue/diff-check.json', CRLF will be replaced by LF the next time Git touches it\n"
+  },
+  "direct_handoff_delivery": "NOT SENT - OpenBot messaging and attachment tools unavailable"
+}

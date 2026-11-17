@@ -29,6 +29,43 @@ from worker.tasks.compute_tasks import verify_equation_ast
 # Speed of Light Invariant Tests
 # ---------------------------------------------------------------------------
 
+def test_custom_velocity_scale_reaches_physical_checks_without_leaking():
+    unit = UnitSpec(name="draft_velocity", symbol="draftvel", dimensionality="[length] / [time]", scale_factor=1000)
+    bundle = JobBundle(job_id="custom-physical", version_id="v", target_entity_type=TargetEntityType.EQUATION,
+        target_entity_id="e", expression_ast=ExprNode(node_type=NodeType.CONSTANT, value=350000),
+        variables=[VariableSpec(symbol="v", name="Velocity", unit=unit.name)], units=[unit], system_context=SystemContext())
+    result = verify_equation_ast.apply(args=[bundle.model_dump()]).get()
+    assert result["state"] == "FAIL" and result["diagnostic_code"] == "SPEED_OF_LIGHT_VIOLATION"
+    assert result["layer_findings"][4]["details"]["calculated_value"] == 350000000
+    # The same name in a subsequent job must use that job's scale.
+    second = bundle.model_dump()
+    second["units"][0]["scale_factor"] = 1
+    assert verify_equation_ast.apply(args=[second]).get()["state"] == "PASS"
+    from worker.core.dimension_engine import ureg
+    assert unit.name not in ureg
+
+
+def test_unknown_velocity_unit_returns_diagnostic_instead_of_assuming_si():
+    result = verify_physical_invariants(ExprNode(node_type=NodeType.CONSTANT, value=350000),
+        [VariableSpec(symbol="v", name="Velocity", unit="undefined_draft_velocity")])
+    assert result.state != FindingState.PASS
+    assert result.diagnostic_code == "DIMENSIONAL_MISMATCH"
+
+
+@pytest.mark.parametrize("symbol", ["v", "u"])
+@pytest.mark.parametrize("custom", [False, True])
+def test_explicit_length_dimension_overrides_velocity_name_heuristic(symbol, custom):
+    units = [UnitSpec(name="draft_length", symbol="dlen", dimensionality="[length]", scale_factor=1000)] if custom else []
+    bundle = JobBundle(job_id="length-not-velocity", version_id="v", target_entity_type=TargetEntityType.EQUATION,
+        target_entity_id="e", expression_ast=ExprNode(node_type=NodeType.BINARY_OP, op=OperatorType.MUL,
+            left=ExprNode(node_type=NodeType.CONSTANT, value=2),
+            right=ExprNode(node_type=NodeType.VARIABLE, value=symbol)),
+        variables=[VariableSpec(symbol=symbol, name="Length", unit="draft_length" if custom else "meter")],
+        units=units, system_context=SystemContext())
+    result = verify_equation_ast.apply(args=[bundle.model_dump()]).get()
+    assert result["state"] == "PASS"
+    assert result["layer_findings"][4]["diagnostic_code"] != "DIMENSIONAL_MISMATCH"
+
 def test_speed_of_light_subluminal_passes():
     """Velocity strictly below c must pass."""
     var_v = VariableSpec(symbol="v", name="velocity", unit="meter / second")

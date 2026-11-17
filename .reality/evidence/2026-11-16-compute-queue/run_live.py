@@ -20,15 +20,100 @@ from redis import Redis
 
 def stop_owned_process(process):
     if process is not None and process.poll() is None:
-        subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],check=True,capture_output=True)
+        subprocess.run(['taskkill','/PID',str(process.pid),'/T','/F'],check=True,capture_output=True,timeout=30)
         process.wait(timeout=20)
 
 
-def run(command,name,env):
+def run(command,name,env,timeout=600):
     with (E/(name+'.log')).open('w',encoding='utf-8') as log:
-        code=subprocess.run(command,cwd=BACKEND,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=600).returncode
+        process=subprocess.Popen(command,cwd=BACKEND,env=env,stdout=log,stderr=subprocess.STDOUT)
+        try:
+            code=process.wait(timeout=timeout)
+        except BaseException as error:
+            # Keep the live parent handle until its descendants (including the
+            # Windows venv launcher and Uvicorn) have been stopped as a tree.
+            try:
+                stop_owned_process(process)
+            except Exception as cleanup_error:
+                error.add_note(f'Test process tree cleanup failed: {cleanup_error}')
+            raise
     print((E/(name+'.log')).read_text(encoding='utf-8'))
     return {'command':command,'exit':code}
+
+
+def cleanup_resources(name,manifest,manifest_path,worker,broker,client,broker_id,port,logs,codes):
+    """Attempt each owned-resource teardown even when an earlier stage fails."""
+    errors=[]
+
+    def attempt(stage,operation):
+        try:
+            return operation()
+        except Exception as error:
+            errors.append({'stage':stage,'type':type(error).__name__,'message':str(error)})
+            return None
+
+    attempt('worker',lambda:stop_owned_process(worker))
+
+    def stop_broker():
+        if broker is None or broker.poll() is not None:
+            return
+        if broker_id is None:
+            stop_owned_process(broker)
+            return
+        # Network shutdown is permitted only for the identified, marked broker.
+        if client.info('server')['run_id']!=broker_id or client.get('reality-test-instance')!=name+'-'+broker_id:
+            raise RuntimeError('Broker identity mismatch; refusing network shutdown')
+        client.shutdown(nosave=True)
+        broker.wait(timeout=15)
+
+    attempt('broker-shutdown',stop_broker)
+    # A lost Redis connection must not strand the process we started. This uses
+    # the retained Popen handle, never a historical PID or an arbitrary server.
+    attempt('broker-process',lambda:stop_owned_process(broker))
+    if client is not None:
+        attempt('redis-client',client.close)
+
+    def stop_postgres():
+        if not manifest.get('stopped'):
+            asyncio.run(identity(manifest))
+            codes['stop']=stop_cluster(manifest,E/(name+'-stop.log'))
+            if codes['stop']!=0:
+                raise RuntimeError('PostgreSQL shutdown returned nonzero')
+
+    attempt('postgres',stop_postgres)
+    attempt('manifest',lambda:manifest_path.write_text(json.dumps(manifest,indent=2)))
+    for index,log in enumerate(logs):
+        attempt(f'log-{index}',log.close)
+
+    ports={manifest['port']}
+    if port: ports.add(port)
+
+    def collect_api_ports():
+        for log in (E/(name+'-pytest')).glob('*/api.log'):
+            ports.update(int(p) for p in re.findall(r'Uvicorn running on http://127\.0\.0\.1:(\d+)',log.read_text()))
+
+    attempt('api-port-discovery',collect_api_ports)
+    listening={}
+    for p in ports:
+        def check_port(p=p):
+            with socket.socket() as sock:
+                sock.settimeout(.5)
+                return sock.connect_ex(('127.0.0.1',p))==0
+        listening[str(p)]=attempt(f'port-{p}',check_port)
+    cleanup={'codes':codes,'ports_accepting':listening,'postgres_stopped':manifest.get('stopped'),
+             'worker_exit':attempt('worker-status',worker.poll) if worker else None,
+             'broker_exit':attempt('broker-status',broker.poll) if broker else None,
+             'postgres_control':attempt('postgres-control',lambda:control_data(manifest)),
+             'errors':errors}
+    if (not manifest.get('stopped') or any(value is not False for value in listening.values())
+            or (worker is not None and cleanup['worker_exit'] is None)
+            or (broker is not None and cleanup['broker_exit'] is None)):
+        errors.append({'stage':'verification','type':'RuntimeError','message':'Incomplete owned-resource cleanup'})
+    attempt('cleanup-evidence',lambda:(E/(name+'-cleanup.json')).write_text(json.dumps(cleanup,indent=2)))
+    print(json.dumps(cleanup,indent=2))
+    if errors:
+        raise RuntimeError('Cleanup failures: '+', '.join(error['stage'] for error in errors))
+    return cleanup
 
 
 async def identity(manifest):
@@ -107,35 +192,7 @@ def main():
             'worker_started':worker is not None},indent=2))
         return codes['tests']['exit']
     finally:
-        stop_owned_process(worker)
-        if broker is not None and broker.poll() is None:
-            if broker_id is not None:
-                assert client.info('server')['run_id']==broker_id
-                assert client.get('reality-test-instance')==name+'-'+broker_id
-                client.shutdown(nosave=True)
-                broker.wait(timeout=15)
-            else:
-                stop_owned_process(broker)
-        if client is not None: client.close()
-        if not manifest.get('stopped'):
-            asyncio.run(identity(manifest))
-            codes['stop']=stop_cluster(manifest,E/(name+'-stop.log'))
-            manifest_path.write_text(json.dumps(manifest,indent=2))
-        for log in logs: log.close()
-        ports={manifest['port']}
-        if port: ports.add(port)
-        for log in (E/(name+'-pytest')).glob('*/api.log'):
-            ports.update(int(p) for p in re.findall(r'Uvicorn running on http://127\.0\.0\.1:(\d+)',log.read_text()))
-        listening={}
-        for p in ports:
-            with socket.socket() as sock:
-                sock.settimeout(.5); listening[str(p)]=sock.connect_ex(('127.0.0.1',p))==0
-        cleanup={'codes':codes,'ports_accepting':listening,'postgres_stopped':manifest['stopped'],
-                 'worker_exit':worker.poll() if worker else None,'broker_exit':broker.poll() if broker else None,
-                 'postgres_control':control_data(manifest)}
-        (E/(name+'-cleanup.json')).write_text(json.dumps(cleanup,indent=2))
-        assert manifest['stopped'] and not any(listening.values())
-        print(json.dumps(cleanup,indent=2))
+        cleanup_resources(name,manifest,manifest_path,worker,broker,client,broker_id,port,logs,codes)
 
 
 if __name__=='__main__': raise SystemExit(main())

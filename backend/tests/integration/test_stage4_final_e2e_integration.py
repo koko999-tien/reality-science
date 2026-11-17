@@ -97,6 +97,10 @@ class MockResult:
     def scalar_one_or_none(self) -> Optional[Any]:
         return self._items[0] if self._items else None
 
+    def scalar_one(self) -> Any:
+        assert len(self._items) == 1
+        return self._items[0]
+
     def scalars(self) -> MockResult:
         return self
 
@@ -126,7 +130,8 @@ class MockDbSession:
     async def execute(self, stmt: Any) -> MockResult:
         if not hasattr(stmt, "column_descriptions"):
             return MockResult([])
-        model_cls = stmt.column_descriptions[0]["type"]
+        descriptions = stmt.column_descriptions
+        model_cls = descriptions[0]["entity"]
         params = stmt.compile().params
         candidates = [e for e in self.entities if isinstance(e, model_cls)]
 
@@ -148,7 +153,13 @@ class MockDbSession:
                             break
                 if match:
                     filtered.append(item)
-            return MockResult(filtered)
+            candidates = filtered
+        if len(descriptions) == 2:
+            assert model_cls is ValidationRun and descriptions[1]["name"] == "revision"
+            versions = {e.id: e for e in self.entities if isinstance(e, ResearchVersion)}
+            return MockResult([(run, versions[run.version_id].revision) for run in candidates])
+        if descriptions[0]["expr"] is not model_cls:
+            return MockResult([getattr(item, descriptions[0]["name"]) for item in candidates])
         return MockResult(candidates)
 
 
@@ -442,6 +453,8 @@ async def test_tier3_full_version_validate_and_persistence(
         expected_state = "PASS" if declare_acceleration else "FAIL"
         assert data_val["overall_state"] == expected_state
         assert len(data_val["findings"]) == 6
+        assert data_val["input_revision"] == v_draft.revision
+        assert data_val["is_current"] is True
         assert v_draft.publication_status == publication_status
         if not declare_acceleration:
             assert data_val["findings"][0]["diagnostic_code"] == DiagnosticCode.UNDECLARED_SYMBOL.value
@@ -454,6 +467,16 @@ async def test_tier3_full_version_validate_and_persistence(
         assert runs_list[0]["id"] == data_val["id"]
         assert runs_list[0]["overall_state"] == expected_state
         assert len(runs_list[0]["findings"]) == 6
+        assert v_draft.publication_status == publication_status
+        assert runs_list[0]["input_revision"] == data_val["input_revision"]
+        assert runs_list[0]["is_current"] is True
+        assert all(f["diagnostics"]["provenance"]["job_id"] == data_val["id"]
+                   for f in runs_list[0]["findings"])
+        v_draft.revision += 1
+        stale = await ac.get(f"/api/v1/versions/{v_draft.id}/validation-runs")
+        assert stale.status_code == 200
+        assert stale.json()[0]["is_current"] is False
+        assert stale.json()[0]["overall_state"] == expected_state
         assert v_draft.publication_status == publication_status
 
 

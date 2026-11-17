@@ -8,6 +8,7 @@ import {
   VariableModel,
   ClaimModel,
   ResearchProjectModel,
+  ResearchVersionModel, DraftContent, DraftSnapshot,
 } from "@/types/contracts";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -178,4 +179,46 @@ export async function exportVersionZip(versionId: string): Promise<Blob> {
   });
   if (!response.ok) throw new Error(`Export failed (${response.status}).`);
   return response.blob();
+}
+
+export class DraftApiError extends Error {
+  constructor(message: string, public status: number, public code?: string) {
+    super(message);
+  }
+}
+
+async function draftRequest<T>(path: string, method = "GET", body?: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method, cache: "no-store", headers: authenticatedHeaders({ "Content-Type": "application/json" }),
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+  if (!response.ok) {
+    let code: string | undefined;
+    let message = `Draft request failed (${response.status}).`;
+    try {
+      const { detail } = await response.json();
+      if (typeof detail === "string") message = detail;
+      if (detail?.code === "DRAFT_REVISION_CONFLICT") {
+        code = detail.code;
+        message = "A newer revision was saved elsewhere. Your edits are still here. Reload the saved draft before saving again.";
+      }
+      if (Array.isArray(detail)) message = `Invalid draft: ${detail.map((item) => item.msg).join("; ")}`;
+    } catch { /* retain HTTP error */ }
+    throw new DraftApiError(message, response.status, code);
+  }
+  return response.json();
+}
+
+export function createVersion(slug: string, title: string): Promise<ResearchVersionModel> {
+  return draftRequest(`/projects/${encodeURIComponent(slug)}/versions`, "POST", { title });
+}
+
+export function fetchVersionDraft(versionId: string): Promise<DraftSnapshot> {
+  return draftRequest(`/versions/${encodeURIComponent(versionId)}/draft`);
+}
+
+export function saveVersionDraft(versionId: string, expectedRevision: number, content: DraftContent): Promise<DraftSnapshot> {
+  return draftRequest(`/versions/${encodeURIComponent(versionId)}/draft`, "PUT", {
+    expected_revision: expectedRevision, ...content,
+  });
 }

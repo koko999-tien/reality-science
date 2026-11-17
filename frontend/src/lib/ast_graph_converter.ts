@@ -245,7 +245,8 @@ export function graphToAst(
         }
         return {
           node_type: "constant",
-          value: num,
+          // Numeric strings may carry precision beyond JavaScript's Number.
+          value: raw,
         };
       }
 

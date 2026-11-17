@@ -1,0 +1,10 @@
+{
+  "head": "595e3f0232e06e3f76fa770430a05213f6cda7d2",
+  "owned_files": 10,
+  "verification_inputs": 164,
+  "ports_checked": 26,
+  "baseline_hashes_unchanged": true,
+  "diff_check": "PASS",
+  "patch_reverse_check": "PASS",
+  "cleanup": "PASS"
+}

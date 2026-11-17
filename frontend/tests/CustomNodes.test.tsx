@@ -43,7 +43,9 @@ describe("Custom Canvas Nodes", () => {
       expect(input).toHaveValue(42);
 
       fireEvent.change(input, { target: { value: "100" } });
-      expect(onChange).toHaveBeenCalledWith(100);
+      expect(onChange).toHaveBeenCalledWith("100");
+      fireEvent.change(input, { target: { value: "9007199254740993" } });
+      expect(onChange).toHaveBeenLastCalledWith("9007199254740993");
     });
   });
 

@@ -1,0 +1,204 @@
+REALITY
+SCIENCE
+SCIENTIFIC WORKSPACE
+Projects
+GitHub
+RESEARCH EQUATION WORKSPACE
+Browser persistence fixture
+
+No version is recorded for this project. Create a draft to begin.
+
+Formula:
+Empty
+New draft title
+Create draft
+
+Interactive checks are ad hoc API responses; they do not create persisted validation history. Recorded versions can be validated from their project page.
+
+LOCAL MODEL EXAMPLES
+Illustrative Equation Presets
+
+Load an example into the local canvas. Verification runs only when explicitly requested.
+
+All
+Classical
+Relativistic
+Astrophysics
+Thermodynamics
+Oscillations
+Classical
+3 vars
+Kinematics Velocity
+
+Linear velocity under constant acceleration
+
+𝑣
+0
++
+𝑎
+⋅
+𝑡
+v
+0
+	​
+
++a⋅t
+v_0 [meter / second]
+a [meter / second ** 2]
+t [second]
+Load Preset
+Relativistic
+2 vars
+Einstein Mass-Energy
+
+Equivalence of relativistic mass and rest energy
+
+𝑚
+⋅
+𝑐
+2
+m⋅c
+2
+m [kilogram]
+c [meter / second]
+Load Preset
+Astrophysics
+4 vars
+Newton's Gravity
+
+Universal gravitational attraction between masses
+
+𝐺
+⋅
+(
+𝑚
+1
+⋅
+𝑚
+2
+)
+𝑟
+2
+r
+2
+G⋅(m
+1
+	​
+
+⋅m
+2
+	​
+
+)
+	​
+
+G [meter ** 3 / (kilogram * second ** 2)]
+m_1 [kilogram]
+m_2 [kilogram]
+r [meter]
+Load Preset
+Classical
+2 vars
+Kinetic Energy
+
+Work required to accelerate a body of mass m
+
+(
+0.5
+⋅
+𝑚
+)
+⋅
+𝑣
+2
+(0.5⋅m)⋅v
+2
+m [kilogram]
+v [meter / second]
+Load Preset
+Thermodynamics
+4 vars
+Ideal Gas Law
+
+State of an ideal gas relating P, V, n, R, T
+
+(
+𝑛
+⋅
+𝑅
+)
+⋅
+𝑇
+𝑉
+V
+(n⋅R)⋅T
+	​
+
+n [mole]
+R [joule / (kelvin * mole)]
+T [kelvin]
+V [meter ** 3]
+Load Preset
+Oscillations
+2 vars
+Harmonic Oscillator Energy
+
+Potential energy stored in a Hookean spring
+
+(
+0.5
+⋅
+𝑘
+)
+⋅
+𝑥
+2
+(0.5⋅k)⋅x
+2
+k [newton / meter]
+x [meter]
+Load Preset
+Physical Quantity & Unit Manifest
+SYMBOL-FIRST DECLARATION PANEL
+
+Rigorous dimensional manifest: Declare verified symbols and physical units (SI / ISO 80000) prior to equation synthesis.
+
+0 declared
+Symbol *
+Name *
+Physical Unit (SI Standard) *
+Domain
+real
+positive_real
+integer
+complex
+Declare Symbol
+SYMBOL	LATEX	NAME	SI UNIT	DOMAIN	USAGE	ACTIONS
+No variables declared yet. Add your model's physical variables above.
+Custom unit definitions (0)
+Symbolic Dataflow Canvas
+Drag connections from output handles to operator inputs
+ADD NODE:
+Constant
+Variable
+Binary Op
+Unary Op
+Function
+Equation Root
+Auto Layout
+Clear
+Validate AST
+React Flow
+NOT YET TESTED
+Backend validation response
+
+Canvas expression has not yet been submitted to the compute verification sandbox.
+
+Run Compute Verification
+Dimensional Homogeneity (SI Standard)
+UNVERIFIED
+
+Submit formula to request backend validation.
+
+Symbolic Simplification (SymPy CAS)
+Awaiting symbolic evaluation...

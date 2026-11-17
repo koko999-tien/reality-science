@@ -1,0 +1,12 @@
+{
+  "command": [
+    "C:\\Users\\TIEN PC\\AppData\\Local\\Temp\\opencode\\reality-worker-verification-20261116\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "tests/test_soft_deadline.py"
+  ],
+  "cwd": "D:\\Reality_Science\\worker",
+  "exit": 0
+}

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 import math
 from typing import Dict, List, Optional, Set, Tuple, Union
+from celery.exceptions import SoftTimeLimitExceeded
 import sympy as sp
 from shared.schemas.math_ast import (
     ExprNode,
@@ -43,6 +44,8 @@ def extract_denominators(sympy_expr: sp.Expr) -> Set[sp.Expr]:
             _, denom = sympy_expr.as_numer_denom()
             if denom != 1 and denom != sp.Integer(1):
                 denominators.add(denom)
+        except SoftTimeLimitExceeded:
+            raise
         except Exception:
             pass
 
@@ -52,6 +55,8 @@ def extract_denominators(sympy_expr: sp.Expr) -> Set[sp.Expr]:
             try:
                 if subexpr.exp.is_number and subexpr.exp < 0:
                     denominators.add(subexpr.base)
+            except SoftTimeLimitExceeded:
+                raise
             except Exception:
                 pass
 
@@ -82,6 +87,8 @@ def check_singularities_and_poles(
             domain_type = var_domain_map.get(sym.name, "real")
             try:
                 roots = sp.solveset(denom, sym, domain=sp.S.Reals)
+            except SoftTimeLimitExceeded:
+                raise
             except Exception:
                 continue
 
@@ -165,8 +172,10 @@ def evaluate_boundary_limits(
                 boundary_limits[f"{sym.name} -> -oo"] = str(lim_neg_inf)
                 if lim_neg_inf.is_infinite:
                     divergences.append(f"Asymptotic divergence as {sym.name} -> -oo: {lim_neg_inf}")
+        except SoftTimeLimitExceeded:
+            raise
         except Exception:
-            # Undetermined limit or CAS timeout
+            # An undetermined limit may fall back; a task deadline may not.
             continue
 
     return boundary_limits, divergences
@@ -191,6 +200,8 @@ def execute_richardson_stratified_sampling(
             val = float(diff_expr.evalf())
             is_zero = abs(val) < tolerance
             return is_zero, abs(val), [f"Constant difference: {val}"]
+        except SoftTimeLimitExceeded:
+            raise
         except Exception:
             return False, float("inf"), ["Evaluation failed on constant difference"]
 
@@ -231,6 +242,8 @@ def execute_richardson_stratified_sampling(
                     max_err,
                     [f"Stratified sampling divergence at point {i}: |diff| = {err} >= {tolerance} for {subs_dict}"],
                 )
+        except SoftTimeLimitExceeded:
+            raise
         except Exception as ex:
             return False, float("inf"), [f"Exception evaluating point {i}: {str(ex)}"]
 
@@ -272,6 +285,8 @@ def analyze_boundary_and_singularities(
             message=str(e),
             diagnostics=[str(e)],
         )
+    except SoftTimeLimitExceeded:
+        raise
     except Exception as e:
         return BoundaryAnalysisResult(
             is_valid=False,

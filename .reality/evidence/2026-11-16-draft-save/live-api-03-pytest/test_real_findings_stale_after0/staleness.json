@@ -1,0 +1,518 @@
+{
+  "first": {
+    "id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+    "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34",
+    "status": "completed",
+    "overall_state": "PASS",
+    "input_revision": 4,
+    "is_current": true,
+    "started_at": "2026-11-16T18:08:18.341092+00:00",
+    "completed_at": "2026-11-16T18:08:19.206163+00:00",
+    "created_at": "2026-11-16T18:08:19.208677+00:00",
+    "findings": [
+      {
+        "id": "bffeebe1-5180-479c-ac9b-5f3463742a2b",
+        "run_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "layer": 1,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "state": "PASS",
+        "diagnostic_code": "VALIDATION_PASSED",
+        "message": "Syntax and semantic checks passed (2 symbols, 3 nodes, depth 2).",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [
+            "Referenced symbols: ['x', 'y']"
+          ],
+          "details": {
+            "node_count": 3,
+            "max_depth": 2,
+            "referenced_symbols": [
+              "x",
+              "y"
+            ]
+          },
+          "provenance": {
+            "bundle_sha256": "3e53e06bd9959e350da85519f1a8fc8d8b025711b501ff423815854a0bd2d61c",
+            "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.220270+00:00"
+      },
+      {
+        "id": "7a0b768c-e1bb-464e-9b28-70502135dfa4",
+        "run_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "layer": 2,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "state": "PASS",
+        "diagnostic_code": "VALIDATION_PASSED",
+        "message": "Layer 2 Boundary and Mathematical Consistency validation passed.",
+        "symbolic_simplification": "x + y",
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [
+            "Asymptotic divergence as x -> oo: oo",
+            "Asymptotic divergence as x -> -oo: -oo",
+            "Asymptotic divergence as y -> oo: oo",
+            "Asymptotic divergence as y -> -oo: -oo",
+            "Symbolic simplification: x + y"
+          ],
+          "details": {
+            "simplified_expr": "x + y"
+          },
+          "provenance": {
+            "bundle_sha256": "3e53e06bd9959e350da85519f1a8fc8d8b025711b501ff423815854a0bd2d61c",
+            "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.220270+00:00"
+      },
+      {
+        "id": "121ed0a4-a793-48ef-b8dd-a7efbdf432ed",
+        "run_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "layer": 3,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "state": "PASS",
+        "diagnostic_code": "VALIDATION_PASSED",
+        "message": "Dimensional consistency verified: [length]",
+        "symbolic_simplification": null,
+        "dimensions_verified": true,
+        "diagnostics": {
+          "diagnostics": [
+            "Inferred dimension: [length]"
+          ],
+          "details": {
+            "inferred_dimension": "[length]"
+          },
+          "provenance": {
+            "bundle_sha256": "3e53e06bd9959e350da85519f1a8fc8d8b025711b501ff423815854a0bd2d61c",
+            "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.220270+00:00"
+      },
+      {
+        "id": "88f576b1-2ae8-4f93-8f13-214d8082f091",
+        "run_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "layer": 4,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "NO_SYSTEM_CONTEXT",
+        "message": "No physical system context declared for invariant checks.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "3e53e06bd9959e350da85519f1a8fc8d8b025711b501ff423815854a0bd2d61c",
+            "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.220270+00:00"
+      },
+      {
+        "id": "4813a6c9-5850-4511-8978-eebbe9bd484b",
+        "run_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "layer": 5,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "NO_EMPIRICAL_DATA",
+        "message": "No empirical observation dataset attached.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "3e53e06bd9959e350da85519f1a8fc8d8b025711b501ff423815854a0bd2d61c",
+            "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.220270+00:00"
+      },
+      {
+        "id": "76afa927-3308-44f0-8366-1befe9e0c468",
+        "run_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "layer": 6,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "NO_CLAIM_GRAPH",
+        "message": "No epistemic claim graph declared.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "3e53e06bd9959e350da85519f1a8fc8d8b025711b501ff423815854a0bd2d61c",
+            "job_id": "555cd234-d594-4ef8-934c-091bb678b9ef",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.220270+00:00"
+      }
+    ]
+  },
+  "late": {
+    "id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+    "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34",
+    "status": "completed",
+    "overall_state": "PASS",
+    "input_revision": 4,
+    "is_current": false,
+    "started_at": "2026-11-16T18:08:19.320115+00:00",
+    "completed_at": "2026-11-16T18:08:19.726406+00:00",
+    "created_at": "2026-11-16T18:08:19.727405+00:00",
+    "findings": [
+      {
+        "id": "3cef46c3-8b64-4837-912c-57f65f5fc544",
+        "run_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "layer": 1,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "state": "PASS",
+        "diagnostic_code": "VALIDATION_PASSED",
+        "message": "Syntax and semantic checks passed (2 symbols, 3 nodes, depth 2).",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [
+            "Referenced symbols: ['x', 'y']"
+          ],
+          "details": {
+            "node_count": 3,
+            "max_depth": 2,
+            "referenced_symbols": [
+              "x",
+              "y"
+            ]
+          },
+          "provenance": {
+            "bundle_sha256": "6143764ba8e0256f42c2e113bfe1cacac37b22a4d37455e5a15014a9687045a7",
+            "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.730414+00:00"
+      },
+      {
+        "id": "9984cdc4-c5fc-4d0f-a5f3-d0e589f87294",
+        "run_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "layer": 2,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "state": "PASS",
+        "diagnostic_code": "VALIDATION_PASSED",
+        "message": "Layer 2 Boundary and Mathematical Consistency validation passed.",
+        "symbolic_simplification": "x + y",
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [
+            "Asymptotic divergence as x -> oo: oo",
+            "Asymptotic divergence as x -> -oo: -oo",
+            "Asymptotic divergence as y -> oo: oo",
+            "Asymptotic divergence as y -> -oo: -oo",
+            "Symbolic simplification: x + y"
+          ],
+          "details": {
+            "simplified_expr": "x + y"
+          },
+          "provenance": {
+            "bundle_sha256": "6143764ba8e0256f42c2e113bfe1cacac37b22a4d37455e5a15014a9687045a7",
+            "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.730414+00:00"
+      },
+      {
+        "id": "30457e78-8d3e-41d8-ae14-22ddae5568ff",
+        "run_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "layer": 3,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "state": "PASS",
+        "diagnostic_code": "VALIDATION_PASSED",
+        "message": "Dimensional consistency verified: [length]",
+        "symbolic_simplification": null,
+        "dimensions_verified": true,
+        "diagnostics": {
+          "diagnostics": [
+            "Inferred dimension: [length]"
+          ],
+          "details": {
+            "inferred_dimension": "[length]"
+          },
+          "provenance": {
+            "bundle_sha256": "6143764ba8e0256f42c2e113bfe1cacac37b22a4d37455e5a15014a9687045a7",
+            "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.730414+00:00"
+      },
+      {
+        "id": "b7662901-355c-4823-99e4-7d1f2422e517",
+        "run_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "layer": 4,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "NO_SYSTEM_CONTEXT",
+        "message": "No physical system context declared for invariant checks.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "6143764ba8e0256f42c2e113bfe1cacac37b22a4d37455e5a15014a9687045a7",
+            "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.730414+00:00"
+      },
+      {
+        "id": "8120b395-a2d3-461c-9548-57ec0940dc6a",
+        "run_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "layer": 5,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "NO_EMPIRICAL_DATA",
+        "message": "No empirical observation dataset attached.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "6143764ba8e0256f42c2e113bfe1cacac37b22a4d37455e5a15014a9687045a7",
+            "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.730414+00:00"
+      },
+      {
+        "id": "2287233a-c6ed-4cd8-9b85-5dc6faab73ee",
+        "run_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "layer": 6,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "NO_CLAIM_GRAPH",
+        "message": "No epistemic claim graph declared.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "6143764ba8e0256f42c2e113bfe1cacac37b22a4d37455e5a15014a9687045a7",
+            "job_id": "a0c9ccdd-11f1-4b18-9544-2b04d0483469",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:19.730414+00:00"
+      }
+    ]
+  },
+  "after_unit_edit": {
+    "id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+    "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34",
+    "status": "completed",
+    "overall_state": "FAIL",
+    "input_revision": 9,
+    "is_current": true,
+    "started_at": "2026-11-16T18:08:19.900405+00:00",
+    "completed_at": "2026-11-16T18:08:20.374364+00:00",
+    "created_at": "2026-11-16T18:08:20.375392+00:00",
+    "findings": [
+      {
+        "id": "7c22ff30-36bd-4cee-964e-b4ccafda58ff",
+        "run_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "layer": 1,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "state": "PASS",
+        "diagnostic_code": "VALIDATION_PASSED",
+        "message": "Syntax and semantic checks passed (2 symbols, 3 nodes, depth 2).",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [
+            "Referenced symbols: ['x', 'y']"
+          ],
+          "details": {
+            "node_count": 3,
+            "max_depth": 2,
+            "referenced_symbols": [
+              "x",
+              "y"
+            ]
+          },
+          "provenance": {
+            "bundle_sha256": "f985a82d9c9d9d91e39810f9b094cc6b193d9fdda00b1bf67088b1296fe479e9",
+            "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:20.378385+00:00"
+      },
+      {
+        "id": "1ab55920-eaae-4f0c-ae04-b3cd22e77fbe",
+        "run_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "layer": 2,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "state": "PASS",
+        "diagnostic_code": "VALIDATION_PASSED",
+        "message": "Layer 2 Boundary and Mathematical Consistency validation passed.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [
+            "Asymptotic divergence as x -> oo: oo",
+            "Asymptotic divergence as x -> -oo: -oo",
+            "Asymptotic divergence as y -> oo: oo",
+            "Asymptotic divergence as y -> -oo: -oo",
+            "Symbolic simplification: x + y"
+          ],
+          "details": {
+            "simplified_expr": "x + y"
+          },
+          "provenance": {
+            "bundle_sha256": "f985a82d9c9d9d91e39810f9b094cc6b193d9fdda00b1bf67088b1296fe479e9",
+            "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:20.378385+00:00"
+      },
+      {
+        "id": "038b87ac-a936-4996-95ef-489ebc1afd06",
+        "run_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "layer": 3,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "state": "FAIL",
+        "diagnostic_code": "DIMENSIONAL_MISMATCH",
+        "message": "Dimensional consistency check failed: DIMENSIONAL_MISMATCH",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [
+            "Dimensional verification failure: DIMENSIONAL_MISMATCH"
+          ],
+          "details": {
+            "inferred_dimension": ""
+          },
+          "provenance": {
+            "bundle_sha256": "f985a82d9c9d9d91e39810f9b094cc6b193d9fdda00b1bf67088b1296fe479e9",
+            "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:20.378385+00:00"
+      },
+      {
+        "id": "87c058fe-71cb-48c9-869c-4c949eb13290",
+        "run_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "layer": 4,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "SKIPPED_GATE",
+        "message": "Layer 4 skipped due to Layer 3 dimensional failure.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "f985a82d9c9d9d91e39810f9b094cc6b193d9fdda00b1bf67088b1296fe479e9",
+            "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:20.378385+00:00"
+      },
+      {
+        "id": "6a4cabc8-f623-462e-9973-e7e4937e2cb0",
+        "run_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "layer": 5,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "SKIPPED_GATE",
+        "message": "Layer 5 skipped due to Layer 3 dimensional failure.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "f985a82d9c9d9d91e39810f9b094cc6b193d9fdda00b1bf67088b1296fe479e9",
+            "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:20.378385+00:00"
+      },
+      {
+        "id": "f9f58734-e7e0-4700-9549-8686f4a087ef",
+        "run_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "layer": 6,
+        "target_entity_type": "EQUATION",
+        "target_entity_id": "1ce9c660-5ebc-4a44-b865-c958e0aa36f8",
+        "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+        "state": "NOT_APPLICABLE",
+        "diagnostic_code": "SKIPPED_GATE",
+        "message": "Layer 6 skipped due to Layer 3 dimensional failure.",
+        "symbolic_simplification": null,
+        "dimensions_verified": false,
+        "diagnostics": {
+          "diagnostics": [],
+          "details": {},
+          "provenance": {
+            "bundle_sha256": "f985a82d9c9d9d91e39810f9b094cc6b193d9fdda00b1bf67088b1296fe479e9",
+            "job_id": "ded65233-1e21-478f-8ca3-c58e81aded62",
+            "version_id": "857b6a96-0ccc-4aaa-81e6-d253919ebe34"
+          }
+        },
+        "created_at": "2026-11-16T18:08:20.378385+00:00"
+      }
+    ]
+  }
+}

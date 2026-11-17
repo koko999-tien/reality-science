@@ -1,0 +1,53 @@
+{
+  "statuses": [
+    409,
+    200
+  ],
+  "winner": {
+    "version": {
+      "id": "ad644214-3e36-4854-b7b7-87048645720c",
+      "project_id": "2ec59da6-18b2-4470-ae36-1496523ae9d0",
+      "version_number": 1,
+      "title": "First draft",
+      "content_hash": null,
+      "publication_status": "draft",
+      "is_frozen": false,
+      "revision": 3,
+      "created_at": "2026-11-17T09:12:31.628507+07:00"
+    },
+    "equations": [
+      {
+        "id": "09c3c0dc-3439-4b07-867d-bc8e3988503b",
+        "version_id": "ad644214-3e36-4854-b7b7-87048645720c",
+        "label": "Position",
+        "latex_raw": "winner_b",
+        "canonical_ast_json": {
+          "node_type": "variable",
+          "value": "winner_b"
+        },
+        "sympy_expr": null,
+        "created_at": "2026-11-17T09:12:31.989926+07:00",
+        "position": 0
+      }
+    ],
+    "variables": [
+      {
+        "id": "44682486-ac7d-4eb5-88d3-b624049d89e4",
+        "version_id": "ad644214-3e36-4854-b7b7-87048645720c",
+        "symbol": "winner_b",
+        "name": "Position",
+        "unit": "meter",
+        "domain": "real",
+        "latex_presentation": null,
+        "created_at": "2026-11-17T09:12:31.998709+07:00"
+      }
+    ],
+    "units": []
+  },
+  "conflict": {
+    "detail": {
+      "code": "DRAFT_REVISION_CONFLICT",
+      "current_revision": 3
+    }
+  }
+}

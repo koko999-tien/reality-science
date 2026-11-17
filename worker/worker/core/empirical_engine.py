@@ -14,6 +14,7 @@ Strict Zone 3 Security Mandates:
 
 from __future__ import annotations
 
+from celery.exceptions import SoftTimeLimitExceeded
 import math
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import mpmath
@@ -231,6 +232,8 @@ def compute_empirical_metrics(
             # Regularized upper incomplete gamma Q(a, z) = Gamma(a, z) / Gamma(a)
             p_val_mp = mpmath.gammainc(dof / 2.0, chi2 / 2.0, regularized=True)
             p_value = float(p_val_mp)
+        except SoftTimeLimitExceeded:
+            raise
         except Exception:
             p_value = None
 
@@ -360,6 +363,8 @@ def correlate_empirical_data(
             is_valid=False,
             diagnostics=[str(err)],
         )
+    except SoftTimeLimitExceeded:
+        raise
     except Exception as err:
         return EmpiricalCorrelationResult(
             job_id="",

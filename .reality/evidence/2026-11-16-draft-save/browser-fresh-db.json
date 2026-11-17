@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "old_pid": 37276,
+  "fresh_pid": 48488,
+  "version_id": "5e9db75c-3b7e-4575-8be2-80b89a9be5c9",
+  "revision": 28,
+  "checks": [
+    "create-lock-selection",
+    "create-save-reload",
+    "exact-ast-latex",
+    "failed-save-retains-edits",
+    "frozen-readonly",
+    "navigation-recovery",
+    "semantic-staleness",
+    "two-tab-conflict"
+  ],
+  "observations": 8
+}

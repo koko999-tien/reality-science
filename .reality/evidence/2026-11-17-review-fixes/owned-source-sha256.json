@@ -1,0 +1,12 @@
+{
+  "worker/worker/tasks/dimensional.py": "7e868958c6dbf70a099dc686b7c5d0a758a62012bef4eac5522b4609ffb22df7",
+  "worker/worker/core/boundary_engine.py": "21cc92a55855509b23cdfe696d965a1a5d98dde229728b99a235e2a3a46f5bd7",
+  "worker/worker/core/dimension_engine.py": "bf4308e71ad516047a91abd40e36a8b92293b9c02f69ee1e7b785e13bc7bcd9f",
+  "worker/worker/core/physical_invariants.py": "e436d5e8c09190042bc2c4c2f11948d23b1f9ae33d2742b685297e600921533c",
+  "worker/worker/core/empirical_engine.py": "ae25d763d5c5541d2283fb944674e025100d1a7e8aff1daae21fb96c7941c659",
+  "worker/worker/core/epistemic_engine.py": "38f95bb2359b9dc7994aa6abbe194667636d8358562bed4bc2bef9507429a119",
+  ".reality/evidence/2026-11-16-compute-queue/run_live.py": "9ea95321334d35fbf3806a7209307441dcedec122b5be776c6276af2832b6d75",
+  "worker/tests/test_soft_deadline.py": "800af74966c8623541bccebeba982b89860c4a1b863dba03a9b42148ac717f85",
+  "backend/tests/unit/test_live_queue_lifecycle.py": "b8afd987ce86ab3b6bf36a9df423ebf006d2eeaf0c0c3f884c204c8aa252e98a",
+  "backend/tests/integration/test_compute_soft_deadline_live.py": "d048e05a0811fbc125508fac88a210d3979386a69ba90afb7a3dac182072cc0f"
+}

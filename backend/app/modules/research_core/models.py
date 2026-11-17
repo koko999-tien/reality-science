@@ -1,7 +1,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, String, Text, Integer, JSON, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -50,6 +50,10 @@ class ResearchProject(Base):
 
 class ResearchVersion(Base):
     __tablename__ = "research_versions"
+    __table_args__ = (
+        UniqueConstraint("project_id", "version_number", name="uq_project_version_number"),
+        CheckConstraint("revision >= 0", name="ck_version_revision"),
+    )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     project_id: Mapped[str] = mapped_column(
@@ -60,6 +64,8 @@ class ResearchVersion(Base):
     content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     publication_status: Mapped[str] = mapped_column(String(30), default="draft", nullable=False)
     is_frozen: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    revision: Mapped[int] = mapped_column(Integer, default=0, server_default="0", nullable=False)
+    units_json: Mapped[list] = mapped_column(JSON, default=list, server_default="[]", nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
     )
@@ -76,6 +82,8 @@ class ResearchVersion(Base):
         kwargs.setdefault("is_frozen", False)
         kwargs.setdefault("version_number", 1)
         kwargs.setdefault("publication_status", "draft")
+        kwargs.setdefault("revision", 0)
+        kwargs.setdefault("units_json", [])
         super().__init__(**kwargs)
 
 
@@ -90,5 +98,4 @@ __all__ = [
     "ValidationRun",
     "Variable",
 ]
-
 

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import noload
 
 from app.db.session import get_db
 from app.modules.compute_orchestrator.errors import ComputeUnavailable
@@ -37,7 +38,7 @@ from shared.schemas.epistemic_logic import (
 )
 from shared.schemas.finding_result import FindingResult, FindingState, TargetEntityType
 from shared.schemas.job_bundle import JobBundle
-from shared.schemas.math_ast import ExprNode, VariableSpec
+from shared.schemas.math_ast import ExprNode, VariableSpec, UnitSpec
 from app.modules.reality_constraint_engine.service import verify_claim_graph_backend as verify_claim_graph
 
 
@@ -169,12 +170,15 @@ def _serialize_finding(f: ValidationFinding) -> dict:
     }
 
 
-def _serialize_run(r: ValidationRun, findings: List[ValidationFinding] = None) -> dict:
+def _serialize_run(r: ValidationRun, findings: List[ValidationFinding] = None,
+                   current_revision: int | None = None) -> dict:
     return {
         "id": r.id,
         "version_id": r.version_id,
         "status": r.status,
         "overall_state": r.overall_state,
+        "input_revision": r.input_revision,
+        "is_current": r.input_revision is not None and r.input_revision == current_revision,
         "started_at": r.started_at.isoformat() if r.started_at else None,
         "completed_at": r.completed_at.isoformat() if r.completed_at else None,
         "created_at": r.created_at.isoformat() if r.created_at else "",
@@ -223,14 +227,15 @@ async def validate_version(
     Loads equations, variables, evidence datasets, and epistemic claims from PostgreSQL.
     Persists ValidationRun and 6 ValidationFinding records in PostgreSQL.
     """
-    stmt = select(ResearchVersion).where(ResearchVersion.id == version_id)
+    stmt = (select(ResearchVersion).options(noload("*")).where(ResearchVersion.id == version_id)
+            .with_for_update(read=True).execution_options(populate_existing=True))
     res = await db.execute(stmt)
     version = res.scalar_one_or_none()
     if not version:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Version not found: {version_id}")
 
     # 1. Fetch equations
-    stmt_eq = select(Equation).where(Equation.version_id == version_id).order_by(Equation.created_at)
+    stmt_eq = select(Equation).where(Equation.version_id == version_id).order_by(Equation.position.asc().nulls_last(), Equation.created_at, Equation.id)
     res_eq = await db.execute(stmt_eq)
     equations_db = list(res_eq.scalars().all())
 
@@ -320,16 +325,19 @@ async def validate_version(
         target_entity_id=equations_db[0].id if equations_db else (claims_db[0].id if claims_db else version_id),
         expression_ast=primary_ast,
         variables=variable_specs,
-        units=[],
+        units=[UnitSpec.model_validate(unit) for unit in version.units_json],
         system_context=None,
         empirical_dataset=None,
         claim_graph=claim_graph,
     )
 
+    input_revision = version.revision
+    # Release the short snapshot lock before waiting for isolated compute.
+    await db.commit()
     started_at = datetime.now(timezone.utc)
     try:
         async with compute_job(bundle) as finding_res:
-            return await _persist_validation(db, bundle, finding_res, started_at)
+            return await _persist_validation(db, bundle, finding_res, started_at, input_revision)
     except ComputeUnavailable as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -339,16 +347,20 @@ async def validate_version(
 
 
 async def _persist_validation(db: AsyncSession, bundle: JobBundle,
-                               finding_res: FindingResult, started_at: datetime):
+                               finding_res: FindingResult, started_at: datetime,
+                               input_revision: int | None = None):
     """Only correlated, complete queue results reach this transaction."""
     validate_result(bundle, finding_res)
     version_id, job_id = bundle.version_id, bundle.job_id
+    current_revision = (await db.execute(select(ResearchVersion.revision).where(
+        ResearchVersion.id == version_id).with_for_update(read=True))).scalar_one()
     now_utc = datetime.now(timezone.utc)
     run = ValidationRun(
         id=job_id,
         version_id=version_id,
         status="completed",
         overall_state=finding_res.state.value,
+        input_revision=input_revision,
         started_at=started_at,
         completed_at=now_utc,
     )
@@ -377,7 +389,7 @@ async def _persist_validation(db: AsyncSession, bundle: JobBundle,
         persisted_findings.append(vf)
 
     await db.commit()
-    return _serialize_run(run, persisted_findings)
+    return _serialize_run(run, persisted_findings, current_revision)
 
 
 @router.get("/versions/{version_id}/validation-runs")
@@ -393,16 +405,18 @@ async def list_validation_runs(
     if not version:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Version not found: {version_id}")
 
-    stmt_runs = select(ValidationRun).where(ValidationRun.version_id == version_id).order_by(ValidationRun.created_at.desc())
+    stmt_runs = (select(ValidationRun, ResearchVersion.revision)
+                 .join(ResearchVersion, ResearchVersion.id == ValidationRun.version_id)
+                 .where(ValidationRun.version_id == version_id).order_by(ValidationRun.created_at.desc()))
     res_runs = await db.execute(stmt_runs)
-    runs = list(res_runs.scalars().all())
+    runs = list(res_runs.all())
 
     results = []
-    for r in runs:
+    for r, revision in runs:
         stmt_f = select(ValidationFinding).where(ValidationFinding.run_id == r.id).order_by(ValidationFinding.layer)
         res_f = await db.execute(stmt_f)
         findings = list(res_f.scalars().all())
-        results.append(_serialize_run(r, findings))
+        results.append(_serialize_run(r, findings, revision))
 
     return results
 
@@ -463,7 +477,7 @@ async def list_equations(
     if not version:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Version not found: {version_id}")
 
-    stmt_eq = select(Equation).where(Equation.version_id == version_id).order_by(Equation.created_at)
+    stmt_eq = select(Equation).where(Equation.version_id == version_id).order_by(Equation.position.asc().nulls_last(), Equation.created_at, Equation.id)
     res_eq = await db.execute(stmt_eq)
     equations = list(res_eq.scalars().all())
     return [_serialize_equation(eq) for eq in equations]

@@ -1,0 +1,17 @@
+2026-11-17 01:06:33.253 +07 [41012] LOG:  starting PostgreSQL 17.12 on x86_64-windows, compiled by msvc-19.44.35229, 64-bit
+2026-11-17 01:06:33.255 +07 [41012] LOG:  listening on IPv4 address "127.0.0.1", port 54761
+2026-11-17 01:06:33.345 +07 [22412] LOG:  database system was interrupted; last known up at 2026-11-17 01:03:39 +07
+2026-11-17 01:06:34.629 +07 [22412] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-17 01:06:34.634 +07 [22412] LOG:  redo starts at 0/1A0FDC8
+2026-11-17 01:06:34.751 +07 [22412] LOG:  invalid record length at 0/1ABA8C8: expected at least 24, got 0
+2026-11-17 01:06:34.752 +07 [22412] LOG:  redo done at 0/1ABA870 system usage: CPU: user: 0.00 s, system: 0.09 s, elapsed: 0.11 s
+2026-11-17 01:06:34.768 +07 [39888] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-17 01:06:34.843 +07 [39888] LOG:  checkpoint complete: wrote 114 buffers (0.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.044 s, sync=0.015 s, total=0.087 s; sync files=53, longest=0.001 s, average=0.001 s; distance=682 kB, estimate=682 kB; lsn=0/1ABA8C8, redo lsn=0/1ABA8C8
+2026-11-17 01:06:34.917 +07 [41012] LOG:  database system is ready to accept connections
+2026-11-17 01:06:35.119 +07 [41012] LOG:  received fast shutdown request
+2026-11-17 01:06:35.122 +07 [41012] LOG:  aborting any active transactions
+2026-11-17 01:06:35.155 +07 [41012] LOG:  background worker "logical replication launcher" (PID 37276) exited with exit code 1
+2026-11-17 01:06:35.155 +07 [39888] LOG:  shutting down
+2026-11-17 01:06:35.156 +07 [39888] LOG:  checkpoint starting: shutdown immediate
+2026-11-17 01:06:35.189 +07 [39888] LOG:  checkpoint complete: wrote 11 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.007 s, sync=0.002 s, total=0.034 s; sync files=4, longest=0.001 s, average=0.001 s; distance=12 kB, estimate=615 kB; lsn=0/1ABD8E0, redo lsn=0/1ABD8E0
+2026-11-17 01:06:35.206 +07 [41012] LOG:  database system is shut down

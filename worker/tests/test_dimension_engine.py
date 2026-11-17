@@ -211,6 +211,42 @@ def test_custom_unit_dynamic_registration():
     assert str(quantity.dimensionality) == "[length]"
 
 
+def test_builtin_unit_declaration_preserves_exact_si_definition():
+    from worker.core.dimension_engine import unit_registry, ureg
+    definition = UnitSpec(name="newton", symbol="N", dimensionality="[length] * [mass] / [time] ** 2")
+    registry = unit_registry({definition.name: definition})
+    assert registry is not ureg
+    assert registry.Quantity(1, "N").to("kg * m / s ** 2").magnitude == 1
+
+
+@pytest.mark.parametrize("symbol,dimensions", [
+    ("clen = second = s", "[length]"),
+    ("clen\nsecond = meter", "[length]"),
+    ("clen", "[length]) = second = s #"),
+])
+def test_unit_definition_syntax_cannot_inject_builtin_aliases(symbol, dimensions):
+    from worker.core.dimension_engine import unit_registry
+    definition = UnitSpec(name="custom_length", symbol=symbol, dimensionality=dimensions)
+    with pytest.raises(DimensionalityCheckError):
+        unit_registry({definition.name: definition})
+
+
+@pytest.mark.parametrize("name,symbol,dimensions,scale", [
+    ("newton", "N", "[length] * [mass] / [time] ** 2", 1000),
+    ("newton", "N", "[time]", 1),
+    ("draft_force", "N", "[length] * [mass] / [time] ** 2", 1),
+    ("newton", "draftN", "[length] * [mass] / [time] ** 2", 1),
+    ("meter", "s", "[length]", 1),
+    ("degree_Celsius", "degC", "[temperature]", 1),
+])
+def test_conflicting_builtin_unit_cannot_change_scientific_scale(name, symbol, dimensions, scale):
+    from worker.core.dimension_engine import unit_registry, ureg
+    definition = UnitSpec(name=name, symbol=symbol, dimensionality=dimensions, scale_factor=scale)
+    with pytest.raises(DimensionalityCheckError):
+        unit_registry({definition.name: definition})
+    assert ureg.Quantity(1, "N").to("kg * m / s ** 2").magnitude == 1
+
+
 def test_transcendental_dimensional_argument_code():
     from worker.tasks.dimensional import execute_dimensional_verification
     from shared.models.enums import DiagnosticCode
@@ -224,5 +260,3 @@ def test_transcendental_dimensional_argument_code():
     ok, dim_str, code = execute_dimensional_verification(node, [var_m], [])
     assert ok is False
     assert code == DiagnosticCode.DIMENSIONED_TRANSCENDENTAL_ARGUMENT.value
-
-

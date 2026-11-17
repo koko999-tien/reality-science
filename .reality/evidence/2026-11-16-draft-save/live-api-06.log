@@ -1,0 +1,37 @@
+D:\Reality_Science\backend\.venv\Lib\site-packages\pytest_asyncio\plugin.py:306: PytestDeprecationWarning: The configuration option "asyncio_default_fixture_loop_scope" is unset.
+The event loop scope for asynchronous fixtures will default to the fixture scope. Future versions of pytest-asyncio will default the loop scope for asynchronous fixtures to "function" scope. Set the default fixture loop scope explicitly in order to avoid unexpected behavior in the future. Valid fixture loop scopes are: "function", "class", "module", "package", "session". Set it to "fixture-scope" to keep the current behavior.
+
+  warnings.warn(PytestDeprecationWarning(_DEFAULT_FIXTURE_LOOP_SCOPE_UNSET))
+============================= test session starts =============================
+platform win32 -- Python 3.11.18, pytest-9.2.0, pluggy-1.7.0 -- D:\Reality_Science\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Reality_Science\backend
+configfile: pyproject.toml
+plugins: anyio-4.16.0, platformdirs-4.14.5, asyncio-1.5.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 22 items
+
+tests/integration/test_draft_save_live.py::test_create_edit_save_reload_new_connection PASSED [  4%]
+tests/integration/test_draft_save_live.py::test_concurrent_create_and_stale_save PASSED [  9%]
+tests/integration/test_draft_save_live.py::test_invalid_draft_is_atomic[boolean] PASSED [ 13%]
+tests/integration/test_draft_save_live.py::test_invalid_draft_is_atomic[undeclared] PASSED [ 18%]
+tests/integration/test_draft_save_live.py::test_invalid_draft_is_atomic[duplicate] PASSED [ 22%]
+tests/integration/test_draft_save_live.py::test_invalid_draft_is_atomic[depth] PASSED [ 27%]
+tests/integration/test_draft_save_live.py::test_invalid_draft_is_atomic[power] PASSED [ 31%]
+tests/integration/test_draft_save_live.py::test_invalid_draft_is_atomic[operator] PASSED [ 36%]
+tests/integration/test_draft_save_live.py::test_invalid_draft_is_atomic[scale] PASSED [ 40%]
+tests/integration/test_draft_save_live.py::test_invalid_draft_is_atomic[cross-version] PASSED [ 45%]
+tests/integration/test_draft_save_live.py::test_owner_privacy_public_read_and_frozen_guards PASSED [ 50%]
+tests/integration/test_draft_save_live.py::test_database_failure_after_partial_writes_rolls_back PASSED [ 54%]
+tests/integration/test_draft_save_live.py::test_real_findings_stale_after_unit_edit_and_late_completion PASSED [ 59%]
+tests/integration/test_draft_concurrency_live.py::test_rich_snapshot_and_legacy_writes PASSED [ 63%]
+tests/integration/test_draft_concurrency_live.py::test_read_during_uncommitted_replace_is_coherent PASSED [ 68%]
+tests/integration/test_draft_concurrency_live.py::test_freeze_wins_race_without_partial_save[research_versions] PASSED [ 72%]
+tests/integration/test_draft_concurrency_live.py::test_freeze_wins_race_without_partial_save[research_projects] PASSED [ 77%]
+tests/integration/test_draft_concurrency_live.py::test_events_chain_and_outbox_failure_roll_back PASSED [ 81%]
+tests/integration/test_draft_concurrency_live.py::test_declaration_and_claim_input_changes_stale_history PASSED [ 86%]
+tests/integration/test_draft_concurrency_live.py::test_existing_public_draft_save_and_sealed_rejection PASSED [ 90%]
+tests/integration/test_draft_concurrency_live.py::test_audit_clock_regression_and_insert_failure PASSED [ 95%]
+tests/integration/test_draft_concurrency_live.py::test_replacement_primary_order_matches_reload_and_validation PASSED [100%]
+
+======================= 22 passed in 135.49s (0:02:15) ========================

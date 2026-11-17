@@ -1,4 +1,7 @@
 from typing import Dict, List
+import math
+import re
+from celery.exceptions import SoftTimeLimitExceeded
 import pint
 from shared.schemas.math_ast import (
     AllowedFunction,
@@ -21,11 +24,20 @@ class TranscendentalDimensionalityError(DimensionalityCheckError):
     pass
 
 
-def register_custom_unit(unit_spec: UnitSpec) -> None:
+def register_custom_unit(unit_spec: UnitSpec, registry=None) -> None:
     """Dynamically registers custom UnitSpec from bundle.units via ureg.define()."""
-    if unit_spec.name in ureg or unit_spec.symbol in ureg:
-        return
+    registry = registry if registry is not None else ureg
     dim = unit_spec.dimensionality
+    # These fields describe one unit, never Pint's multi-definition/alias DSL.
+    # Validate before either lookup or define, which both parse their input.
+    if (not unit_spec.symbol or any(char.isspace() or ord(char) < 32 or ord(char) == 127
+                                   for char in unit_spec.symbol)
+            or re.search(r"[=;#@]", unit_spec.symbol)
+            or not re.fullmatch(r"[A-Za-z0-9_\[\]*/().+\- \t]+", dim)):
+        raise DimensionalityCheckError(f"Invalid custom unit syntax: {unit_spec.name}")
+    scale = unit_spec.scale_factor
+    if not math.isfinite(scale) or scale <= 0:
+        raise DimensionalityCheckError(f"Invalid custom unit scale: {unit_spec.name}")
     replacements = {
         "[length]": "meter",
         "[mass]": "kilogram",
@@ -39,43 +51,68 @@ def register_custom_unit(unit_spec: UnitSpec) -> None:
     dim_expr = dim
     for k, v in replacements.items():
         dim_expr = dim_expr.replace(k, v)
-    scale = unit_spec.scale_factor if unit_spec.scale_factor else 1.0
     def_str = f"{unit_spec.name} = {scale} * ({dim_expr}) = {unit_spec.symbol}"
     try:
-        ureg.define(def_str)
-    except Exception:
-        pass
+        existing = [key in registry for key in (unit_spec.name, unit_spec.symbol)]
+        if any(existing):
+            # Built-in declarations may repeat the exact SI definition, but must
+            # never shadow an alias, alter its scale or discard an offset.
+            declared = (scale * registry(dim_expr)).to_base_units()
+            if all(existing) and all(
+                registry.Quantity(1, key).to_base_units() == declared
+                and registry.Quantity(0, key).to_base_units().magnitude == 0
+                for key in (unit_spec.name, unit_spec.symbol)
+            ):
+                return
+            raise DimensionalityCheckError(f"Custom unit conflicts with an existing unit: {unit_spec.name}")
+        registry.define(def_str)
+    except SoftTimeLimitExceeded:
+        raise
+    except DimensionalityCheckError:
+        raise
+    except Exception as error:
+        raise DimensionalityCheckError(f"Invalid custom unit: {unit_spec.name}") from error
+
+
+def unit_registry(unit_map: Dict[str, UnitSpec]):
+    registry = pint.UnitRegistry() if unit_map else ureg
+    for unit in unit_map.values():
+        register_custom_unit(unit, registry)
+    return registry
 
 
 def evaluate_ast_dimensions(
     node: ExprNode,
     var_map: Dict[str, VariableSpec],
     unit_map: Dict[str, UnitSpec],
+    registry=None,
 ) -> pint.Quantity:
     """Recursively checks physical dimensional consistency of an ExprNode using Pint."""
-    if unit_map:
-        for u in unit_map.values():
-            register_custom_unit(u)
+    registry = registry if registry is not None else unit_registry(unit_map)
+    return _evaluate_dimensions(node, var_map, unit_map, registry)
+
+
+def _evaluate_dimensions(node, var_map, unit_map, registry):
     if node.node_type == NodeType.CONSTANT:
-        return 1.0 * ureg.dimensionless
+        return 1.0 * registry.dimensionless
 
     if node.node_type == NodeType.VARIABLE:
         var_name = str(node.value)
         if var_name not in var_map:
             raise DimensionalityCheckError(f"Variable '{var_name}' not defined in variable specifications")
         unit_str = var_map[var_name].unit
-        return 1.0 * ureg(unit_str)
+        return 1.0 * registry(unit_str)
 
     if node.node_type == NodeType.UNARY_OP:
         if not node.left:
             raise DimensionalityCheckError("Unary operator missing operand")
-        return evaluate_ast_dimensions(node.left, var_map, unit_map)
+        return _evaluate_dimensions(node.left, var_map, unit_map, registry)
 
     if node.node_type == NodeType.BINARY_OP:
         if not node.left or not node.right:
             raise DimensionalityCheckError("Binary operator missing operand")
-        left_q = evaluate_ast_dimensions(node.left, var_map, unit_map)
-        right_q = evaluate_ast_dimensions(node.right, var_map, unit_map)
+        left_q = _evaluate_dimensions(node.left, var_map, unit_map, registry)
+        right_q = _evaluate_dimensions(node.right, var_map, unit_map, registry)
 
         if node.op in (OperatorType.ADD, OperatorType.SUB):
             if left_q.dimensionality != right_q.dimensionality:
@@ -97,7 +134,7 @@ def evaluate_ast_dimensions(
                     f"Exponent must be dimensionless, got {right_q.dimensionality}"
                 )
             if left_q.dimensionless:
-                return 1.0 * ureg.dimensionless
+                return 1.0 * registry.dimensionless
 
             exp_val = try_eval_constant_ast(node.right)
             if exp_val is None:
@@ -112,7 +149,7 @@ def evaluate_ast_dimensions(
             raise DimensionalityCheckError(
                 f"Function {node.func} requires exactly 1 argument"
             )
-        arg_q = evaluate_ast_dimensions(node.args[0], var_map, unit_map)
+        arg_q = _evaluate_dimensions(node.args[0], var_map, unit_map, registry)
 
         if node.func == AllowedFunction.SQRT:
             return arg_q ** 0.5
@@ -128,7 +165,7 @@ def evaluate_ast_dimensions(
                 raise TranscendentalDimensionalityError(
                     f"Transcendental function {func_name} requires dimensionless input, got {arg_q.dimensionality}"
                 )
-            return 1.0 * ureg.dimensionless
+            return 1.0 * registry.dimensionless
 
         raise DimensionalityCheckError(f"Unsupported function: {node.func}")
 

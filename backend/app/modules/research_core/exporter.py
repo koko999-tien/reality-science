@@ -516,7 +516,7 @@ async def generate_research_zip_bundle(
     variables = list(res_var.scalars().all())
 
     # 7. Fetch Equations
-    stmt_eq = select(Equation).where(Equation.version_id == version.id).order_by(Equation.created_at)
+    stmt_eq = select(Equation).where(Equation.version_id == version.id).order_by(Equation.position.asc().nulls_last(), Equation.created_at, Equation.id)
     res_eq = await db.execute(stmt_eq)
     equations = list(res_eq.scalars().all())
 
@@ -570,6 +570,8 @@ async def generate_research_zip_bundle(
             "id": r.id,
             "status": r.status,
             "overall_state": r.overall_state,
+            "input_revision": r.input_revision,
+            "is_current": r.input_revision is not None and r.input_revision == version.revision,
             "started_at": r.started_at.isoformat() if r.started_at else None,
             "completed_at": r.completed_at.isoformat() if r.completed_at else None,
             "findings": findings_list,
@@ -596,6 +598,7 @@ async def generate_research_zip_bundle(
         "id": version.id,
         "project_id": version.project_id,
         "version_number": version.version_number,
+        "revision": version.revision,
         "title": version.title,
         "content_hash": version.content_hash,
         "publication_status": version.publication_status,
@@ -630,6 +633,7 @@ async def generate_research_zip_bundle(
                 "symbols": [x.symbol for x in variables if x.unit == v.unit],
             })
     bundle_files["math/units.json"] = json.dumps(units_dict, indent=2, sort_keys=True).encode("utf-8")
+    bundle_files["math/unit_definitions.json"] = json.dumps(version.units_json, indent=2, sort_keys=True).encode("utf-8")
 
     # Equations
     for eq in equations:

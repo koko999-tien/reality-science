@@ -9,11 +9,17 @@ from app.modules.research_core.exporter import (
     BundleSigningUnavailableError,
     generate_research_zip_bundle,
 )
-from app.modules.research_core.schemas import ProjectCreate, ProjectResponse
+from app.modules.research_core.schemas import (
+    ProjectCreate, ProjectResponse, VersionCreate, ResearchVersionResponse, DraftSave, DraftSnapshot,
+)
+from app.modules.research_core.drafts import create_version, read_draft, save_draft
+from app.modules.research_core.models import ResearchVersion
 from app.modules.research_core.service import create_project, get_project_by_slug
 from app.modules.iam_governance.dependencies import (
     get_current_actor,
     get_optional_current_actor,
+    get_accessible_version,
+    get_owned_version,
 )
 from app.modules.iam_governance.models import ResearchActor
 
@@ -27,7 +33,10 @@ async def create_new_project(
     actor: ResearchActor = Depends(get_current_actor),
     db: AsyncSession = Depends(get_db),  # noqa: B008
 ):
-    return await create_project(db, actor.id, payload)
+    project = await create_project(db, actor.id, payload)
+    response = ProjectResponse.model_validate(project)
+    response.can_edit = True
+    return response
 
 
 @projects_router.get("/{slug}", response_model=ProjectResponse)
@@ -41,7 +50,33 @@ async def get_project(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     if project.visibility == "private_draft" and (actor is None or actor.id != project.owner_actor_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
-    return project
+    response = ProjectResponse.model_validate(project)
+    response.can_edit = actor is not None and actor.id == project.owner_actor_id
+    return response
+
+
+@projects_router.post("/{slug}/versions", response_model=ResearchVersionResponse, status_code=201)
+async def create_new_version(
+    slug: str, payload: VersionCreate,
+    actor: ResearchActor = Depends(get_current_actor), db: AsyncSession = Depends(get_db),
+):
+    return await create_version(db, slug, actor.id, payload)
+
+
+@versions_router.get("/{version_id}/draft", response_model=DraftSnapshot)
+async def get_version_draft(
+    version_id: str, _: ResearchVersion = Depends(get_accessible_version),
+    db: AsyncSession = Depends(get_db),
+):
+    return await read_draft(db, version_id)
+
+
+@versions_router.put("/{version_id}/draft", response_model=DraftSnapshot)
+async def put_version_draft(
+    version_id: str, payload: DraftSave, _: ResearchVersion = Depends(get_owned_version),
+    db: AsyncSession = Depends(get_db),
+):
+    return await save_draft(db, version_id, payload)
 
 
 @versions_router.post("/{version_id}/export-zip")

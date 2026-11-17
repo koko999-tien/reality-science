@@ -104,7 +104,7 @@ Evidence base: `evidence/2026-11-16-backend-fixes/`. ALL received result8e4d4064
 
 | Check | Status | Evidence and limits |
 |---|---|---|
-| Original85 live PostgreSQL/API cases | FAIL overall;84 PASS/1 FAIL | `live-all.log`,24.08s; no SKIP or teardown errors. Remaining failure is compute/history HTTP503. |
+| Original85 live PostgreSQL/API cases | FAIL overall;84 PASS/1 FAIL | `live-all.log`,24.08s; no SKIP or teardown errors. POST `/versions/{id}/validate` returned503 before successful-history assertions. This does not prove GET history returned503. |
 |8-table visibility and owner-only writes | PASS, bounded live | Original suite:83 SQL cases pass, including public/org/anonymous read controls, non-owner deletion/takeover/reparenting rejection, old/new parent ownership and context reuse. `policy-comparison.json` records32 command policies and unchanged8 SELECT expressions. |
 | Live project create and durable read | PASS | Original suite's project case POST201, versions[], subsequent GET and new DB connection read correct committed project; anonymous/spoofed/outsider404 and invalid JWT401. No implicit version creation. |
 | Project NEW-owner transfer | PASS, separate live checkpoint | `review-live/owner-transfer.log`:2 PASS,1.53s; private/public owner cannot transfer project ownership; fresh connection verifies unchanged owner. |
@@ -113,7 +113,40 @@ Evidence base: `evidence/2026-11-16-backend-fixes/`. ALL received result8e4d4064
 | Disposable runner guard/lifecycle | PASS | `runner-review-fix.log`:22 PASS. Independent review P2 fixed; `restart-failure-check/result.json` confirms real post-start fault-injection cleanup and unchanged DB marker. |
 | Bounded independent source review | PASS after fix | `REVIEW.md`:cleanup P2 addressed, no remaining scoped correctness finding. Reviewer did not independently run tests. |
 | Matching handoff source and cleanup | PASS, parent |8 changed hashes and16 verification hashes match; fresh parent inventory21:42:50+07:00 finds0 task processes/listeners at60655/51531/51578. Read-only host checks; no parent DB restart/kill. |
-| Queued computation and persisted history | FAIL at current checkpoint | API direct worker import triggers zero-DB guard; actual503 retained in live test. Subsequent run/history/findings/export assertions NOT RUN. New slice6927175a queued to Lực under ADR-006. |
+| Queued computation and persisted history | FAIL at this historical checkpoint | API direct worker import triggers zero-DB guard; POST validate503 retained in live test. Subsequent run/history/findings/export assertions NOT RUN then. Later slice6927175a results follow below. |
+
+### Local compute/queue final checkpoint — 2026-11-16
+
+Evidence base: `evidence/2026-11-16-compute-queue/`. ALL inspected final logs, REPORT/HANDOFF/REVIEW and evidence inventories. All suite executions below belong to the implementation owner; no parent rerun or independent reviewer runtime is claimed. Prior503 failure entries are historical.
+
+| Check | Status | Evidence and limits |
+|---|---|---|
+| Real HTTP/queue/worker/PostgreSQL history | PASS | `live-final.log`:95 PASS,12 deselected; original85 +2 owner-transfer +8 queue cases. Symbolic PASS/negative FAIL, publication preservation, run/target/input correlation and fresh HTTP/DB reads. |
+| Worker unavailable/deadline | PASS | `live-no-worker.log`:1 PASS; expected503, zero persisted runs and unchanged publication. |
+| Real-broker malformed/correlation/replay/late-result faults | PASS | `live-faults.log`:11 PASS; deliberate invalid envelopes, not scientific compute evidence. No false finding; duplicate publication rejected. Does not prove exactly-once worker execution. |
+| Backend final default | PASS | `backend-final.log`:237 PASS/107 SKIP;107 opt-in cases executed in the separate95/1/11 lifecycles, not added as one run. |
+| Isolated worker/shared regressions | PASS | `worker-default.log`:126 PASS; `shared-default.log`:53 PASS. Separate commands/checkpoints. |
+| Source review and artifacts | PASS, scoped | `REVIEW.md` reports no blocker; no reviewer suite execution. Owner patch roundtrip19 files PASS, tracked diff exit0. |
+| Current source/cleanup receipt | PASS, parent |23:54:10+07:00:19 SHA256 hashes match,0 listeners across37 recorded task ports. Owner inventory records0 task processes and shutdown cluster. Parent did not restart or kill processes. |
+| Assigned numeric input/output, save/freeze, Linux/network isolation | NOT RUN | Current VariableSpec lacks assigned numeric values; version fixtures SQL-seeded. Windows solo and socket observation do not prove Linux prefork or network sandbox. Draft-save requestc5dc40e6 queued. |
+| Whole concurrent commit/deployment | NOT RUN | HEAD/local origin/main595e3f0 observed; only19 slice hashes checked. No remote/deployment request, attribution or full-commit acceptance. |
+
+### Final receipt and recovery-gap reconciliation — 2026-11-17
+
+Final handofff8ddbe96 and analyst addendum98a215a5 are received. Analysteb8fa3b7 read an earlier snapshot and executed none of its seven proposed groups. Parent inspected current dispatcher/service/ingestion/persistence and the cleanup-on-DB-failure test, and verified five matching source/test hashes plus the addendum SHA256 at00:01:21+07:00. This is source/artifact evidence, not a new test run. See `evidence/2026-11-16-compute-queue/parent-addendum-receipt.md`.
+
+| Check | Status | Evidence and limits |
+|---|---|---|
+| Same-job ingestion after failed DB commit | NOT RUN | Implementation NOT IMPLEMENTED: `service.py:57` finally discards result after caller failure; dispatch claim prevents same-ID dispatch; no connected durable pending/input registry/recovery. Existing unit test asserts cleanup on failure, not recoverability. |
+| API restart/crash and uncertain commit recovery | NOT RUN | No lifecycle evidence after result-before-commit or commit-before-lost-response/cleanup. Run PK alone does not establish idempotent retry, complete input provenance or recovery. Follow-up4e310270 queued after draft-save. |
+| Concurrent duplicate ingestion and two successes completing in reverse order | NOT RUN | Existing replay test measures duplicate dispatch, and existing late-result test rejects a mismatched result. Neither exercises these success/recovery scenarios. |
+| Unauthorized request queue side effects | NOT RUN | Existing live401/404/access tests pass; direct queue publication counts following denied requests are not measured. |
+| Complete status/malformed/boundary input matrix | NOT RUN | Only documented subsets passed. Pending states/null result, timeout0/121 and empty-ID cases lack full runtime coverage; IDs lack `min_length`, AST is optional for claims. No blanket422/no-publish claim. |
+| Broker loss, worker loss, commit interruption | NOT RUN | No-worker deadline and injected result faults do not exercise these process/transport failures. Windows solo does not verify Linux limits. |
+| Worker soft timeout handling | NOT RUN for new live timeout execution | Source deliberately maps `COMPUTE_TIMEOUT_EXCEEDED` to API503 without scientific persistence; earlier mocked-boundary checks remain separate. Analyst expectation of persisted scientific timeout is not the current slice contract. |
+| API-only image and deployed network isolation | NOT RUN | Worker environment guards and observed Redis-only sockets do not prove routing enforcement or container packaging. |
+
+The95/1/11 local owner results above remain valid for their bounded success/rejection cases. Recovery status is explicitly NOT IMPLEMENTED; its test gate remains NOT RUN until the new follow-up executes. M-000/M-002 remain IN PROGRESS.
 
 - PASS: test actually ran and passed.
 - FAIL: test actually ran and failed.
@@ -121,3 +154,28 @@ Evidence base: `evidence/2026-11-16-backend-fixes/`. ALL received result8e4d4064
 - NOT APPLICABLE: genuinely irrelevant, with reason.
 
 Never infer PASS from source inspection, test-file existence, successful installation, or HTTP 200 alone.
+
+### Draft and review-fix progress receipt — 2026-11-17 morning
+
+Parent inspected existing execution logs; no suites were rerun. These later observations supersede earlier blanket persistence-NOT-RUN claims only within the recorded cases. Draft final-tree acceptance remains open.
+
+| Check | Status | Evidence and limits |
+|---|---|---|
+| Draft create/edit/save/reload, access/freeze/conflict/rollback/stale results | PASS at saved checkpoint | `2026-11-16-draft-save/live-api-04.log`:20 passed111.12s against actual API/PostgreSQL; earlier13-case run is not added. |
+| Browser create/edit/save/reload/conflict | PASS at saved checkpoint | `live-api-05.log`:1 passed66.80s; parent read log, did not rerun browser or establish final-source parity. |
+| Later draft frontend regressions | FAIL | UTF-16 `review-frontend-green-01.log`:10 failed/76 passed,1 failed/2 passed suites. Failures in editor_validation_integrity; root cause requires diagnosis. |
+| Later unit-scale worker regressions | FAIL | UTF-16 `review-worker-green-01.log`:1 failed/77 passed; custom velocity-scale test assigns to frozen UnitSpec.scale_factor. No later passing closeout found. |
+| Helper deadline and harness cleanup correction | PASS at earlier checkpoint | `2026-11-17-review-fixes/REPORT.md` and logs: worker143, backend247/108 SKIP, lifecycle10, separate live8/1/1. Explicit timeout injection does not prove native Linux timer delivery. |
+| Review-fix source parity at progress read | FAIL for unchanged-snapshot assertion | Recomputed10 owned hashes:8 match,2 changed (dimension_engine.py,physical_invariants.py). This is source drift, not proof those changes are defective. |
+| Draft final integrated acceptance/report | NOT RUN | No final REPORT/HANDOFF; later failures remain. Continuationf3948b2b accepted/queued to Lực. |
+| Durable compute commit/restart recovery | NOT RUN; implementation remains NOT IMPLEMENTED | Current service.py finally-discard behavior reconfirmed. New draft audit/outbox code is not evidence of compute recovery. |
+
+### New draft logs and parallel task intake — 2026-11-17
+
+| Check | Status | Evidence and limits |
+|---|---|---|
+| Prior11 draft regression failures | PASS at later focused checkpoint | WORK records frontend86 and worker78 PASS in review-*-green-02; source explanation: access-session isolation of recovery state and copying frozen UnitSpec test payload. Earlier green-01 failures retained as historical. |
+| Latest recorded frontend suite | PASS at recorded checkpoint | frontend-final-02.log:16 suites/227 tests passed. Parent read summary only; final source hashes and handoff pending. |
+| Latest recorded backend suite | PASS at recorded checkpoint | backend-final-02.log:247 passed/132 skipped. Live opt-in checks are separate; not proof132 cases failed or passed. |
+| Latest recorded isolated worker suite | PASS at recorded checkpoint | worker-final-02.log:152 passed. Parent read log, did not rerun. |
+| Parallel accessibility implementation / recovery spec / scientific contract / security review / independent gap analysis | NOT RUN for new deliverables | Five accepted task deliveries, asynchronous results pending. Scope and IDs in NEXT_ACTION. Completion and integrated PASS require returned evidence and parent verification. |

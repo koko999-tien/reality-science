@@ -2,22 +2,15 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
-import {
-  VariableSpec,
-  ExprNode,
-  ResearchProjectModel,
-  EquationModel,
-  VariableModel,
-} from "@/types/contracts";
-import { assertCanonicalAst } from "@/lib/ast_graph_converter";
-import { fetchProjectBySlug, fetchVersionEquations, fetchVersionVariables } from "@/lib/api";
 import { formatEvaluatedValue } from "@/lib/formula_evaluator";
 import { useEquationCanvas } from "@/hooks/useEquationCanvas";
+import { canvasDraft, draftContentKey, useDraftEditor } from "@/hooks/useDraftEditor";
+import { UnitDefinitionsPanel } from "@/components/equations/UnitDefinitionsPanel";
+import { useDraftRecovery } from "@/hooks/useDraftRecovery";
 
 import { SymbolicCanvas } from "@/components/equations/canvas/SymbolicCanvas";
 import {
   ScientificPresetsBar,
-  CANONICAL_PRESETS,
   type ScientificPreset,
 } from "@/components/equations/canvas/ScientificPresetsBar";
 import { VariableDeclarationPanel } from "@/components/equations/VariableDeclarationPanel";
@@ -26,39 +19,6 @@ import { KatexFormula } from "@/components/equations/KatexFormula";
 import { AstVisualizer } from "@/components/equations/AstVisualizer";
 import { Card } from "@/components/ui/Card";
 import { Code2, Sparkles, Layers, Calculator } from "lucide-react";
-
-// Default physical variables for demonstration: v = a * t
-const INITIAL_VARIABLES: VariableSpec[] = [
-  {
-    symbol: "v",
-    name: "Velocity",
-    unit: "meter / second",
-    domain: "real",
-    latex_presentation: "v",
-  },
-  {
-    symbol: "a",
-    name: "Acceleration",
-    unit: "meter / second ** 2",
-    domain: "real",
-    latex_presentation: "a",
-  },
-  {
-    symbol: "t",
-    name: "Time",
-    unit: "second",
-    domain: "positive_real",
-    latex_presentation: "t",
-  },
-];
-
-// Initial AST: a * t
-const INITIAL_AST: ExprNode = {
-  node_type: "binary_op",
-  op: "*",
-  left: { node_type: "variable", value: "a" },
-  right: { node_type: "variable", value: "t" },
-};
 
 export default function EquationEditorPage({
   params: _params,
@@ -69,108 +29,36 @@ export default function EquationEditorPage({
   const slug = (params?.slug as string) || "";
 
   const {
-    nodes, edges, variables, currentAst, currentLatex, computedResult,
-    validationResult, isValidating, translationError, replaceCanvas, cancelPendingValidation,
+    nodes, edges, variables, units, currentAst, currentLatex, computedResult,
+    validationResult, isValidating, translationError, replaceCanvas, restoreCanvas, getCanvasSnapshot, cancelPendingValidation,
     handleVariablesChange, handleNodeDataChange, onNodesChange, onEdgesChange, onConnect,
-    handleAddNode, handleAutoLayout, handleClear, handleValidate,
+    handleAddNode, handleAutoLayout, handleClear, handleValidate, handleUnitsChange, getSaveSnapshot,
   } = useEquationCanvas();
-  const [project, setProject] = useState<ResearchProjectModel | null>(null);
-  const [projectLoading, setProjectLoading] = useState(true);
-  const [projectError, setProjectError] = useState<string | null>(null);
-  const activeVersion = project?.versions?.[0] ?? null;
+  const draft = useDraftEditor(slug, replaceCanvas, getSaveSnapshot, cancelPendingValidation);
+  const { project, loading: projectLoading, error: projectError } = draft;
+  const activeVersion = draft.snapshot?.version ?? null;
+  const [versionTitle, setVersionTitle] = useState("");
+  const editable = !draft.creating && !!project?.can_edit && !!activeVersion && !activeVersion.is_frozen &&
+    !project.is_frozen && activeVersion.publication_status === "draft" && !activeVersion.content_hash;
+  const currentKey = useMemo(() => {
+    try { return draftContentKey(canvasDraft(draft.snapshot, { ast: currentAst, latex: currentLatex, variables, units }, draft.primaryEquationId)); }
+    catch { return null; }
+  }, [draft.snapshot, draft.primaryEquationId, currentAst, currentLatex, variables, units]);
+  const dirty = !!draft.snapshot && (currentKey !== draft.savedKey || (nodes.length > 0 && currentAst === null));
+  const recoveryMessage = useDraftRecovery(slug, draft, dirty, editable, getCanvasSnapshot, restoreCanvas);
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => { if (dirty) event.preventDefault(); };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+  const switchVersion = (id: string) => {
+    if (!dirty || window.confirm("Discard unsaved edits and load the saved version?")) void draft.load(id);
+  };
 
   // Presets populate only the local canvas; validation remains an explicit action.
   const handleSelectPreset = useCallback((preset: ScientificPreset) => {
-    replaceCanvas(preset.ast, preset.variables);
-  }, [replaceCanvas]);
-
-  // Load the actual project/version records before describing the canvas context.
-  useEffect(() => {
-    let active = true;
-
-    async function loadEditorContext() {
-      let loadedProject: ResearchProjectModel | null = null;
-      replaceCanvas(null, []);
-      setProjectLoading(true);
-      setProjectError(null);
-      setProject(null);
-      try {
-        loadedProject = slug ? await fetchProjectBySlug(slug) : null;
-        if (!active) return;
-        setProject(loadedProject);
-
-        const version = loadedProject?.versions?.[0];
-        if (version) {
-          let equations: EquationModel[];
-          let apiVariables: VariableModel[];
-          try {
-            [equations, apiVariables] = await Promise.all([
-              fetchVersionEquations(version.id),
-              fetchVersionVariables(version.id),
-            ]);
-          } catch (cause) {
-            if (!active) return;
-            setProjectError(cause instanceof Error ? cause.message : "Version records could not be loaded.");
-            replaceCanvas(null, []);
-            return;
-          }
-          if (!active) return;
-
-          const declaredVariables: VariableSpec[] = apiVariables.map((variable) => ({
-            symbol: variable.symbol,
-            name: variable.name,
-            unit: variable.unit,
-            domain: variable.domain as VariableSpec["domain"],
-            latex_presentation: variable.latex_presentation,
-          }));
-          const equation = equations[0];
-          if (equation?.canonical_ast_json) {
-            assertCanonicalAst(equation.canonical_ast_json);
-            const ast = equation.canonical_ast_json;
-            replaceCanvas(ast, declaredVariables);
-            return;
-          }
-
-          replaceCanvas(null, declaredVariables);
-          return;
-        }
-
-        if (loadedProject) {
-          replaceCanvas(null, []);
-          return;
-        }
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const presetParam = urlParams.get("preset");
-        const preset = presetParam
-          ? CANONICAL_PRESETS.find((item) => item.id === presetParam || item.id.toLowerCase().includes(presetParam.toLowerCase()))
-          : null;
-        const initialAst = preset?.ast ?? INITIAL_AST;
-        const initialVariables = preset?.variables ?? INITIAL_VARIABLES;
-        replaceCanvas(initialAst, initialVariables);
-      } catch (cause) {
-        if (!active) return;
-        if (loadedProject) {
-          setProject(loadedProject);
-          setProjectError(cause instanceof Error ? cause.message : "Project records could not be loaded.");
-          replaceCanvas(null, []);
-          return;
-        }
-
-        setProject(null);
-        setProjectError(cause instanceof Error ? cause.message : "Project context could not be loaded.");
-        replaceCanvas(INITIAL_AST, INITIAL_VARIABLES);
-      } finally {
-        if (active) setProjectLoading(false);
-      }
-    }
-
-    loadEditorContext();
-    return () => {
-      active = false;
-      cancelPendingValidation();
-    };
-  }, [slug, replaceCanvas, cancelPendingValidation]);
+    replaceCanvas(preset.ast, preset.variables, units);
+  }, [replaceCanvas, units]);
 
   // Compute set of symbols currently used on canvas
   const usedSymbols = useMemo(() => {
@@ -201,16 +89,16 @@ export default function EquationEditorPage({
             <span>Research equation workspace</span>
           </div>
           <h1 className="mt-1 text-2xl font-semibold text-slate-100 sm:text-3xl">
-            {project?.title || "Local equation draft"}
+            {project?.title || "Equation workspace"}
           </h1>
           <p className="text-sm text-slate-400" aria-live="polite">
             {projectLoading
               ? "Loading project records…"
               : activeVersion
-              ? `Project ${project?.slug} · Version ${activeVersion.version_number}: ${activeVersion.title}. Canvas edits are not saved automatically.`
+               ? `Project ${project?.slug} · Version ${activeVersion.version_number}: ${activeVersion.title}. Revision ${activeVersion.revision}.`
               : project
-              ? "No version is recorded for this project. Canvas edits remain local and are not persisted."
-              : "Illustrative local draft. Canvas edits are not persisted to a project."}
+               ? "No version is recorded for this project. Create a draft to begin."
+               : "Project records are unavailable."}
           </p>
         </div>
 
@@ -243,11 +131,36 @@ export default function EquationEditorPage({
 
       {projectError && (
         <div role="alert" className="border border-amber-700/70 bg-amber-950/30 p-3 text-sm text-amber-100">
-          {project
-            ? `Stored project records could not be loaded: ${projectError}. The canvas was cleared and no example data was substituted.`
-            : `Project lookup failed: ${projectError}. This illustrative local draft is not associated with the requested project.`}
+          {`Stored project records could not be loaded: ${projectError}.`}
+          <button type="button" className="ml-3 underline" onClick={() => void draft.load()}>Retry</button>
         </div>
       )}
+
+      {project && <section aria-label="Draft persistence" className="space-y-3 border border-slate-700 p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          {!!project.versions?.length && <label className="text-sm">Version
+            <select aria-label="Version" value={activeVersion?.id ?? ""} disabled={draft.saving}
+              onChange={(event) => switchVersion(event.target.value)} className="ml-2 min-h-11 border border-slate-600 bg-slate-950 px-3">
+              {!activeVersion && <option value="">Choose version</option>}
+              {project.versions.map((v) => <option key={v.id} value={v.id}>{`v${v.version_number} · ${v.title}`}</option>)}
+            </select>
+          </label>}
+          {project.can_edit && project.visibility === "private_draft" && !project.is_frozen && <>
+            <label className="text-sm">New draft title<input aria-label="New draft title" value={versionTitle} maxLength={255}
+              onChange={(e) => setVersionTitle(e.target.value)} className="ml-2 min-h-11 border border-slate-600 bg-slate-950 px-3" /></label>
+            <button type="button" disabled={draft.saving || !versionTitle.trim()} className="min-h-11 border border-slate-600 px-4 disabled:opacity-50"
+              onClick={() => { if (!dirty || window.confirm("Discard unsaved edits and create an empty draft?")) void draft.create(versionTitle.trim()); }}>Create draft</button>
+          </>}
+          {editable && <button type="button" disabled={draft.saving || !dirty || (nodes.length > 0 && !currentAst)}
+            onClick={() => void draft.save()} className="min-h-11 bg-cyan-600 px-4 font-semibold text-white disabled:opacity-50">{draft.saving ? "Saving…" : "Save draft"}</button>}
+          {activeVersion && <button type="button" disabled={draft.saving} onClick={() => switchVersion(activeVersion.id)} className="min-h-11 border border-slate-600 px-4">Reload saved draft</button>}
+        </div>
+        <p role="status" aria-live="polite" className="text-sm text-slate-300">{draft.saving ? "Saving to the research API…" : dirty ? "Unsaved changes" : draft.saveMessage || (activeVersion ? "Saved draft loaded." : "")}</p>
+        {activeVersion && !editable && !draft.creating && <p className="text-sm text-amber-200">This version is read-only.</p>}
+        {(draft.snapshot?.equations.length ?? 0) > 1 && <p className="text-xs text-slate-400">The canvas edits the primary equation. Other equations are retained when saving.</p>}
+        {draft.saveError && <p role="alert" className="text-sm text-rose-300">{draft.saveError}</p>}
+        {recoveryMessage && <p role="status" className="text-sm text-amber-200">{recoveryMessage}</p>}
+      </section>}
 
       <p role="status" className="border border-slate-700 bg-slate-900/70 p-3 text-xs text-slate-300">
         Interactive checks are ad hoc API responses; they do not create persisted validation history. Recorded versions can be validated from their project page.
@@ -264,6 +177,7 @@ export default function EquationEditorPage({
       )}
 
       {/* 1-Click Scientific Presets Bar */}
+      <fieldset disabled={!editable} inert={!editable} className="min-w-0 space-y-6">
       <ScientificPresetsBar onSelectPreset={handleSelectPreset} />
 
       {/* Main Authoring Area */}
@@ -274,6 +188,7 @@ export default function EquationEditorPage({
           onVariablesChange={handleVariablesChange}
           usedSymbols={usedSymbols}
         />
+        <UnitDefinitionsPanel units={units} onChange={handleUnitsChange} />
 
         {/* Interactive Node Canvas */}
         <Card className="p-4 border-white/[0.08] bg-slate-900/80 backdrop-blur-xl shadow-tactile-card">
@@ -290,9 +205,9 @@ export default function EquationEditorPage({
           <SymbolicCanvas
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
+            onNodesChange={editable ? onNodesChange : () => {}}
+            onEdgesChange={editable ? onEdgesChange : () => {}}
+            onConnect={editable ? onConnect : () => {}}
             declaredVariables={variables}
             onNodeDataChange={handleNodeDataChange}
             onAddNode={handleAddNode}
@@ -326,6 +241,7 @@ export default function EquationEditorPage({
           </div>
         )}
       </div>
+      </fieldset>
     </div>
   );
 }

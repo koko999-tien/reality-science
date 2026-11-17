@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "mode": "live-cleanup-redis-fault",
+  "expected_failure": {
+    "type": "RuntimeError",
+    "message": "Cleanup failures: broker-shutdown"
+  },
+  "postgres_stopped": true,
+  "recorded_ports_closed": true,
+  "worker_exited": true,
+  "broker_exited": true,
+  "cleanup_error_stages": [
+    "broker-shutdown"
+  ]
+}

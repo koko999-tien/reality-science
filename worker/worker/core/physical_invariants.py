@@ -7,6 +7,7 @@ Enforces fundamental physical conservation laws and relativistic constraints:
 """
 
 from __future__ import annotations
+from celery.exceptions import SoftTimeLimitExceeded
 import math
 import re
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -22,6 +23,7 @@ from shared.schemas.math_ast import (
     NodeType,
     OperatorType,
     VariableSpec,
+    UnitSpec,
     try_eval_constant_ast,
 )
 from shared.schemas.physical_invariants import (
@@ -36,7 +38,7 @@ from worker.core.ast_evaluator import (
     UndeclaredSymbolError,
     ast_to_sympy,
 )
-from worker.core.dimension_engine import evaluate_ast_dimensions, ureg
+from worker.core.dimension_engine import evaluate_ast_dimensions, unit_registry, ureg
 
 # Fundamental physical constants
 SPEED_OF_LIGHT_MS: float = 299792458.0
@@ -71,16 +73,22 @@ class PhysicalInvariantResult(FindingResult):
     details: Optional[Dict[str, Any]] = None
 
 
-def is_velocity_unit(unit_str: str) -> bool:
+def is_velocity_unit(unit_str: str, registry=None) -> bool:
     """Checks if a unit string has velocity dimensionality ([length] / [time])."""
     try:
-        q = ureg(unit_str)
+        q = (registry if registry is not None else ureg)(unit_str)
         return q.dimensionality == VELOCITY_DIM
+    except SoftTimeLimitExceeded:
+        raise
     except Exception:
         return False
 
 
-def to_si_velocity(val: float, unit_str: Optional[str]) -> Tuple[float, float]:
+class PhysicalUnitError(RuntimeError):
+    pass
+
+
+def to_si_velocity(val: float, unit_str: Optional[str], registry=None) -> Tuple[float, float]:
     """Converts a velocity quantity with a declared unit to SI m/s using Pint.
 
     Args:
@@ -89,8 +97,8 @@ def to_si_velocity(val: float, unit_str: Optional[str]) -> Tuple[float, float]:
 
     Returns:
         Tuple of (val_in_ms, abs_val_in_ms).
-        If unit_str is None, empty, dimensionless, or conversion fails,
-        returns (val, abs(val)).
+        Missing or dimensionless units retain the existing numeric convention.
+        Unresolvable or incompatible declared units raise PhysicalUnitError.
     """
     try:
         val_f = float(val)
@@ -100,29 +108,37 @@ def to_si_velocity(val: float, unit_str: Optional[str]) -> Tuple[float, float]:
     if not unit_str:
         return val_f, abs(val_f)
     try:
-        q = ureg.Quantity(val_f, unit_str)
+        q = (registry if registry is not None else ureg).Quantity(val_f, unit_str)
         if q.dimensionality == VELOCITY_DIM:
             si_val = float(q.to("meter / second").magnitude)
             return si_val, abs(si_val)
-    except Exception:
-        pass
-    return val_f, abs(val_f)
+        if q.dimensionless:
+            return val_f, abs(val_f)
+    except SoftTimeLimitExceeded:
+        raise
+    except Exception as error:
+        raise PhysicalUnitError(f"Cannot convert declared velocity unit '{unit_str}' to m/s") from error
+    raise PhysicalUnitError(f"Declared velocity unit '{unit_str}' is not a velocity unit")
 
 
-def is_energy_unit(unit_str: str) -> bool:
+def is_energy_unit(unit_str: str, registry=None) -> bool:
     """Checks if a unit string has energy dimensionality ([mass] * [length]^2 / [time]^2)."""
     try:
-        q = ureg(unit_str)
+        q = (registry if registry is not None else ureg)(unit_str)
         return q.dimensionality == ENERGY_DIM
+    except SoftTimeLimitExceeded:
+        raise
     except Exception:
         return False
 
 
-def is_momentum_unit(unit_str: str) -> bool:
+def is_momentum_unit(unit_str: str, registry=None) -> bool:
     """Checks if a unit string has momentum dimensionality ([mass] * [length] / [time])."""
     try:
-        q = ureg(unit_str)
+        q = (registry if registry is not None else ureg)(unit_str)
         return q.dimensionality == MOMENTUM_DIM
+    except SoftTimeLimitExceeded:
+        raise
     except Exception:
         return False
 
@@ -132,6 +148,7 @@ def _check_speed_of_light(
     variables: List[VariableSpec],
     sympy_expr: Optional[sp.Expr],
     system_context: SystemContext,
+    registry=None,
 ) -> Optional[PhysicalInvariantResult]:
     """Evaluates the relativistic speed of light invariant (v <= c, c = 299,792,458 m/s).
 
@@ -140,16 +157,18 @@ def _check_speed_of_light(
     2. Relativistic Lorentz factor terms (gamma = 1/sqrt(1 - v^2/c^2)) evaluated at v >= c.
     """
     var_map: Dict[str, VariableSpec] = {v.symbol: v for v in variables}
+    registry = registry if registry is not None else ureg
     velocity_vars: Set[str] = {
         v.symbol for v in variables
-        if is_velocity_unit(v.unit) or VELOCITY_PATTERNS.match(v.symbol)
+        if is_velocity_unit(v.unit, registry)
+        or (registry(v.unit).dimensionless and VELOCITY_PATTERNS.match(v.symbol))
     }
 
     # Identify primary declared velocity unit
     default_velocity_unit: Optional[str] = None
     for sym in velocity_vars:
         spec = var_map.get(sym)
-        if spec and spec.unit and is_velocity_unit(spec.unit):
+        if spec and spec.unit and is_velocity_unit(spec.unit, registry):
             default_velocity_unit = spec.unit
             break
     if not default_velocity_unit and velocity_vars:
@@ -160,8 +179,10 @@ def _check_speed_of_light(
     # 1. Check if the entire AST or a constant velocity subtree evaluates to |v| > c
     # Check if the expression has velocity dimensionality
     try:
-        ast_dim = evaluate_ast_dimensions(ast, var_map, {})
+        ast_dim = evaluate_ast_dimensions(ast, var_map, {}, registry=registry)
         has_velocity_dim = (ast_dim.dimensionality == VELOCITY_DIM)
+    except SoftTimeLimitExceeded:
+        raise
     except Exception:
         has_velocity_dim = False
 
@@ -169,13 +190,15 @@ def _check_speed_of_light(
     if has_velocity_dim:
         try:
             ast_unit_str = str(ast_dim.units)
+        except SoftTimeLimitExceeded:
+            raise
         except Exception:
             pass
 
     const_val = try_eval_constant_ast(ast)
     if const_val is not None:
         if has_velocity_dim or (len(velocity_vars) > 0 and len(variables) == len(velocity_vars)):
-            val_ms, abs_val_ms = to_si_velocity(const_val, ast_unit_str)
+            val_ms, abs_val_ms = to_si_velocity(const_val, ast_unit_str, registry)
             if abs_val_ms > SPEED_OF_LIGHT_MS:
                 excess_ms = float(abs_val_ms - SPEED_OF_LIGHT_MS)
                 val_display = (
@@ -230,7 +253,7 @@ def _check_speed_of_light(
             if node.node_type == NodeType.CONSTANT and node.value is not None:
                 try:
                     num_val = float(node.value)
-                    val_ms, abs_val_ms = to_si_velocity(num_val, eff_unit)
+                    val_ms, abs_val_ms = to_si_velocity(num_val, eff_unit, registry)
                     if abs_val_ms > SPEED_OF_LIGHT_MS:
                         return (val_ms, abs_val_ms, num_val, eff_unit)
                 except (ValueError, TypeError):
@@ -238,7 +261,7 @@ def _check_speed_of_light(
             elif node.node_type == NodeType.UNARY_OP:
                 val = try_eval_constant_ast(node)
                 if val is not None:
-                    val_ms, abs_val_ms = to_si_velocity(val, eff_unit)
+                    val_ms, abs_val_ms = to_si_velocity(val, eff_unit, registry)
                     if abs_val_ms > SPEED_OF_LIGHT_MS:
                         return (val_ms, abs_val_ms, val, eff_unit)
 
@@ -519,6 +542,8 @@ def _check_speed_of_light(
                                         "Lorentz factor singularity: division by zero at v = c",
                                     ],
                                 )
+                        except SoftTimeLimitExceeded:
+                            raise
                         except Exception:
                             pass
 
@@ -530,6 +555,7 @@ def _check_energy_conservation(
     variables: List[VariableSpec],
     sympy_expr: Optional[sp.Expr],
     system_context: SystemContext,
+    registry=None,
 ) -> Optional[PhysicalInvariantResult]:
     """Evaluates Conservation of Energy Invariant (Delta E = 0).
 
@@ -543,11 +569,11 @@ def _check_energy_conservation(
     """
     var_map: Dict[str, VariableSpec] = {v.symbol: v for v in variables}
     energy_vars: Set[str] = {
-        v.symbol for v in variables if is_energy_unit(v.unit)
+        v.symbol for v in variables if is_energy_unit(v.unit, registry)
     }
     delta_energy_vars: Set[str] = {
         v.symbol for v in variables
-        if ENERGY_DELTA_PATTERNS.match(v.symbol) or (is_energy_unit(v.unit) and "delta" in v.name.lower())
+        if ENERGY_DELTA_PATTERNS.match(v.symbol) or (is_energy_unit(v.unit, registry) and "delta" in v.name.lower())
     }
 
     # Determine if expression represents an energy delta
@@ -558,10 +584,12 @@ def _check_energy_conservation(
         # Check if left and right operands are energy quantities
         try:
             if ast.left and ast.right:
-                dim_l = evaluate_ast_dimensions(ast.left, var_map, {})
-                dim_r = evaluate_ast_dimensions(ast.right, var_map, {})
+                dim_l = evaluate_ast_dimensions(ast.left, var_map, {}, registry=registry)
+                dim_r = evaluate_ast_dimensions(ast.right, var_map, {}, registry=registry)
                 if dim_l.dimensionality == ENERGY_DIM and dim_r.dimensionality == ENERGY_DIM:
                     is_energy_delta = True
+        except SoftTimeLimitExceeded:
+            raise
         except Exception:
             pass
 
@@ -667,6 +695,7 @@ def _check_momentum_conservation(
     variables: List[VariableSpec],
     sympy_expr: Optional[sp.Expr],
     system_context: SystemContext,
+    registry=None,
 ) -> Optional[PhysicalInvariantResult]:
     """Evaluates Conservation of Linear Momentum Invariant (Delta P = 0).
 
@@ -680,11 +709,11 @@ def _check_momentum_conservation(
     """
     var_map: Dict[str, VariableSpec] = {v.symbol: v for v in variables}
     momentum_vars: Set[str] = {
-        v.symbol for v in variables if is_momentum_unit(v.unit)
+        v.symbol for v in variables if is_momentum_unit(v.unit, registry)
     }
     delta_momentum_vars: Set[str] = {
         v.symbol for v in variables
-        if MOMENTUM_DELTA_PATTERNS.match(v.symbol) or (is_momentum_unit(v.unit) and "delta" in v.name.lower())
+        if MOMENTUM_DELTA_PATTERNS.match(v.symbol) or (is_momentum_unit(v.unit, registry) and "delta" in v.name.lower())
     }
 
     # Determine if expression represents a momentum delta
@@ -694,10 +723,12 @@ def _check_momentum_conservation(
     elif ast.node_type == NodeType.BINARY_OP and ast.op == OperatorType.SUB:
         try:
             if ast.left and ast.right:
-                dim_l = evaluate_ast_dimensions(ast.left, var_map, {})
-                dim_r = evaluate_ast_dimensions(ast.right, var_map, {})
+                dim_l = evaluate_ast_dimensions(ast.left, var_map, {}, registry=registry)
+                dim_r = evaluate_ast_dimensions(ast.right, var_map, {}, registry=registry)
                 if dim_l.dimensionality == MOMENTUM_DIM and dim_r.dimensionality == MOMENTUM_DIM:
                     is_momentum_delta = True
+        except SoftTimeLimitExceeded:
+            raise
         except Exception:
             pass
 
@@ -802,6 +833,7 @@ def verify_physical_invariants(
     ast: ExprNode,
     variables: List[VariableSpec],
     system_context: Optional[SystemContext] = None,
+    units: Optional[List[UnitSpec]] = None,
 ) -> PhysicalInvariantResult:
     """Verifies physical law invariants (Layer 4) for a mathematical AST.
 
@@ -815,6 +847,21 @@ def verify_physical_invariants(
     ctx = system_context if system_context is not None else SystemContext()
     declared_symbols = {v.symbol for v in variables}
 
+    def unit_failure(error):
+        return PhysicalInvariantResult(job_id="physical_invariants", state=FindingState.FAIL,
+            diagnostic_code=DiagnosticCode.DIMENSIONAL_MISMATCH.value,
+            message=f"Physical unit verification failed: {error}",
+            dimensions_verified=False, is_valid=False, diagnostics=[str(error)])
+
+    try:
+        registry = unit_registry({unit.name: unit for unit in (units or [])})
+        for variable in variables:
+            registry(variable.unit)
+    except SoftTimeLimitExceeded:
+        raise
+    except Exception as error:
+        return unit_failure(error)
+
     # Safely convert to SymPy expression if possible
     sympy_expr: Optional[sp.Expr] = None
     try:
@@ -823,18 +870,21 @@ def verify_physical_invariants(
         pass
 
     # 1. Evaluate Relativistic Speed of Light Invariant
-    sol_res = _check_speed_of_light(ast, variables, sympy_expr, ctx)
+    try:
+        sol_res = _check_speed_of_light(ast, variables, sympy_expr, ctx, registry)
+    except PhysicalUnitError as error:
+        return unit_failure(error)
     if sol_res is not None and not sol_res.is_valid:
         return sol_res
 
     # 2. Evaluate Conservation of Energy Invariant
-    energy_res = _check_energy_conservation(ast, variables, sympy_expr, ctx)
+    energy_res = _check_energy_conservation(ast, variables, sympy_expr, ctx, registry)
     if energy_res is not None:
         if not energy_res.is_valid or energy_res.state in (FindingState.FAIL, FindingState.WARNING, FindingState.NOT_APPLICABLE):
             return energy_res
 
     # 3. Evaluate Conservation of Linear Momentum Invariant
-    momentum_res = _check_momentum_conservation(ast, variables, sympy_expr, ctx)
+    momentum_res = _check_momentum_conservation(ast, variables, sympy_expr, ctx, registry)
     if momentum_res is not None:
         if not momentum_res.is_valid or momentum_res.state in (FindingState.FAIL, FindingState.WARNING, FindingState.NOT_APPLICABLE):
             return momentum_res

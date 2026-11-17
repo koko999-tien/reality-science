@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "system_id": "7708747722773675460",
+  "stale_marker_handled_by_postgres": true,
+  "reset_or_manual_pid_deletion": false,
+  "clean_shutdown_verified": true
+}

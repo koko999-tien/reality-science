@@ -1,0 +1,16 @@
+ 
+ -------------- draft-save@koko v5.6.3 (recovery)
+--- ***** ----- 
+-- ******* ---- Windows-10-10.0.26300-SP0 2026-11-17 01:16:37
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         reality_science_worker:0x2628e344450
+- ** ---------- .> transport:   redis://127.0.0.1:54033/0
+- ** ---------- .> results:     redis://127.0.0.1:54033/1
+- *** --- * --- .> concurrency: 1 (solo)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> compute_tasks    exchange=compute_tasks(direct) key=compute_tasks
+                
+

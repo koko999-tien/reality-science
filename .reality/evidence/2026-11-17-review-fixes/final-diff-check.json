@@ -1,0 +1,25 @@
+{
+  "diff_check": {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of '.reality/evidence/2026-11-16-compute-queue/diff-check.json', CRLF will be replaced by LF the next time Git touches it\n"
+  },
+  "patch_reverse_check": {
+    "command": [
+      "git",
+      "apply",
+      "--reverse",
+      "--check",
+      "--whitespace=error",
+      "D:\\Reality_Science\\.reality\\evidence\\2026-11-17-review-fixes\\owned-changes.patch"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+}

@@ -1,0 +1,78 @@
+FFFFFFFFFFFFF                                                            [100%]
+================================== FAILURES ===================================
+_ test_nested_deadline_is_operational_result_with_original_provenance[worker.tasks.dimensional.evaluate_ast_dimensions] _
+tests\test_soft_deadline.py:36: in test_nested_deadline_is_operational_result_with_original_provenance
+    assert result.state == FindingState.NEEDS_EXPERT_REVIEW
+E   AssertionError: assert <FindingState.FAIL: 'FAIL'> == <FindingState...XPERT_REVIEW'>
+E     
+E     - NEEDS_EXPERT_REVIEW
+E     + FAIL
+_ test_nested_deadline_is_operational_result_with_original_provenance[worker.core.boundary_engine.sp.limit] _
+tests\test_soft_deadline.py:36: in test_nested_deadline_is_operational_result_with_original_provenance
+    assert result.state == FindingState.NEEDS_EXPERT_REVIEW
+E   AssertionError: assert <FindingState.PASS: 'PASS'> == <FindingState...XPERT_REVIEW'>
+E     
+E     - NEEDS_EXPERT_REVIEW
+E     + PASS
+_ test_nested_deadline_is_operational_result_with_original_provenance[worker.core.boundary_engine.ast_to_sympy] _
+tests\test_soft_deadline.py:36: in test_nested_deadline_is_operational_result_with_original_provenance
+    assert result.state == FindingState.NEEDS_EXPERT_REVIEW
+E   AssertionError: assert <FindingState.FAIL: 'FAIL'> == <FindingState...XPERT_REVIEW'>
+E     
+E     - NEEDS_EXPERT_REVIEW
+E     + FAIL
+____________ test_denominator_extraction_does_not_swallow_deadline ____________
+tests\test_soft_deadline.py:47: in test_denominator_extraction_does_not_swallow_deadline
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+_________________ test_pole_solver_does_not_swallow_deadline __________________
+tests\test_soft_deadline.py:54: in test_pole_solver_does_not_swallow_deadline
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+___ test_sampling_does_not_turn_deadline_into_numerical_evidence[constant] ____
+tests\test_soft_deadline.py:61: in test_sampling_does_not_turn_deadline_into_numerical_evidence
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+____ test_sampling_does_not_turn_deadline_into_numerical_evidence[sample] _____
+tests\test_soft_deadline.py:61: in test_sampling_does_not_turn_deadline_into_numerical_evidence
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+___________ test_custom_unit_registration_does_not_swallow_deadline ___________
+tests\test_soft_deadline.py:69: in test_custom_unit_registration_does_not_swallow_deadline
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+_ test_unit_classification_does_not_turn_deadline_into_inapplicability[is_velocity_unit] _
+tests\test_soft_deadline.py:80: in test_unit_classification_does_not_turn_deadline_into_inapplicability
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+_ test_unit_classification_does_not_turn_deadline_into_inapplicability[is_energy_unit] _
+tests\test_soft_deadline.py:80: in test_unit_classification_does_not_turn_deadline_into_inapplicability
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+_ test_unit_classification_does_not_turn_deadline_into_inapplicability[is_momentum_unit] _
+tests\test_soft_deadline.py:80: in test_unit_classification_does_not_turn_deadline_into_inapplicability
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+_____________ test_velocity_conversion_does_not_swallow_deadline ______________
+tests\test_soft_deadline.py:87: in test_velocity_conversion_does_not_swallow_deadline
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+______________ test_empirical_p_value_does_not_swallow_deadline _______________
+tests\test_soft_deadline.py:93: in test_empirical_p_value_does_not_swallow_deadline
+    with pytest.raises(SoftTimeLimitExceeded):
+E   Failed: DID NOT RAISE SoftTimeLimitExceeded
+=========================== short test summary info ===========================
+FAILED tests/test_soft_deadline.py::test_nested_deadline_is_operational_result_with_original_provenance[worker.tasks.dimensional.evaluate_ast_dimensions]
+FAILED tests/test_soft_deadline.py::test_nested_deadline_is_operational_result_with_original_provenance[worker.core.boundary_engine.sp.limit]
+FAILED tests/test_soft_deadline.py::test_nested_deadline_is_operational_result_with_original_provenance[worker.core.boundary_engine.ast_to_sympy]
+FAILED tests/test_soft_deadline.py::test_denominator_extraction_does_not_swallow_deadline
+FAILED tests/test_soft_deadline.py::test_pole_solver_does_not_swallow_deadline
+FAILED tests/test_soft_deadline.py::test_sampling_does_not_turn_deadline_into_numerical_evidence[constant]
+FAILED tests/test_soft_deadline.py::test_sampling_does_not_turn_deadline_into_numerical_evidence[sample]
+FAILED tests/test_soft_deadline.py::test_custom_unit_registration_does_not_swallow_deadline
+FAILED tests/test_soft_deadline.py::test_unit_classification_does_not_turn_deadline_into_inapplicability[is_velocity_unit]
+FAILED tests/test_soft_deadline.py::test_unit_classification_does_not_turn_deadline_into_inapplicability[is_energy_unit]
+FAILED tests/test_soft_deadline.py::test_unit_classification_does_not_turn_deadline_into_inapplicability[is_momentum_unit]
+FAILED tests/test_soft_deadline.py::test_velocity_conversion_does_not_swallow_deadline
+FAILED tests/test_soft_deadline.py::test_empirical_p_value_does_not_swallow_deadline
+13 failed in 3.97s

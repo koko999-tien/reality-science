@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "mode": "live-cleanup-pytest-timeout",
+  "expected_failure": {
+    "type": "TimeoutExpired",
+    "message": "Command '['D:\\\\Reality_Science\\\\backend\\\\.venv\\\\Scripts\\\\python.exe', '-m', 'pytest', '-vv', '--tb=short', '--basetemp', 'D:\\\\Reality_Science\\\\.reality\\\\evidence\\\\2026-11-17-review-fixes\\\\live-cleanup-pytest-timeout-pytest', 'tests/integration/test_compute_queue_live.py::test_interactive_uses_real_queue[valid-PASS]', '-p', 'live_timeout_probe']' timed out after 30 seconds"
+  },
+  "postgres_stopped": true,
+  "recorded_ports_closed": true,
+  "worker_exited": true,
+  "broker_exited": true,
+  "cleanup_error_stages": []
+}

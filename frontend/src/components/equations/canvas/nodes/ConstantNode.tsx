@@ -11,8 +11,7 @@ export const ConstantNode: React.FC<NodeProps<ConstantNodeType>> = ({
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
-    const num = parseFloat(val);
-    data.onChange?.(isNaN(num) ? val : num);
+    data.onChange?.(val);
   };
 
   const displayVal = data.value ?? 0;

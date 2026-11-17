@@ -1,0 +1,7 @@
+## main...origin/main
+ M .reality/evidence/2026-11-16-compute-queue/REPORT.md
+ M .reality/evidence/2026-11-16-compute-queue/WORK.md
+ M .reality/evidence/2026-11-16-compute-queue/diff-check.json
+?? .reality/evidence/2026-11-16-compute-queue/HANDOFF.md
+?? .reality/evidence/2026-11-16-compute-queue/concurrent-head-change.json
+?? .reality/evidence/2026-11-16-compute-queue/git-handoff.txt

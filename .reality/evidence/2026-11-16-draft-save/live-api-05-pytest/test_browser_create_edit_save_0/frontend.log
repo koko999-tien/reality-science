@@ -1,0 +1,21 @@
+   ▲ Next.js 15.5.29
+   - Local:        http://127.0.0.1:54117
+   - Network:      http://127.0.0.1:54117
+
+ ✓ Starting...
+ ✓ Ready in 5.9s
+ ○ Compiling /login ...
+ ✓ Compiled /login in 7.3s (707 modules)
+ ✓ Compiled in 879ms (312 modules)
+ GET /login 200 in 8278ms
+ GET /login 200 in 91ms
+ ○ Compiling /projects ...
+ ✓ Compiled /projects in 1106ms (643 modules)
+ GET /projects 200 in 1265ms
+ ○ Compiling /projects/[slug]/editor ...
+ ✓ Compiled /projects/[slug]/editor in 1091ms (805 modules)
+ GET /projects/browser-draft-73d158ad852444c284e40d9122f6dd0a/editor 200 in 2558ms
+ GET /projects/browser-draft-73d158ad852444c284e40d9122f6dd0a/editor?version=d7704c81-78b1-4928-a799-cfd2db16ef81 200 in 126ms
+ GET /login 200 in 170ms
+ GET /projects/browser-draft-73d158ad852444c284e40d9122f6dd0a/editor?version=d7704c81-78b1-4928-a799-cfd2db16ef81 200 in 292ms
+ GET /projects/browser-draft-73d158ad852444c284e40d9122f6dd0a/editor?version=d7704c81-78b1-4928-a799-cfd2db16ef81 200 in 180ms

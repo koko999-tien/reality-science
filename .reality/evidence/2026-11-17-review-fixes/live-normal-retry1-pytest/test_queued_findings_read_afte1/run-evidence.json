@@ -1,0 +1,167 @@
+{
+  "id": "6433b99f-8f6b-48de-828a-482d385b4372",
+  "version_id": "a2180967-02ce-4616-b91d-263fa22f2ac6",
+  "status": "completed",
+  "overall_state": "PASS",
+  "started_at": "2026-11-16T17:33:26.585254+00:00",
+  "completed_at": "2026-11-16T17:33:26.659989+00:00",
+  "created_at": "2026-11-16T17:33:26.661148+00:00",
+  "findings": [
+    {
+      "id": "f88d5f96-e22e-40e3-924a-2fe9a65bbfe5",
+      "run_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "layer": 1,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "8116e93f-b840-49fb-bdd4-136f85da2655",
+      "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "state": "PASS",
+      "diagnostic_code": "VALIDATION_PASSED",
+      "message": "Syntax and semantic checks passed (1 symbols, 1 nodes, depth 1).",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [
+          "Referenced symbols: ['x']"
+        ],
+        "details": {
+          "node_count": 1,
+          "max_depth": 1,
+          "referenced_symbols": [
+            "x"
+          ]
+        },
+        "provenance": {
+          "bundle_sha256": "1a5e3e13ce2a2cee7c9ceef6379ea2ae359606e1ec106e39dc27144e5a82398e",
+          "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+          "version_id": "a2180967-02ce-4616-b91d-263fa22f2ac6"
+        }
+      },
+      "created_at": "2026-11-16T17:33:26.667186+00:00"
+    },
+    {
+      "id": "9f82914f-9bc9-469b-b27d-17e270aadac9",
+      "run_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "layer": 2,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "8116e93f-b840-49fb-bdd4-136f85da2655",
+      "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "state": "PASS",
+      "diagnostic_code": "VALIDATION_PASSED",
+      "message": "Layer 2 Boundary and Mathematical Consistency validation passed.",
+      "symbolic_simplification": "x",
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [
+          "Asymptotic divergence as x -> oo: oo",
+          "Asymptotic divergence as x -> -oo: -oo",
+          "Symbolic simplification: x"
+        ],
+        "details": {
+          "simplified_expr": "x"
+        },
+        "provenance": {
+          "bundle_sha256": "1a5e3e13ce2a2cee7c9ceef6379ea2ae359606e1ec106e39dc27144e5a82398e",
+          "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+          "version_id": "a2180967-02ce-4616-b91d-263fa22f2ac6"
+        }
+      },
+      "created_at": "2026-11-16T17:33:26.667186+00:00"
+    },
+    {
+      "id": "11153b30-cf48-4a61-b203-655105b797db",
+      "run_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "layer": 3,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "8116e93f-b840-49fb-bdd4-136f85da2655",
+      "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "state": "PASS",
+      "diagnostic_code": "VALIDATION_PASSED",
+      "message": "Dimensional consistency verified: [length]",
+      "symbolic_simplification": null,
+      "dimensions_verified": true,
+      "diagnostics": {
+        "diagnostics": [
+          "Inferred dimension: [length]"
+        ],
+        "details": {
+          "inferred_dimension": "[length]"
+        },
+        "provenance": {
+          "bundle_sha256": "1a5e3e13ce2a2cee7c9ceef6379ea2ae359606e1ec106e39dc27144e5a82398e",
+          "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+          "version_id": "a2180967-02ce-4616-b91d-263fa22f2ac6"
+        }
+      },
+      "created_at": "2026-11-16T17:33:26.667186+00:00"
+    },
+    {
+      "id": "810f3570-e2f0-4111-9be0-4e5be3f8d091",
+      "run_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "layer": 4,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "8116e93f-b840-49fb-bdd4-136f85da2655",
+      "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "state": "NOT_APPLICABLE",
+      "diagnostic_code": "NO_SYSTEM_CONTEXT",
+      "message": "No physical system context declared for invariant checks.",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [],
+        "details": {},
+        "provenance": {
+          "bundle_sha256": "1a5e3e13ce2a2cee7c9ceef6379ea2ae359606e1ec106e39dc27144e5a82398e",
+          "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+          "version_id": "a2180967-02ce-4616-b91d-263fa22f2ac6"
+        }
+      },
+      "created_at": "2026-11-16T17:33:26.667186+00:00"
+    },
+    {
+      "id": "3c49aadb-0217-42fc-b785-a5b9d7a8dbd9",
+      "run_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "layer": 5,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "8116e93f-b840-49fb-bdd4-136f85da2655",
+      "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "state": "NOT_APPLICABLE",
+      "diagnostic_code": "NO_EMPIRICAL_DATA",
+      "message": "No empirical observation dataset attached.",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [],
+        "details": {},
+        "provenance": {
+          "bundle_sha256": "1a5e3e13ce2a2cee7c9ceef6379ea2ae359606e1ec106e39dc27144e5a82398e",
+          "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+          "version_id": "a2180967-02ce-4616-b91d-263fa22f2ac6"
+        }
+      },
+      "created_at": "2026-11-16T17:33:26.667186+00:00"
+    },
+    {
+      "id": "adcc2e25-1293-49c6-9c4f-931c25511e24",
+      "run_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "layer": 6,
+      "target_entity_type": "EQUATION",
+      "target_entity_id": "8116e93f-b840-49fb-bdd4-136f85da2655",
+      "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+      "state": "NOT_APPLICABLE",
+      "diagnostic_code": "NO_CLAIM_GRAPH",
+      "message": "No epistemic claim graph declared.",
+      "symbolic_simplification": null,
+      "dimensions_verified": false,
+      "diagnostics": {
+        "diagnostics": [],
+        "details": {},
+        "provenance": {
+          "bundle_sha256": "1a5e3e13ce2a2cee7c9ceef6379ea2ae359606e1ec106e39dc27144e5a82398e",
+          "job_id": "6433b99f-8f6b-48de-828a-482d385b4372",
+          "version_id": "a2180967-02ce-4616-b91d-263fa22f2ac6"
+        }
+      },
+      "created_at": "2026-11-16T17:33:26.667186+00:00"
+    }
+  ]
+}
